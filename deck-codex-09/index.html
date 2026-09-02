@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第6章 自然法则不是被发现的，而是被结构演化出来的</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:8.4vw;line-height:1.1;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5.4vw;line-height:1.14;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.9vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.16vw);line-height:1.72;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.72vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.8vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.18vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.5vw);line-height:1.42}
+
+  .pipeline{display:grid;gap:1.4vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="5"]{grid-template-columns:repeat(5,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.42vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.92vw);line-height:1.5;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1vw);line-height:1.6}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.84vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.4vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.4vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.05vw,19px);line-height:1.92;margin:0 0 1.35em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 6 章</div><div>Chapter VI</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>Natural Law, Evolved</div>
+    <h1 class="h-hero" data-anim>自然法则不是被发现的，</h1>
+    <h2 class="h-sub" data-anim>而是被结构演化出来的</h2>
+    <p class="lead" style="max-width:62vw" data-anim>法则是结构系统中演化速度趋近于零的结构单位——不是外在世界的预设秩序，而是系统长期反馈中的稳定极限。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.15</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 6 章</div><div>01 / 14</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第6章（来源：结构认知实验室 · 2026年3月15日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章六节：第1节 自然法则的认知误区——不是外在发现物，而是系统内生结构；第2节 结构演化中的极限稳定状态——何谓「不再演化」；第3节 法则的三大生成条件——跨系统 × 低能耗 × 反馈静默；第4节 为何法则被误以为是真理——语言、工具与投影结构的误导；第5节 结构不是法则的容器，法则是结构自身的极限形态；第6节 自然法则是认知系统内部的稳定错觉？各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 认知误区</div><div>02 / 14</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 不是外在发现物，而是系统内生结构</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">自然法则不是外在世界中预设存在的秩序，</span>
+      <span data-anim="line" style="display:block">而是结构系统在时间维度中演化出来的极限稳定结构。</span>
+      <span data-anim="line" style="display:block">它不是「被发现」，而是「被演化生成」。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>人类所有的观察、记录与分析行为，都已经在认知系统内部经过高度结构化——法则正是这一结构化系统在长期演化中沉淀出的路径稳定性产物。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 认知误区</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 自然法则的认知误区：不是外在发现物，而是系统内生结构</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 自然法则的认知误区：不是外在发现物，而是系统内生结构</h4>
+      <p>在经典科学观中，自然法则被认为是宇宙中原本就存在的一种秩序：它们独立于人类意识之外，具备稳定性、普适性和可被发现性。人类认知活动在这一框架下的角色，只是通过观察与实验揭示出这些客观而恒定的法则。正是在这种「发现主义」的预设下，科学发展被描绘为对自然真理的逐步接近，科学家则成为「揭幕者」。</p>
+      <p>然而从结构哲学视角重新审视这一逻辑，便会发现一个深层的认知错位：<strong>我们所称之为「自然法则」的对象，从未以原始、无结构、直接可识别的状态出现在人类面前。相反，人类所有的观察、记录与分析行为，都已经在认知系统内部经过高度结构化；而法则正是这一结构化系统在长期演化中沉淀出的路径稳定性产物。</strong></p>
+      <p>因此，ESC所提出的命题并非技术性修正，而是对自然法则认知地位的根本重构：自然法则不是外在世界中预设存在的秩序，而是结构系统在时间维度中演化出来的极限稳定结构。它不是「被发现」，而是「被演化生成」。</p>
+      <h4>1.1. 所有观察都是结构先行的</h4>
+      <p>任何一次「观察自然」的行为，并非从无结构的中立点出发，而是通过既有的语言、数学工具、思维范式、仪器设备完成的系统性加工。这种加工不仅筛选了信息内容，更决定了我们能看到什么、记录什么、归纳什么。</p>
+      <p>结构先行的直接结果是：我们面对的从来不是「自然本身」，而是「结构加工后的自然显现」。这意味着：</p>
+      <p>我们不是「找到」某个法则，而是在既定结构中「形成」一个被系统接受的稳定路径；<br>
+      不是自然本身提供给我们一个「力等于质量乘加速度」的真理，而是我们的观察方式将复杂现象结构化为「F = ma」这一种表达；<br>
+      所谓「法则」的存在，依赖于我们如何定义变量、建构关系、执行测量，而不是它是否独立存在于自然之中。</p>
+      <h4>1.2. 法则不是自然的语言，而是结构系统的语言</h4>
+      <p>若将法则视为自然对人类的「语言输出」，则意味着自然先验地携带某种结构性表达方式，等待人类去「翻译」。但ESC指出，自然并不「说话」，说话的是我们的认知系统。</p>
+      <p>所有我们称之为「法则」的陈述—— 从数学公式到物理定律—— 其实都源于以下路径：</p>
+      <p>1.结构识别：我们将观测信息编码为结构；<br>
+      2.路径优化：我们在多种结构组织方式中选择耗散最小、反馈最少者；<br>
+      3.语言封装：我们用表达工具（数学/语言）将该结构沉淀为命题或定律；<br>
+      4.反馈验证：我们测试该结构在更多场景中的适配性。</p>
+      <p>由此，法则不再是自然的语言，而是结构系统为维持认知秩序所生成的一种极限表达。人类认知不是翻译者，而是建构者。我们说出的每一句「自然语言」，都是在用结构语言说自己。</p>
+      <h4>1.3. 「发现论」误区的根源：忽视了结构的中介性</h4>
+      <p>将自然法则视为「被发现的对象」，之所以成为主流认知方式，是因为这一理解路径忽略了一个根本事实：<strong>任何认知过程本质上都是结构处理过程。法则作为认知对象的可识别性、可表述性和可重复性，全都依赖于结构中介的介入与组织。</strong></p>
+      <p>在未进行结构处理之前，任何现象都仅是感官上的杂讯或不可聚合的信息碎片。结构让现象成为模式，模式让模式成为路径，而路径在稳定与嵌套之后才可能以「法则」的面貌呈现出来。若忽略结构这一中介，便会陷入如下误区：</p>
+      <p>将结构输出误认为世界本身的组织方式；<br>
+      将观察结果误认为自然原始的呈现；<br>
+      将结构稳定性误判为真理的普遍性。</p>
+      <p>而真正发生的，是我们在结构加工后回头看，误以为这就是自然的本来面貌。</p>
+      <h4>1.4. 法则作为系统内生结果的重新定位</h4>
+      <p>ESC将自然法则定位为：</p>
+      <p><strong>认知系统在结构演化过程中所生成的极限稳定路径，是反馈趋于静默、结构不再演化的一种认知结果。</strong></p>
+      <p>它既不是经验归纳，也不是逻辑演绎，而是系统性演化到一定阶段所「自然出现」的结构锁定状态。它的「成立」，不是因为世界如此安排，而是因为系统如此运行。</p>
+      <p>从这一视角出发，法则具有如下特征：</p>
+      <p>系统内生性：法则并非从自然中提取，而是系统内部加工产物；<br>
+      结构演化性：法则是在调用—嵌套—反馈机制下稳定下来的路径；<br>
+      非命题性：法则不是语言陈述，而是结构性行为稳定图谱；<br>
+      演化可替性：法则并非唯一可能，历史上常见法则被替代、改写、重组。</p>
+      <h4>1.5. 链接下一节：何谓「不再演化」？</h4>
+      <p>若法则并非「发现」的对象，而是「结构演化的结果」，则关键不在于我们是否「看见」法则，而在于：为何某些结构不再演化？</p>
+      <p>下一节将进一步聚焦这一核心命题：法则的真正定义条件，不是逻辑上成立，也不是被验证次数多，而是结构系统在长期反馈中「停止更新」的临界状态。</p>
+      <p>结构在什么条件下会演化为法则？这一稳定是否具备可计算性？系统如何识别这一转折点？所有这些问题都将构成下一节的理论焦点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡（特征表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Structural Primacy</div><div>03 / 14</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>所有观察都是结构先行的 · 1.1 / 1.4</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.6vh" data-anim>自然并不「说话」，说话的是我们的认知系统</h4></h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:24%">特征</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">系统内生性</td><td>法则并非从自然中提取，而是系统内部加工产物</td></tr>
+        <tr><td class="em-cell">结构演化性</td><td>法则是在调用—嵌套—反馈机制下稳定下来的路径</td></tr>
+        <tr><td class="em-cell">非命题性</td><td>法则不是语言陈述，而是结构性行为稳定图谱</td></tr>
+        <tr><td class="em-cell">演化可替性</td><td>法则并非唯一可能，历史上常见法则被替代、改写、重组</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:70vw" data-anim>
+      <span class="q-big">法则生成四路径：结构识别 → 路径优化 → 语言封装 → 反馈验证。人类认知不是翻译者，而是建构者——我们说出的每一句「自然语言」，都是在用结构语言说自己。</span>
+      <span class="cite">1.2 / 1.3 · 「发现论」误区 = 忽视结构的中介性</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 03 · Structural Primacy</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1. 所有观察都是结构先行的</h4>
+      <p>任何一次「观察自然」的行为，并非从无结构的中立点出发，而是通过既有的语言、数学工具、思维范式、仪器设备完成的系统性加工。这种加工不仅筛选了信息内容，更决定了我们能看到什么、记录什么、归纳什么。</p>
+      <p>结构先行的直接结果是：我们面对的从来不是「自然本身」，而是「结构加工后的自然显现」。这意味着：</p>
+      <p>我们不是「找到」某个法则，而是在既定结构中「形成」一个被系统接受的稳定路径；<br>
+      不是自然本身提供给我们一个「力等于质量乘加速度」的真理，而是我们的观察方式将复杂现象结构化为「F = ma」这一种表达；<br>
+      所谓「法则」的存在，依赖于我们如何定义变量、建构关系、执行测量，而不是它是否独立存在于自然之中。</p>
+      <h4>1.2. 法则不是自然的语言，而是结构系统的语言</h4>
+      <p>若将法则视为自然对人类的「语言输出」，则意味着自然先验地携带某种结构性表达方式，等待人类去「翻译」。但ESC指出，自然并不「说话」，说话的是我们的认知系统。</p>
+      <p>所有我们称之为「法则」的陈述—— 从数学公式到物理定律—— 其实都源于以下路径：</p>
+      <p>1.结构识别：我们将观测信息编码为结构；<br>
+      2.路径优化：我们在多种结构组织方式中选择耗散最小、反馈最少者；<br>
+      3.语言封装：我们用表达工具（数学/语言）将该结构沉淀为命题或定律；<br>
+      4.反馈验证：我们测试该结构在更多场景中的适配性。</p>
+      <p>由此，法则不再是自然的语言，而是结构系统为维持认知秩序所生成的一种极限表达。人类认知不是翻译者，而是建构者。我们说出的每一句「自然语言」，都是在用结构语言说自己。</p>
+      <h4>1.3. 「发现论」误区的根源：忽视了结构的中介性</h4>
+      <p>将自然法则视为「被发现的对象」，之所以成为主流认知方式，是因为这一理解路径忽略了一个根本事实：<strong>任何认知过程本质上都是结构处理过程。法则作为认知对象的可识别性、可表述性和可重复性，全都依赖于结构中介的介入与组织。</strong></p>
+      <p>在未进行结构处理之前，任何现象都仅是感官上的杂讯或不可聚合的信息碎片。结构让现象成为模式，模式让模式成为路径，而路径在稳定与嵌套之后才可能以「法则」的面貌呈现出来。若忽略结构这一中介，便会陷入如下误区：</p>
+      <p>将结构输出误认为世界本身的组织方式；<br>
+      将观察结果误认为自然原始的呈现；<br>
+      将结构稳定性误判为真理的普遍性。</p>
+      <p>而真正发生的，是我们在结构加工后回头看，误以为这就是自然的本来面貌。</p>
+      <h4>1.4. 法则作为系统内生结果的重新定位</h4>
+      <p>ESC将自然法则定位为：</p>
+      <p><strong>认知系统在结构演化过程中所生成的极限稳定路径，是反馈趋于静默、结构不再演化的一种认知结果。</strong></p>
+      <p>它既不是经验归纳，也不是逻辑演绎，而是系统性演化到一定阶段所「自然出现」的结构锁定状态。它的「成立」，不是因为世界如此安排，而是因为系统如此运行。</p>
+      <p>从这一视角出发，法则具有如下特征：</p>
+      <p>系统内生性：法则并非从自然中提取，而是系统内部加工产物；<br>
+      结构演化性：法则是在调用—嵌套—反馈机制下稳定下来的路径；<br>
+      非命题性：法则不是语言陈述，而是结构性行为稳定图谱；<br>
+      演化可替性：法则并非唯一可能，历史上常见法则被替代、改写、重组。</p>
+      <h4>1.5. 链接下一节：何谓「不再演化」？</h4>
+      <p>若法则并非「发现」的对象，而是「结构演化的结果」，则关键不在于我们是否「看见」法则，而在于：为何某些结构不再演化？</p>
+      <p>下一节将进一步聚焦这一核心命题：法则的真正定义条件，不是逻辑上成立，也不是被验证次数多，而是结构系统在长期反馈中「停止更新」的临界状态。</p>
+      <p>结构在什么条件下会演化为法则？这一稳定是否具备可计算性？系统如何识别这一转折点？所有这些问题都将构成下一节的理论焦点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第2节 命题页 ========== -->
+<section class="slide dark" data-animate="quote">
+  <div class="chrome"><div>第 2 节 · 极限稳定</div><div>04 / 14</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 何谓「不再演化」</div>
+    <h1 class="h-hero" style="font-size:5.6vw" data-anim>lim(t→∞) [Δs(t)/Δt] → 0</h1>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.4vw;line-height:1.4;max-width:80vw">
+      <span data-anim="line" style="display:block">所谓法则，是结构系统中演化速度趋近于零的结构单位。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>不是绝对静止，而是在系统内部、在长期反馈中达到不再需要被修正、被替代、被再解释的临界状态。</p>
+  </div>
+  <div class="foot"><div>Page 04 · 极限稳定</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 结构演化中的极限稳定状态：何谓「不再演化」</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 结构演化中的极限稳定状态：何谓「不再演化」</h4>
+      <p>当我们提出「自然法则是结构演化出来的」这一命题时，最关键的问题随之出现：什么叫做结构不再演化？</p>
+      <p>在一个持续变动的系统中，是否存在某种结构，其反馈行为趋于静默、路径使用进入封闭、连接关系趋于不可裁剪？如果存在，这种结构便具备了被称为「法则」的基本可能性。</p>
+      <p>ESC用结构哲学语言给出明确回答：</p>
+      <p><strong>所谓法则，是结构系统中演化速度趋近于零的结构单位。</strong></p>
+      <p><strong>它不是绝对静止，而是在系统内部、在长期反馈中达到不再需要被修正、被替代、被再解释的临界状态。</strong>这种状态标志着：</p>
+      <p>演化路径已收敛；<br>
+      系统反馈已饱和；<br>
+      再调用不再带来新增信息。</p>
+      <p>本节将从系统演化动力学角度，细化这一「极限稳定状态」的结构性质。</p>
+      <h4>2.1. 法则的动态定义：结构演化速度 = 0</h4>
+      <p>在任何复杂系统中，结构的演化通常表现为以下三种路径：</p>
+      <p>1.变异性演化：结构路径在不断生成与消解中调整方向；<br>
+      2.优化性演化：结构在反馈中不断降低调用代价与系统扰动；<br>
+      3.稳定性演化：结构趋于固定路径，嵌套深度加重，系统对其依赖性增强。</p>
+      <p>而当一个结构的演化轨迹满足如下数学近似：</p>
+      <p><strong>lim(t→∞) [Δs(t)/Δt] → 0</strong></p>
+      <p>即可判断该结构进入了「极限稳定状态」。这里的 Δs(t) 表示结构在时间中的单位变化，而 Δt 是时间演进。在结构几乎不再变化的情况下，结构行为图谱呈现出高频调用 × 低反馈 × 无替代性的稳定特征。</p>
+      <p>这种状态下的结构即具备了「自然法则」的潜质。</p>
+      <h4>2.2. 法则是反馈静默结构</h4>
+      <p>结构系统的演化依赖于反馈机制：</p>
+      <p>若结构调用引发高强度反馈，系统将尝试修正路径；<br>
+      若反馈持久但方向不定，系统进入不稳定状态；<br>
+      若反馈趋近静默，表明结构调用的扰动极小、成本极低、路径极稳。</p>
+      <p>因此，ESC提出：<strong>法则是结构反馈在系统中趋于静默的那一部分。</strong></p>
+      <p>反馈静默意味着两件事：</p>
+      <p>1. 结构调用不再被质疑、不再被评估；<br>
+      2. 系统中其他结构对其依赖达成共识性耦合。</p>
+      <p>这正是经典科学史中「公理」、「定律」、「范式」的结构学表达方式。</p>
+      <h4>2.3. 法则是结构路径的耗散极限</h4>
+      <p>系统结构路径的耗散指的是其在运行过程中所消耗的能量、注意、计算资源等一切资源性要素。</p>
+      <p>ESC视角指出：</p>
+      <p><strong>法则之所以成为法则，是因为它是该结构系统中耗散最小的稳定路径。</strong></p>
+      <p>不是因为它「更正确」，而是因为它在：</p>
+      <p>输入处理上最通用；<br>
+      输出预测上最稳定；<br>
+      结构耦合上最简洁；<br>
+      系统演化上最经济。</p>
+      <p>因此，法则的成立来自于结构资源优化后的「最小阻力通道」。它不是逻辑必然，而是系统演化后的路径最低能耗解。</p>
+      <h4>2.4. 法则是结构嵌套的压缩单位</h4>
+      <p>任何系统结构若进入法则状态，必然承担着更高层级结构的构建基元角色。换言之：</p>
+      <p>法则会成为其他结构的「默认基础」；<br>
+      法则不再被主动调用，而是隐式调用；<br>
+      法则成为语言、工具、方法的嵌套前提。</p>
+      <p>这一特性意味着：</p>
+      <p><strong>法则是一种被最大化压缩后的结构单位，具有最高嵌套权重与最低显性表达。</strong></p>
+      <p>正因为如此，我们很少质疑法则—— 不是因为它更真实，而是因为系统运行已默认它为基础不可动摇。</p>
+      <h4>2.5. 系统如何判断结构「已不再演化」？</h4>
+      <p>ESC认为，结构的「不再演化」不是某一瞬间的突变，而是多个结构性指标逐步聚合后的转折：</p>
+      <p>反馈机制：系统对该结构输出无修正行为——长期调用后无反馈调整记录；<br>
+      路径稳定：输入—结构—输出路径固定无扰动——新输入调用结构路径与旧路径一致；<br>
+      结构调用频次：调用频率高而调整次数低——结构成为默认接口或处理模块；<br>
+      系统依赖性：系统其他结构对其高度依赖——移除该结构会引发系统整体崩溃。</p>
+      <p>结构满足这些特征时，可判断其已进入「演化速度≈0」的极限稳定状态，即已获得结构性法则地位。</p>
+      <h4>2.6. 链接下一节：当结构不再演化，它就变成了什么？</h4>
+      <p>本节回答了「何谓不再演化」，并指出：（1）法则不是逻辑的终点，而是结构演化的极限；（2）法则不是被发现的陈述，而是路径冻结的结构；（3）法则成立的理由，不是它对自然的准确性，而是它对结构系统的适配性与稳定性。下一节将进一步追问：</p>
+      <p>法则何以跨系统成立？也就是说：为何某些结构在多个系统中都不再演化？这背后是否存在可识别的共同条件？ESC将在下一节提出跨系统 × 低能耗 × 反馈静默三大法则生成机制，并展开分析。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节卡（四性质+判定指标） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Zero Velocity</div><div>05 / 14</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>极限稳定状态的四重结构性质 · 2.1-2.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>法则的四重身份</h2>
+    <div class="pipeline" data-cols="4" style="margin-bottom:3vh">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">演化速度 = 0</div>
+        <div class="step-desc">高频调用 × 低反馈 × 无替代性的稳定特征。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">反馈静默结构</div>
+        <div class="step-desc">调用不再被质疑；其他结构对其依赖达成共识性耦合。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">耗散极限</div>
+        <div class="step-desc">最通用、最稳定、最简洁、最经济——最低阻力通道。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iv</div>
+        <div class="step-title">嵌套压缩单位</div>
+        <div class="step-desc">最高嵌套权重 × 最低显性表达——隐式调用的默认基础。</div>
+      </div>
+    </div>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:22%">指标类别</th><th style="width:40%">表现机制</th><th>判定信号</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">反馈机制</td><td>系统对该结构输出无修正行为</td><td>长期调用后无反馈调整记录</td></tr>
+        <tr><td class="em-cell">路径稳定</td><td>输入—结构—输出路径固定无扰动</td><td>新输入调用与旧路径一致</td></tr>
+        <tr><td class="em-cell">结构调用频次</td><td>调用频率高而调整次数低</td><td>结构成为默认接口或处理模块</td></tr>
+        <tr><td class="em-cell">系统依赖性</td><td>系统其他结构对其高度依赖</td><td>移除该结构会引发系统整体崩溃</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 05 · Zero Velocity</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1-2.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1. 法则的动态定义：结构演化速度 = 0</h4>
+      <p>在任何复杂系统中，结构的演化通常表现为以下三种路径：</p>
+      <p>1.变异性演化：结构路径在不断生成与消解中调整方向；<br>
+      2.优化性演化：结构在反馈中不断降低调用代价与系统扰动；<br>
+      3.稳定性演化：结构趋于固定路径，嵌套深度加重，系统对其依赖性增强。</p>
+      <p>而当一个结构的演化轨迹满足如下数学近似：</p>
+      <p><strong>lim(t→∞) [Δs(t)/Δt] → 0</strong></p>
+      <p>即可判断该结构进入了「极限稳定状态」。这里的 Δs(t) 表示结构在时间中的单位变化，而 Δt 是时间演进。在结构几乎不再变化的情况下，结构行为图谱呈现出高频调用 × 低反馈 × 无替代性的稳定特征。</p>
+      <p>这种状态下的结构即具备了「自然法则」的潜质。</p>
+      <h4>2.2. 法则是反馈静默结构</h4>
+      <p>结构系统的演化依赖于反馈机制：</p>
+      <p>若结构调用引发高强度反馈，系统将尝试修正路径；<br>
+      若反馈持久但方向不定，系统进入不稳定状态；<br>
+      若反馈趋近静默，表明结构调用的扰动极小、成本极低、路径极稳。</p>
+      <p>因此，ESC提出：<strong>法则是结构反馈在系统中趋于静默的那一部分。</strong></p>
+      <p>反馈静默意味着两件事：</p>
+      <p>1. 结构调用不再被质疑、不再被评估；<br>
+      2. 系统中其他结构对其依赖达成共识性耦合。</p>
+      <p>这正是经典科学史中「公理」、「定律」、「范式」的结构学表达方式。</p>
+      <h4>2.3. 法则是结构路径的耗散极限</h4>
+      <p>系统结构路径的耗散指的是其在运行过程中所消耗的能量、注意、计算资源等一切资源性要素。</p>
+      <p>ESC视角指出：</p>
+      <p><strong>法则之所以成为法则，是因为它是该结构系统中耗散最小的稳定路径。</strong></p>
+      <p>不是因为它「更正确」，而是因为它在：</p>
+      <p>输入处理上最通用；<br>
+      输出预测上最稳定；<br>
+      结构耦合上最简洁；<br>
+      系统演化上最经济。</p>
+      <p>因此，法则的成立来自于结构资源优化后的「最小阻力通道」。它不是逻辑必然，而是系统演化后的路径最低能耗解。</p>
+      <h4>2.4. 法则是结构嵌套的压缩单位</h4>
+      <p>任何系统结构若进入法则状态，必然承担着更高层级结构的构建基元角色。换言之：</p>
+      <p>法则会成为其他结构的「默认基础」；<br>
+      法则不再被主动调用，而是隐式调用；<br>
+      法则成为语言、工具、方法的嵌套前提。</p>
+      <p>这一特性意味着：</p>
+      <p><strong>法则是一种被最大化压缩后的结构单位，具有最高嵌套权重与最低显性表达。</strong></p>
+      <p>正因为如此，我们很少质疑法则—— 不是因为它更真实，而是因为系统运行已默认它为基础不可动摇。</p>
+      <h4>2.5. 系统如何判断结构「已不再演化」？</h4>
+      <p>ESC认为，结构的「不再演化」不是某一瞬间的突变，而是多个结构性指标逐步聚合后的转折：</p>
+      <p>反馈机制：系统对该结构输出无修正行为——长期调用后无反馈调整记录；<br>
+      路径稳定：输入—结构—输出路径固定无扰动——新输入调用结构路径与旧路径一致；<br>
+      结构调用频次：调用频率高而调整次数低——结构成为默认接口或处理模块；<br>
+      系统依赖性：系统其他结构对其高度依赖——移除该结构会引发系统整体崩溃。</p>
+      <p>结构满足这些特征时，可判断其已进入「演化速度≈0」的极限稳定状态，即已获得结构性法则地位。</p>
+      <h4>2.6. 链接下一节：当结构不再演化，它就变成了什么？</h4>
+      <p>本节回答了「何谓不再演化」，并指出：（1）法则不是逻辑的终点，而是结构演化的极限；（2）法则不是被发现的陈述，而是路径冻结的结构；（3）法则成立的理由，不是它对自然的准确性，而是它对结构系统的适配性与稳定性。下一节将进一步追问：</p>
+      <p>法则何以跨系统成立？也就是说：为何某些结构在多个系统中都不再演化？这背后是否存在可识别的共同条件？ESC将在下一节提出跨系统 × 低能耗 × 反馈静默三大法则生成机制，并展开分析。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第3节 命题页 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>第 3 节 · 三大生成条件</div><div>06 / 14</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 法则的判定标准</div>
+    <h1 class="h-hero" style="font-size:5.6vw" data-anim>跨系统 × 低能耗 × 反馈静默</h1>
+    <p class="lead" style="max-width:66vw" data-anim>并非所有趋稳的结构都能被称为法则——三大条件共同构成自然法则生成的判定标准，分别从适用范围、运行代价与系统响应三个角度建立判断模型。</p>
+  </div>
+  <div class="foot"><div>Page 06 · 三大生成条件</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 法则的三大生成条件：跨系统 × 低能耗 × 反馈静默</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 法则的三大生成条件：跨系统 × 低能耗 × 反馈静默</h4>
+      <p>前一节指出，自然法则并非一种被动发现的逻辑陈述，而是一种在结构系统中进入「演化速度为零」的极限状态。法则是结构演化的结果，不再演化正是其最本质的系统特征。</p>
+      <p>但并非所有趋稳的结构都能被称为法则。系统中有大量「暂时有效」的路径，它们虽然稳定，但仅限于特定系统、特定输入、特定目的，未能获得「自然法则」这一称号所要求的普适性与支撑性。因此，我们必须回答一个关键问题：</p>
+      <p>一个结构趋稳之后，何以成为自然法则，而不是仅仅停留为局部原理？</p>
+      <p>ESC从结构系统与认知演化的角度指出，三大条件共同构成自然法则生成的判定标准：</p>
+      <p>跨系统的有效性<br>
+      结构路径的低能耗特征<br>
+      系统反馈的静默化</p>
+      <p>它们分别从适用范围、运行代价与系统响应三个角度，为法则的成立构建出稳定的判断模型。</p>
+      <h4>3.1. 条件一：跨系统有效性</h4>
+      <p><strong>定义：</strong> 该结构在多个异构系统中仍然成立，具备超出本系统边界的适配能力。</p>
+      <p><strong>说明：</strong></p>
+      <p>跨系统并不指空间位置，而指结构体系的类型差异；<br>
+      不同系统中的变量、目标、工具不同，但该结构路径依然有效；<br>
+      如牛顿第二定律在天体运动、机械系统、微观建模中均适用；<br>
+      如语法结构中的主谓关系，不论语言种类、文化背景、文本用途，皆具一致性；</p>
+      <p><strong>结构哲学意义：</strong></p>
+      <p><strong>法则之所以成立，不在于被重复使用，而在于它能在不依赖特定结构条件的情况下被重复调用；</strong></p>
+      <p>即：<strong>结构嵌套的兼容性极高。</strong></p>
+      <p><strong>ESC判断标准：</strong></p>
+      <p>若结构路径 S₁ 能嵌套于多个系统 Sₙ 而不失效，则 S₁ 满足跨系统稳定性；<br>
+      其结构投影在多个系统间保持形态与效能一致。</p>
+      <h4>3.2. 条件二：结构路径的低能耗特征</h4>
+      <p><strong>定义：</strong> 该结构路径在运行中表现出最小的系统扰动、最低的信息消耗与最少的连接负担。</p>
+      <p><strong>说明：</strong></p>
+      <p>所谓「低能耗」不仅指物理能量消耗，更涵盖：</p>
+      <p>认知加载成本；<br>
+      系统调用复杂度；<br>
+      路径演化阻力；<br>
+      低能耗结构成为系统默认路径的首要候选；<br>
+      系统演化趋向于最低耗散通道（minimum dissipation trajectory）。</p>
+      <p><strong>结构哲学意义：</strong></p>
+      <p>法则不是「最深刻的解释」，而是「最经济的解释」；<br>
+      系统保留结构，不因其复杂，而因其节省资源与维持秩序。</p>
+      <p><strong>ESC判断标准：</strong></p>
+      <p>若结构路径 P 在同类输入—输出条件下，具备最短连接链、最少反馈轮与最弱扰动波，则满足此项；<br>
+      此类结构将被系统演化优先锁定，进而封闭为法则。</p>
+      <h4>3.3. 条件三：反馈机制的静默化</h4>
+      <p><strong>定义：</strong> 系统对该结构路径不再产生任何形式的显性反馈。</p>
+      <p><strong>说明：</strong></p>
+      <p>系统反馈代表结构仍处于试验期或修正期；<br>
+      一旦反馈静默，说明系统已接受该结构路径作为「无需质疑的常规」；<br>
+      静默并不表示「完美无误」，而是系统已失去修正动因。</p>
+      <p><strong>结构哲学意义：</strong></p>
+      <p>法则之为法则，根本不在其逻辑形式，而在其「默认效力」；<br>
+      所谓「自然」，其实就是「系统不再干预的那一部分结构」；<br>
+      结构学上，这种结构已进入「隐性调用」阶段—— 系统无意识地维持它。</p>
+      <p><strong>ESC判断标准：</strong></p>
+      <p><strong>若结构路径 R 在系统调用中无显性反馈、无替代路径竞争、无再定义尝试，则可判断其进入反馈静默区。</strong></p>
+      <h4>3.4. 三条件之间的耦合与门槛</h4>
+      <p>三大条件并非相互独立，它们构成一个联动系统：</p>
+      <p>跨系统稳定性：拓展法则的适用范围——为低能耗结构提供更广调用平台；<br>
+      低能耗路径：增强法则的演化优势——加速反馈静默的系统形成；<br>
+      反馈静默机制：固化法则的结构地位——阻断路径替代与新结构竞争。</p>
+      <p>系统中若某一结构同时满足三者，即可判断其已跃迁为自然法则。</p>
+      <h4>3.5. 对「法则等于普适性」的修正</h4>
+      <p>传统科学中普遍将「可被验证 × 可被重复 × 可被普遍应用」视为法则成立的核心三元标准。而ESC将此解释权交还给结构本身，指出：</p>
+      <p>普适性不是法则的定义，而是其结构演化结果。</p>
+      <p>这意味着：</p>
+      <p>法则并不「生而普适」；<br>
+      法则的普适性是长期结构反馈后形成的结构稳定现象；<br>
+      法则不是对自然的「共识性还原」，而是系统自身在压缩复杂性、优化路径连接后演化出的最小偏差结构。</p>
+      <h4>3.6. 链接下一节：为何我们误以为「法则即真理」？</h4>
+      <p>当某一结构在系统中稳定到「不再触发反馈」，被多系统调用，并且耗散最小，它的地位就逐渐从「被测试路径」转变为「结构默认」。但也正是在这一过程中，人类的语言系统与认知系统开始发生一次深度误判：我们不再意识到法则是结构生成的结果，而误以为它是自然的本体性真理。</p>
+      <p>下一节将深入讨论这一误判是如何发生的，语言结构、工具实践、人类构造如何共同制造出「自然真理」的幻觉。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第3节卡（三条件） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Three Conditions</div><div>07 / 14</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三条件构成联动系统 · 3.1-3.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>普适性不是法则的定义，而是其结构演化结果</h2>
+    <div class="grid-3">
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">01 · 跨系统有效性</div>
+        <p class="body-zh" style="margin-top:1.4vh">在多个异构系统中仍然成立——结构嵌套的兼容性极高。S₁ 能嵌套于多个系统 Sₙ 而不失效。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">02 · 低能耗特征</div>
+        <p class="body-zh" style="margin-top:1.4vh">最小扰动、最低消耗、最少负担——法则不是「最深刻的解释」，而是「最经济的解释」。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">03 · 反馈静默化</div>
+        <p class="body-zh" style="margin-top:1.4vh">无显性反馈、无替代竞争、无再定义尝试——所谓「自然」，就是系统不再干预的那部分结构。</p>
+      </div>
+    </div>
+    <table class="tbl" data-anim style="margin-top:3vh">
+      <thead><tr><th style="width:24%">条件名称</th><th style="width:36%">影响机制</th><th>相互作用</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">跨系统稳定性</td><td>拓展法则的适用范围</td><td>为低能耗结构提供更广调用平台</td></tr>
+        <tr><td class="em-cell">低能耗路径</td><td>增强法则的演化优势</td><td>加速反馈静默的系统形成</td></tr>
+        <tr><td class="em-cell">反馈静默机制</td><td>固化法则的结构地位</td><td>阻断路径替代与新结构竞争</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 07 · Three Conditions</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1. 条件一：跨系统有效性</h4>
+      <p><strong>定义：</strong> 该结构在多个异构系统中仍然成立，具备超出本系统边界的适配能力。</p>
+      <p><strong>说明：</strong></p>
+      <p>跨系统并不指空间位置，而指结构体系的类型差异；<br>
+      不同系统中的变量、目标、工具不同，但该结构路径依然有效；<br>
+      如牛顿第二定律在天体运动、机械系统、微观建模中均适用；<br>
+      如语法结构中的主谓关系，不论语言种类、文化背景、文本用途，皆具一致性；</p>
+      <p><strong>结构哲学意义：</strong></p>
+      <p><strong>法则之所以成立，不在于被重复使用，而在于它能在不依赖特定结构条件的情况下被重复调用；</strong></p>
+      <p>即：<strong>结构嵌套的兼容性极高。</strong></p>
+      <p><strong>ESC判断标准：</strong></p>
+      <p>若结构路径 S₁ 能嵌套于多个系统 Sₙ 而不失效，则 S₁ 满足跨系统稳定性；<br>
+      其结构投影在多个系统间保持形态与效能一致。</p>
+      <h4>3.2. 条件二：结构路径的低能耗特征</h4>
+      <p><strong>定义：</strong> 该结构路径在运行中表现出最小的系统扰动、最低的信息消耗与最少的连接负担。</p>
+      <p><strong>说明：</strong></p>
+      <p>所谓「低能耗」不仅指物理能量消耗，更涵盖：</p>
+      <p>认知加载成本；<br>
+      系统调用复杂度；<br>
+      路径演化阻力；<br>
+      低能耗结构成为系统默认路径的首要候选；<br>
+      系统演化趋向于最低耗散通道（minimum dissipation trajectory）。</p>
+      <p><strong>结构哲学意义：</strong></p>
+      <p>法则不是「最深刻的解释」，而是「最经济的解释」；<br>
+      系统保留结构，不因其复杂，而因其节省资源与维持秩序。</p>
+      <p><strong>ESC判断标准：</strong></p>
+      <p>若结构路径 P 在同类输入—输出条件下，具备最短连接链、最少反馈轮与最弱扰动波，则满足此项；<br>
+      此类结构将被系统演化优先锁定，进而封闭为法则。</p>
+      <h4>3.3. 条件三：反馈机制的静默化</h4>
+      <p><strong>定义：</strong> 系统对该结构路径不再产生任何形式的显性反馈。</p>
+      <p><strong>说明：</strong></p>
+      <p>系统反馈代表结构仍处于试验期或修正期；<br>
+      一旦反馈静默，说明系统已接受该结构路径作为「无需质疑的常规」；<br>
+      静默并不表示「完美无误」，而是系统已失去修正动因。</p>
+      <p><strong>结构哲学意义：</strong></p>
+      <p>法则之为法则，根本不在其逻辑形式，而在其「默认效力」；<br>
+      所谓「自然」，其实就是「系统不再干预的那一部分结构」；<br>
+      结构学上，这种结构已进入「隐性调用」阶段—— 系统无意识地维持它。</p>
+      <p><strong>ESC判断标准：</strong></p>
+      <p><strong>若结构路径 R 在系统调用中无显性反馈、无替代路径竞争、无再定义尝试，则可判断其进入反馈静默区。</strong></p>
+      <h4>3.4. 三条件之间的耦合与门槛</h4>
+      <p>三大条件并非相互独立，它们构成一个联动系统：</p>
+      <p>跨系统稳定性：拓展法则的适用范围——为低能耗结构提供更广调用平台；<br>
+      低能耗路径：增强法则的演化优势——加速反馈静默的系统形成；<br>
+      反馈静默机制：固化法则的结构地位——阻断路径替代与新结构竞争。</p>
+      <p>系统中若某一结构同时满足三者，即可判断其已跃迁为自然法则。</p>
+      <h4>3.5. 对「法则等于普适性」的修正</h4>
+      <p>传统科学中普遍将「可被验证 × 可被重复 × 可被普遍应用」视为法则成立的核心三元标准。而ESC将此解释权交还给结构本身，指出：</p>
+      <p>普适性不是法则的定义，而是其结构演化结果。</p>
+      <p>这意味着：</p>
+      <p>法则并不「生而普适」；<br>
+      法则的普适性是长期结构反馈后形成的结构稳定现象；<br>
+      法则不是对自然的「共识性还原」，而是系统自身在压缩复杂性、优化路径连接后演化出的最小偏差结构。</p>
+      <h4>3.6. 链接下一节：为何我们误以为「法则即真理」？</h4>
+      <p>当某一结构在系统中稳定到「不再触发反馈」，被多系统调用，并且耗散最小，它的地位就逐渐从「被测试路径」转变为「结构默认」。但也正是在这一过程中，人类的语言系统与认知系统开始发生一次深度误判：我们不再意识到法则是结构生成的结果，而误以为它是自然的本体性真理。</p>
+      <p>下一节将深入讨论这一误判是如何发生的，语言结构、工具实践、人类构造如何共同制造出「自然真理」的幻觉。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第4节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 真理幻觉</div><div>08 / 14</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · 语言、工具与投影结构的误导</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">「真理」只是我们对稳定结构路径</span>
+      <span data-anim="line" style="display:block">缺乏可疑视角时的语义替代物。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>三重机制——语言结构的逻辑封闭性、工具实践的结果偏向性、投影结构的反向遮蔽性——共同构成「真理幻觉」系统。</p>
+  </div>
+  <div class="foot"><div>Page 08 · 真理幻觉</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 为何法则被误以为是真理：语言、工具与投影结构的误导</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 为何法则被误以为是真理：语言、工具与投影结构的误导</h4>
+      <p>法则是一种结构极限状态—— 它在特定系统中稳定有效、耗散最小、反馈静默，从而在认知系统中获得了压倒性的调用优势。然而，恰恰是这种优势，使得我们很容易在认识论上产生一种误判：认为法则代表了世界的「本质真理」，而非只是系统运行的结构性结果。</p>
+      <p>这种误判的根源，不在于科学错误，而在于人类认知构造的三重机制：</p>
+      <p>1.语言结构的逻辑封闭性；<br>
+      2.工具实践的结果偏向性；<br>
+      3.投影结构的反向遮蔽性。</p>
+      <p><strong>这三种机制共同构成了一种「真理幻觉」系统，即：当某一结构长期稳定时，人类倾向于将其等同于世界本身的本质秩序，进而忘记该结构曾是认知系统生成的结果。这种误以为「法则即真理」的认知幻觉，构成了经典科学与ESC之间最深层的哲学分歧。</strong></p>
+      <h4>4.1. 语言结构如何锁定认知结构</h4>
+      <p>语言不仅是表达工具，它本身就是结构系统。当一个结构路径进入语言系统的表达层，它会被编码为语法、公式或符号序列，并通过：</p>
+      <p>重复使用；教育传递；知识组织；</p>
+      <p>迅速在认知共同体中固化为「默认表达方式」。例如，牛顿第二定律「F = ma」在语言中形成如下三重锁定：</p>
+      <p>1.语法锁定：它是一个主谓宾结构的等式；<br>
+      2.逻辑锁定：它在逻辑推导中充当公理；<br>
+      3.语义锁定：它默认了力与加速度之间的确定关系。</p>
+      <p>结构一旦语言化，它就不再是结构，而是成为了概念秩序的一部分。而概念一旦参与秩序构建，人类便难以将其视为「结构性路径」，转而将其看作「真理性陈述」。</p>
+      <h4>4.2. 工具实践如何强化结构路径</h4>
+      <p>工具并不是中性的，它们是结构选择的物质化延伸。任何结构一旦成为操作流程的一部分，便拥有了现实可调用性。这种调用性会反向加固其结构路径，使其看起来像是「自然运作的方式」。</p>
+      <p>例如：</p>
+      <p>物理实验仪器默认使用牛顿动力学模型；<br>
+      工程建模使用线性时空假设；<br>
+      编程语言依赖形式逻辑与集合论结构；</p>
+      <p>这些工具将某些结构路径内嵌为「默认接口」，导致：</p>
+      <p><strong>人们看到的现实，是工具允许他们看到的结构稳定性。</strong></p>
+      <p>于是，结构稳定看起来就像世界本身的稳定，而非系统建构之稳定。工具在此充当了「现实再现的接口」，但这一接口是人为构建的，而非自然固有的。</p>
+      <h4>4.3. 投影结构如何遮蔽生成结构</h4>
+      <p>ESC在图谱语言中称之为「认知投影层」（projective cognitive layer），它是指：<strong>结构系统在输出过程中将其稳定路径投影为「现象秩序」，从而形成对世界的显现版本。</strong></p>
+      <p>这一投影层有两个重要特征：</p>
+      <p>1.自遮蔽性：结构路径的使用频率越高，它在现象中留下的痕迹越少；<br>
+      2.逆显性：系统输出越顺畅，人类越难察觉其内部结构加工过程。</p>
+      <p>正因为法则在结构中极度稳定，它的存在变得「无感」：</p>
+      <p>我们不会意识到「地球绕太阳」是一个结构路径；<br>
+      我们不会质疑「光的传播」中隐含的介质假设；<br>
+      我们不会怀疑「主谓宾」结构可能并不适用于一切语言。</p>
+      <p>于是，投影结构成为现实本身的「表象」，而我们忘记了这些表象原本是认知结构加工后的产物。</p>
+      <h4>4.4. 真理幻觉是结构稳定性的认知替代品</h4>
+      <p>ESC指出，所谓「真理」并不是世界中独立存在的属性，而是认知系统在结构稳定后所形成的叙述性判断。当结构路径高度稳定，其语言表达、工具应用与现象投影一致时，人类便会将其标注为「真理」。</p>
+      <p>换言之：</p>
+      <p><strong>「真理」只是我们对稳定结构路径缺乏可疑视角时的语义替代物。</strong></p>
+      <p>它不是认知的终点，而是认知可疑性的暂时中止。它的成立，并不意味着我们发现了自然的终极法则，而只是说明：</p>
+      <p>当前结构在当前系统中是最优路径；<br>
+      该路径尚未被系统反馈所打破；<br>
+      认知系统暂时失去了替代选项。</p>
+      <p>这并不构成「真理」的哲学正当性，而仅是一种结构稳定性的认知现象学表达。</p>
+      <h4>4.5. 链接下一节：如果法则不是普遍命题，它究竟是什么？</h4>
+      <p>本节回溯了「法则即真理」的认知错位机制，指出这一错位不是错误，而是一种认知系统内的功能性捷径。法则一旦被等同于真理，它的结构路径就不再被检视、结构条件不再被分析、替代模型不再被允许，从而进入哲学误区。</p>
+      <p>下一节将完成本章结构哲学任务：法则不是命题性真理，而是结构系统内部的极限组织逻辑。我们将拒绝「法则是自然秩序陈述」的本体论立场，转而确立法则的结构存在方式，并给出结构哲学对「法则」的终极定义。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第4节卡（三重锁定） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · The Illusion</div><div>09 / 14</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三重机制如何制造幻觉 · 4.1-4.4</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>人们看到的现实，<br>是工具允许他们看到的结构稳定性</h2>
+    <div class="grid-3">
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">01 · 语言锁定</div>
+        <p class="body-zh" style="margin-top:1.4vh">F = ma 的三重锁定：语法（主谓宾等式）× 逻辑（公理）× 语义（力的确定关系）。结构语言化后即成为「真理性陈述」。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">02 · 工具强化</div>
+        <p class="body-zh" style="margin-top:1.4vh">仪器、工程、编程语言将结构路径内嵌为「默认接口」——结构稳定看起来像世界本身的稳定。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">03 · 投影遮蔽</div>
+        <p class="body-zh" style="margin-top:1.4vh">认知投影层：自遮蔽性（越使用越无痕）× 逆显性（越顺畅越无感）。法则变得「无感」。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:66vw;margin-top:4vh" data-anim>
+      <span class="q-big">它的成立，并不意味着我们发现了自然的终极法则，而只是说明：当前结构是最优路径、尚未被反馈打破、系统暂时失去了替代选项。</span>
+      <span class="cite">4.4 · 真理 = 结构稳定性的认知替代品</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 09 · The Illusion</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1-4.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1. 语言结构如何锁定认知结构</h4>
+      <p>语言不仅是表达工具，它本身就是结构系统。当一个结构路径进入语言系统的表达层，它会被编码为语法、公式或符号序列，并通过：</p>
+      <p>重复使用；教育传递；知识组织；</p>
+      <p>迅速在认知共同体中固化为「默认表达方式」。例如，牛顿第二定律「F = ma」在语言中形成如下三重锁定：</p>
+      <p>1.语法锁定：它是一个主谓宾结构的等式；<br>
+      2.逻辑锁定：它在逻辑推导中充当公理；<br>
+      3.语义锁定：它默认了力与加速度之间的确定关系。</p>
+      <p>结构一旦语言化，它就不再是结构，而是成为了概念秩序的一部分。而概念一旦参与秩序构建，人类便难以将其视为「结构性路径」，转而将其看作「真理性陈述」。</p>
+      <h4>4.2. 工具实践如何强化结构路径</h4>
+      <p>工具并不是中性的，它们是结构选择的物质化延伸。任何结构一旦成为操作流程的一部分，便拥有了现实可调用性。这种调用性会反向加固其结构路径，使其看起来像是「自然运作的方式」。</p>
+      <p>例如：</p>
+      <p>物理实验仪器默认使用牛顿动力学模型；<br>
+      工程建模使用线性时空假设；<br>
+      编程语言依赖形式逻辑与集合论结构；</p>
+      <p>这些工具将某些结构路径内嵌为「默认接口」，导致：</p>
+      <p><strong>人们看到的现实，是工具允许他们看到的结构稳定性。</strong></p>
+      <p>于是，结构稳定看起来就像世界本身的稳定，而非系统建构之稳定。工具在此充当了「现实再现的接口」，但这一接口是人为构建的，而非自然固有的。</p>
+      <h4>4.3. 投影结构如何遮蔽生成结构</h4>
+      <p>ESC在图谱语言中称之为「认知投影层」（projective cognitive layer），它是指：<strong>结构系统在输出过程中将其稳定路径投影为「现象秩序」，从而形成对世界的显现版本。</strong></p>
+      <p>这一投影层有两个重要特征：</p>
+      <p>1.自遮蔽性：结构路径的使用频率越高，它在现象中留下的痕迹越少；<br>
+      2.逆显性：系统输出越顺畅，人类越难察觉其内部结构加工过程。</p>
+      <p>正因为法则在结构中极度稳定，它的存在变得「无感」：</p>
+      <p>我们不会意识到「地球绕太阳」是一个结构路径；<br>
+      我们不会质疑「光的传播」中隐含的介质假设；<br>
+      我们不会怀疑「主谓宾」结构可能并不适用于一切语言。</p>
+      <p>于是，投影结构成为现实本身的「表象」，而我们忘记了这些表象原本是认知结构加工后的产物。</p>
+      <h4>4.4. 真理幻觉是结构稳定性的认知替代品</h4>
+      <p>ESC指出，所谓「真理」并不是世界中独立存在的属性，而是认知系统在结构稳定后所形成的叙述性判断。当结构路径高度稳定，其语言表达、工具应用与现象投影一致时，人类便会将其标注为「真理」。</p>
+      <p>换言之：</p>
+      <p><strong>「真理」只是我们对稳定结构路径缺乏可疑视角时的语义替代物。</strong></p>
+      <p>它不是认知的终点，而是认知可疑性的暂时中止。它的成立，并不意味着我们发现了自然的终极法则，而只是说明：</p>
+      <p>当前结构在当前系统中是最优路径；<br>
+      该路径尚未被系统反馈所打破；<br>
+      认知系统暂时失去了替代选项。</p>
+      <p>这并不构成「真理」的哲学正当性，而仅是一种结构稳定性的认知现象学表达。</p>
+      <h4>4.5. 链接下一节：如果法则不是普遍命题，它究竟是什么？</h4>
+      <p>本节回溯了「法则即真理」的认知错位机制，指出这一错位不是错误，而是一种认知系统内的功能性捷径。法则一旦被等同于真理，它的结构路径就不再被检视、结构条件不再被分析、替代模型不再被允许，从而进入哲学误区。</p>
+      <p>下一节将完成本章结构哲学任务：法则不是命题性真理，而是结构系统内部的极限组织逻辑。我们将拒绝「法则是自然秩序陈述」的本体论立场，转而确立法则的结构存在方式，并给出结构哲学对「法则」的终极定义。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第5节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 极限形态</div><div>10 / 14</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 结构不是法则的容器</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">法则不是结构的内容，</span>
+      <span data-anim="line" style="display:block">而是结构的存在方式在极限条件下的表现形式。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>法则不是结构想要抵达的某处，而是结构再也无法离开的某处。</p>
+  </div>
+  <div class="foot"><div>Page 10 · 极限形态</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 结构不是法则的容器，法则是结构自身的极限形态</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 结构不是法则的容器，法则是结构自身的极限形态</h4>
+      <p>如果说前几节已逐步指出法则并非独立存在的「自然真理」，而是结构系统中长期演化后的稳定结果，那么本节将进一步推进这一命题的哲学深度：法则不是某种「被装进结构中的真理」，而是结构本身在演化中达到极限之后所显现的组织形式。</p>
+      <p>这一区别不是语言上的微调，而是认知论上的根本转向。</p>
+      <p>它拒绝了「法则存在于结构之中」的容器模型，也拒绝了「结构实现了法则」的投射模型，而确立了一个结构哲学的基本立场：</p>
+      <p><strong>法则不是结构的内容，而是结构的存在方式在极限条件下的表现形式。</strong></p>
+      <p>在这一认知框架下，法则的哲学地位被重写，不再是「世界给予人类的秩序」，而是「结构在演化中收敛为系统自身不可替代的组织逻辑」。它不是嵌入结构的实体，而是结构自我形成、自我封闭、自我稳定的极限表达。</p>
+      <h4>5.1. 否定一：法则不是结构的附属物</h4>
+      <p>传统观念中，结构往往被视为装载法则的容器，结构是「外壳」，法则是「内核」。在这种模型中，科学的任务被理解为剥离结构表象，揭示内在法则。然而这一模型忽略了一个基本事实：</p>
+      <p><strong>结构不是中立媒介，它本身就是运行机制。</strong></p>
+      <p>结构的出现意味着信息的分组、连接、嵌套与反馈，一旦结构成立，其行为就是系统行为。此时所谓「法则」不过是该结构行为的稳定性命名。因此，不存在某种先验法则被结构「实现」的过程，存在的只是结构运行到一定阶段，其表现出的稳定路径被认知系统标记为「法则」。</p>
+      <h4>5.2. 否定二：法则不是结构的外在目标</h4>
+      <p>另一种误解是将法则视作结构演化的「目的」，仿佛所有结构都在趋向某种理想法则状态。这是一种目的论式的偏见，在哲学上构成了「隐性本质主义」的回归。</p>
+      <p>ESC拒绝此种解释路径。结构之所以演化，不是为了接近法则，而是为了应对输入、降低反馈、提升系统稳定性。法则不是终点，而是副产物：</p>
+      <p>它是系统无法再优化该结构路径的表现；<br>
+      是系统对该路径做出的「默认响应」；<br>
+      是结构调度图谱中反馈趋于零的稳定极限。</p>
+      <p><strong>法则不是结构想要抵达的某处，而是结构再也无法离开的某处。</strong></p>
+      <h4>5.3. 肯定一：法则是结构的封闭性表现</h4>
+      <p>结构若要维持稳定，必须对外界输入做出一致响应。此时它必须压缩变量、冻结参数、限制调用，并在系统中生成可预测的输出。长此以往，结构不再是开放系统中的适应性单位，而是变成了具有强封闭性与路径惰性的系统锁定路径。</p>
+      <p>这正是法则生成的根源。封闭性是一种结构对抗熵增、保持秩序的自我演化结果。而法则不过是这一封闭结构的命名。它没有比其他结构「更真实」，它只是：</p>
+      <p>更不可裁剪<br>
+      更不可逆<br>
+      更不可替代。</p>
+      <p>其存在方式不是「真」，而是「不可变」。</p>
+      <h4>5.4. 肯定二：法则是结构嵌套体系的不可抽换单元</h4>
+      <p>在系统结构演化的层层嵌套中，越往底层，结构被调用的频率越高，被替代的可能性越低。一旦某个结构成为上层结构构建的基础，其地位就被锁定为不可抽换模块。</p>
+      <p>法则正是这样的结构单位：</p>
+      <p>它不是「描述其他结构的规则」；而是「被其他结构依赖的路径本身」。</p>
+      <p>从这个角度看，法则的系统地位并非逻辑高位，而是嵌套结构中的压缩基点。它的核心特征不是「解释一切」，而是「一切以其为前提」。</p>
+      <h4>5.5. 肯定三：法则是结构演化中「不可再被看见」的那部分</h4>
+      <p>ESC进一步指出一个极具哲学意味的特征：法则是最稳定的结构，但也是最不容易被识别为结构的结构。</p>
+      <p>它不再被质疑；它不再被重建；它不再被显性调用；</p>
+      <p><strong>它进入了系统的「透明层」。我们对其的认知不是「看到它」，而是「看不见它却依赖它」。</strong></p>
+      <p>这正是哲学意义上的「显现消隐」：结构的极度稳定反而导致其在认知层面上的不可感知性。我们称之为自然、为真理、为必然，但实际上它只是：<strong>演化路径被系统完全吞噬之后留下的痕迹。</strong></p>
+      <h4>5.6. 链接下一节：收束结构哲学中的「法则观」</h4>
+      <p>本节完成了法则结构存在方式的哲学定义，并通过一组否定与肯定语义，确立了如下结论：（1）法则不是结构携带的对象，而是结构自身运行到极限的表现；（2）法则不是认知寻找的目标，而是认知生成的副产物；（3）法则不是自然的赋值，而是系统组织逻辑的稳定映射；（4）法则不是知识的内容，而是知识得以组织的框架；下一节将对这些结论作系统性收束，为本章完成最后的理论连接任务，并引向下一章节关于「知识系统」的展开。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第5节卡（二否定三肯定） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · Two No, Three Yes</div><div>11 / 14</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>两个否定 · 三个肯定 · 5.1-5.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>其存在方式不是「真」，而是「不可变」</h2>
+    <div class="grid-2">
+      <div data-anim style="padding:2vh 1.6vw;border-left:3px solid currentColor;opacity:.72">
+        <div class="kicker">两个否定</div>
+        <p class="body-zh" style="margin-top:1.2vh"><strong>非附属物</strong>——结构不是中立媒介，法则只是结构行为的稳定性命名；<strong>非外在目标</strong>——结构演化不为接近法则，法则是副产物而非终点。</p>
+      </div>
+      <div data-anim style="padding:2vh 1.6vw;border-left:3px solid currentColor">
+        <div class="kicker">三个肯定</div>
+        <p class="body-zh" style="margin-top:1.2vh"><strong>封闭性表现</strong>——更不可裁剪、不可逆、不可替代；<strong>不可抽换单元</strong>——一切以其为前提；<strong>不可再被看见</strong>——进入系统的「透明层」，看不见却依赖它。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:68vw;margin-top:4vh" data-anim>
+      <span class="q-big">法则是最稳定的结构，但也是最不容易被识别为结构的结构——它是演化路径被系统完全吞噬之后留下的痕迹。</span>
+      <span class="cite">5.5 · 显现消隐：极度稳定导致认知上的不可感知</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 11 · Two No, Three Yes</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1. 否定一：法则不是结构的附属物</h4>
+      <p>传统观念中，结构往往被视为装载法则的容器，结构是「外壳」，法则是「内核」。在这种模型中，科学的任务被理解为剥离结构表象，揭示内在法则。然而这一模型忽略了一个基本事实：</p>
+      <p><strong>结构不是中立媒介，它本身就是运行机制。</strong></p>
+      <p>结构的出现意味着信息的分组、连接、嵌套与反馈，一旦结构成立，其行为就是系统行为。此时所谓「法则」不过是该结构行为的稳定性命名。因此，不存在某种先验法则被结构「实现」的过程，存在的只是结构运行到一定阶段，其表现出的稳定路径被认知系统标记为「法则」。</p>
+      <h4>5.2. 否定二：法则不是结构的外在目标</h4>
+      <p>另一种误解是将法则视作结构演化的「目的」，仿佛所有结构都在趋向某种理想法则状态。这是一种目的论式的偏见，在哲学上构成了「隐性本质主义」的回归。</p>
+      <p>ESC拒绝此种解释路径。结构之所以演化，不是为了接近法则，而是为了应对输入、降低反馈、提升系统稳定性。法则不是终点，而是副产物：</p>
+      <p>它是系统无法再优化该结构路径的表现；<br>
+      是系统对该路径做出的「默认响应」；<br>
+      是结构调度图谱中反馈趋于零的稳定极限。</p>
+      <p><strong>法则不是结构想要抵达的某处，而是结构再也无法离开的某处。</strong></p>
+      <h4>5.3. 肯定一：法则是结构的封闭性表现</h4>
+      <p>结构若要维持稳定，必须对外界输入做出一致响应。此时它必须压缩变量、冻结参数、限制调用，并在系统中生成可预测的输出。长此以往，结构不再是开放系统中的适应性单位，而是变成了具有强封闭性与路径惰性的系统锁定路径。</p>
+      <p>这正是法则生成的根源。封闭性是一种结构对抗熵增、保持秩序的自我演化结果。而法则不过是这一封闭结构的命名。它没有比其他结构「更真实」，它只是：</p>
+      <p>更不可裁剪<br>
+      更不可逆<br>
+      更不可替代。</p>
+      <p>其存在方式不是「真」，而是「不可变」。</p>
+      <h4>5.4. 肯定二：法则是结构嵌套体系的不可抽换单元</h4>
+      <p>在系统结构演化的层层嵌套中，越往底层，结构被调用的频率越高，被替代的可能性越低。一旦某个结构成为上层结构构建的基础，其地位就被锁定为不可抽换模块。</p>
+      <p>法则正是这样的结构单位：</p>
+      <p>它不是「描述其他结构的规则」；而是「被其他结构依赖的路径本身」。</p>
+      <p>从这个角度看，法则的系统地位并非逻辑高位，而是嵌套结构中的压缩基点。它的核心特征不是「解释一切」，而是「一切以其为前提」。</p>
+      <h4>5.5. 肯定三：法则是结构演化中「不可再被看见」的那部分</h4>
+      <p>ESC进一步指出一个极具哲学意味的特征：法则是最稳定的结构，但也是最不容易被识别为结构的结构。</p>
+      <p>它不再被质疑；它不再被重建；它不再被显性调用；</p>
+      <p><strong>它进入了系统的「透明层」。我们对其的认知不是「看到它」，而是「看不见它却依赖它」。</strong></p>
+      <p>这正是哲学意义上的「显现消隐」：结构的极度稳定反而导致其在认知层面上的不可感知性。我们称之为自然、为真理、为必然，但实际上它只是：<strong>演化路径被系统完全吞噬之后留下的痕迹。</strong></p>
+      <h4>5.6. 链接下一节：收束结构哲学中的「法则观」</h4>
+      <p>本节完成了法则结构存在方式的哲学定义，并通过一组否定与肯定语义，确立了如下结论：（1）法则不是结构携带的对象，而是结构自身运行到极限的表现；（2）法则不是认知寻找的目标，而是认知生成的副产物；（3）法则不是自然的赋值，而是系统组织逻辑的稳定映射；（4）法则不是知识的内容，而是知识得以组织的框架；下一节将对这些结论作系统性收束，为本章完成最后的理论连接任务，并引向下一章节关于「知识系统」的展开。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 第6节 命题页（稳定错觉） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 6 节 · 稳定错觉</div><div>12 / 14</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 6 节 · 收束命题</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">稳定性是「已知」的沉淀，</span>
+      <span data-anim="line" style="display:block">而非「真理」的凭证。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>法则不是我们看见的结果，而是我们「无法不看见」的结构性产物。</p>
+  </div>
+  <div class="foot"><div>Page 12 · 稳定错觉</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第6节 自然法则是认知系统内部的稳定错觉？</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第6节 | 自然法则是认知系统内部的稳定错觉？</h4>
+      <p>当我们将「自然法则」从一种预设的外在真理，重新定位为结构系统的极限表达时，认知哲学便面临一个深刻的转向命题：</p>
+      <p><strong>法则是否只是认知系统内部所制造出的稳定幻觉？</strong></p>
+      <p>这一命题并不意图否定自然世界中的规律性表现，而是质疑这些规律性的「法则化表达」是否源自世界本身，亦或只是人类认知结构在组织经验过程中所生成的一种内在稳定性投影。在本节中，我们不再追问「什么是法则」，而转向追问：</p>
+      <p>我们为何如此确信法则的存在？<br>
+      我们的认知结构是否有能力制造「法则的幻觉」？<br>
+      在认知系统内部，法则究竟扮演了什么角色？</p>
+      <p>这些问题标志着本章的收束点，同时也成为下一章—— 关于知识系统如何反向映射法则—— 的理论引擎。</p>
+      <h4>6.1. 稳定性是否等同于实在性？</h4>
+      <p>认知系统之所以将法则等同于自然真理，根本在于一种未经检视的前提假设：</p>
+      <p><strong>如果某种结构长期稳定、普遍适用、反馈为零，那么它就是真实的。</strong></p>
+      <p>这是稳定性逻辑（logic of stability）的核心信条，也是大多数科学方法论的默认底层结构。</p>
+      <p>但 ESC 提出：</p>
+      <p>稳定 ≠ 本质；<br>
+      稳定 ≠ 不可替代；<br>
+      稳定只是系统对结构演化的局部停顿状态。</p>
+      <p>因此，法则的稳定性并不构成它的本体论正当性，它只说明该结构在特定系统、特定历史条件下达成了一种路径上的最低耗散状态与最大兼容性。</p>
+      <p><strong>稳定性是「已知」的沉淀，而非「真理」的凭证。</strong></p>
+      <h4>6.2. 认知系统为何需要「法则」？</h4>
+      <p>人类认知系统具备高度依赖结构路径的特性：</p>
+      <p>我们处理信息，不是通过无限多样的路径，而是通过有限可复用的结构；<br>
+      我们理解世界，不是处理每一次输入的个体性，而是寻找可以通用的路径；<br>
+      我们组织知识，不是记忆所有细节，而是提炼出最稳定的形式。</p>
+      <p>这些特性决定了：认知系统会主动制造「稳定的结构单位」以节省资源、压缩复杂性、提升预测性。而这些被认知系统反复调用、嵌套、沉淀的结构路径，最终便成为「法则」。</p>
+      <p>法则不是被观察出来的，而是被系统组织出来的。</p>
+      <h4>6.3. 当结构无法再被改写，就会被误认为是真理</h4>
+      <p>法则的哲学地位之所以长期未被动摇，在于如下认知闭环：</p>
+      <p>1.结构进入极限稳定 →<br>
+      2.系统不再修正其路径 →<br>
+      3.认知转而默认其正确性 →<br>
+      4.语言系统将其设定为命题单位 →<br>
+      5.工具实践围绕其结构展开 →<br>
+      6.再次观察已无法脱离该结构 →<br>
+      7.法则获得「不可动摇的实在性」 →<br>
+      8.被归类为自然真理。</p>
+      <p><strong>这是一个结构稳定性→认知不可疑性→语言事实化→真理化的全过程。而在这一过程的底部，真正决定一切的，恰恰是结构系统自身的组织机制。</strong></p>
+      <p>因此，<strong>法则不是我们看见的结果，而是我们「无法不看见」的结构性产物。</strong></p>
+      <h4>6.4. 结构认知视角下的「自然法则」再定义</h4>
+      <p>本章至此，已完成如下命题转换：</p>
+      <p>自然法则是世界固有的规律 → 自然法则是结构系统的极限路径；<br>
+      法则是被发现的 → 法则是结构演化生成的；<br>
+      法则是客观真理 → 法则是系统内部稳定路径的认知投影；<br>
+      法则是命题陈述 → 法则是不可逆结构路径的默认调用单元；<br>
+      法则是因果关系的描述 → 法则是嵌套与反馈机制冻结后的组织逻辑。</p>
+      <p>在这一转化中，法则的本体论地位被解除，其结构论地位被确立。我们不再需要借助「自然赋予」这一形而上说法来支撑法则的正当性，而只需说明该结构路径如何在系统中实现了耗散最小、反馈静默与跨系统适配这三个条件，即可给予其「结构性成立」的定位。</p>
+      <h4>6.5. 练接下一章：知识系统如何映射结构法则？</h4>
+      <p>如果法则不再是世界给予的真理，而是认知系统生成的结构单位，那么下一个关键命题是：</p>
+      <p>人类的知识系统，是否就是对这些结构单位的再封装？本章完成了对自然法则认知地位的彻底重构，为第7章奠定了路径基础。下一章将展开如下思考：</p>
+      <p>知识系统如何围绕结构法则组织自身？<br>
+      如何在语言、教育、工具、符号等层面生成稳定的「知识形态」？<br>
+      反之，知识系统是否也可以反向影响结构法则的认知演化？</p>
+      <p>我们将进入「结构法则如何被知识系统反向投影」的核心命题场域，并进入认知理论的下一个螺旋层级。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P13 · 第6节卡（闭环+对照表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 6 · The Loop</div><div>13 / 14</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>真理化的八步闭环 · 命题转换 · 6.3 / 6.4</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.4vh" data-anim>从结构稳定到自然真理的八步</h2>
+    <p class="body-zh" style="max-width:80vw;margin-bottom:3vh" data-anim>结构进入极限稳定 → 系统不再修正 → 认知默认其正确 → 语言设定为命题 → 工具围绕其展开 → 观察无法脱离 → 获得「不可动摇的实在性」 → 被归类为自然真理。</p>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:46%">传统命题</th><th>ESC 命题</th></tr></thead>
+      <tbody>
+        <tr><td>自然法则是世界固有的规律</td><td class="em-cell">自然法则是结构系统的极限路径</td></tr>
+        <tr><td>法则是被发现的</td><td class="em-cell">法则是结构演化生成的</td></tr>
+        <tr><td>法则是客观真理</td><td class="em-cell">法则是系统内部稳定路径的认知投影</td></tr>
+        <tr><td>法则是命题陈述</td><td class="em-cell">法则是不可逆结构路径的默认调用单元</td></tr>
+        <tr><td>法则是因果关系的描述</td><td class="em-cell">法则是嵌套与反馈机制冻结后的组织逻辑</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 13 · The Loop</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 6.1-6.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>6.1. 稳定性是否等同于实在性？</h4>
+      <p>认知系统之所以将法则等同于自然真理，根本在于一种未经检视的前提假设：</p>
+      <p><strong>如果某种结构长期稳定、普遍适用、反馈为零，那么它就是真实的。</strong></p>
+      <p>这是稳定性逻辑（logic of stability）的核心信条，也是大多数科学方法论的默认底层结构。</p>
+      <p>但 ESC 提出：</p>
+      <p>稳定 ≠ 本质；<br>
+      稳定 ≠ 不可替代；<br>
+      稳定只是系统对结构演化的局部停顿状态。</p>
+      <p>因此，法则的稳定性并不构成它的本体论正当性，它只说明该结构在特定系统、特定历史条件下达成了一种路径上的最低耗散状态与最大兼容性。</p>
+      <p><strong>稳定性是「已知」的沉淀，而非「真理」的凭证。</strong></p>
+      <h4>6.2. 认知系统为何需要「法则」？</h4>
+      <p>人类认知系统具备高度依赖结构路径的特性：</p>
+      <p>我们处理信息，不是通过无限多样的路径，而是通过有限可复用的结构；<br>
+      我们理解世界，不是处理每一次输入的个体性，而是寻找可以通用的路径；<br>
+      我们组织知识，不是记忆所有细节，而是提炼出最稳定的形式。</p>
+      <p>这些特性决定了：认知系统会主动制造「稳定的结构单位」以节省资源、压缩复杂性、提升预测性。而这些被认知系统反复调用、嵌套、沉淀的结构路径，最终便成为「法则」。</p>
+      <p>法则不是被观察出来的，而是被系统组织出来的。</p>
+      <h4>6.3. 当结构无法再被改写，就会被误认为是真理</h4>
+      <p>法则的哲学地位之所以长期未被动摇，在于如下认知闭环：</p>
+      <p>1.结构进入极限稳定 →<br>
+      2.系统不再修正其路径 →<br>
+      3.认知转而默认其正确性 →<br>
+      4.语言系统将其设定为命题单位 →<br>
+      5.工具实践围绕其结构展开 →<br>
+      6.再次观察已无法脱离该结构 →<br>
+      7.法则获得「不可动摇的实在性」 →<br>
+      8.被归类为自然真理。</p>
+      <p><strong>这是一个结构稳定性→认知不可疑性→语言事实化→真理化的全过程。而在这一过程的底部，真正决定一切的，恰恰是结构系统自身的组织机制。</strong></p>
+      <p>因此，<strong>法则不是我们看见的结果，而是我们「无法不看见」的结构性产物。</strong></p>
+      <h4>6.4. 结构认知视角下的「自然法则」再定义</h4>
+      <p>本章至此，已完成如下命题转换：</p>
+      <p>自然法则是世界固有的规律 → 自然法则是结构系统的极限路径；<br>
+      法则是被发现的 → 法则是结构演化生成的；<br>
+      法则是客观真理 → 法则是系统内部稳定路径的认知投影；<br>
+      法则是命题陈述 → 法则是不可逆结构路径的默认调用单元；<br>
+      法则是因果关系的描述 → 法则是嵌套与反馈机制冻结后的组织逻辑。</p>
+      <p>在这一转化中，法则的本体论地位被解除，其结构论地位被确立。我们不再需要借助「自然赋予」这一形而上说法来支撑法则的正当性，而只需说明该结构路径如何在系统中实现了耗散最小、反馈静默与跨系统适配这三个条件，即可给予其「结构性成立」的定位。</p>
+      <h4>6.5. 练接下一章：知识系统如何映射结构法则？</h4>
+      <p>如果法则不再是世界给予的真理，而是认知系统生成的结构单位，那么下一个关键命题是：</p>
+      <p>人类的知识系统，是否就是对这些结构单位的再封装？本章完成了对自然法则认知地位的彻底重构，为第7章奠定了路径基础。下一章将展开如下思考：</p>
+      <p>知识系统如何围绕结构法则组织自身？<br>
+      如何在语言、教育、工具、符号等层面生成稳定的「知识形态」？<br>
+      反之，知识系统是否也可以反向影响结构法则的认知演化？</p>
+      <p>我们将进入「结构法则如何被知识系统反向投影」的核心命题场域，并进入认知理论的下一个螺旋层级。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P14 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>14 / 14</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:4.8vw" data-anim>法则不是被发现的，<br>而是被结构演化出来的。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：法则 = 演化速度趋零的极限稳定结构；三大生成条件（跨系统 × 低能耗 × 反馈静默）；真理幻觉的三重机制；法则作为结构自身的极限形态；稳定性 ≠ 实在性。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>下一章将展开：知识系统是对结构法则的反向映射——知识不是事实的记录，而是结构路径的组织性投影。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-08/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 5 章 · 从结构到原理：IP 的生成机制</div></a>
+    <a href="../deck-codex-10/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 7 章 · 知识系统是对结构法则的反向映射</div></a>
+  </div>
+  <div class="foot"><div>第 7 章 · 知识系统的反向映射</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-08/index.html', chapterNext = '../deck-codex-10/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

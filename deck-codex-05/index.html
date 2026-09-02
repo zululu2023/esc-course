@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第1章 我们如何知道我们所知道的？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* ============ WebGL 双背景 ============ */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  /* ============ Deck 容器 + 翻页 ============ */
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  /* ============ chrome / foot ============ */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+
+  /* ============ 字体 ============ */
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:9.2vw;line-height:1.04;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6vw;line-height:1.12;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.2vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.2vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.8vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  /* ============ 布局 ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  /* ============ Callout ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.55vw);line-height:1.42}
+
+  /* ============ pipeline ============ */
+  .pipeline{display:grid;gap:1.4vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.15vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.5vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.95vw);line-height:1.5;opacity:.72}
+
+  /* ============ 表格 .tbl ============ */
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1.02vw);line-height:1.6}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.5vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.5vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600}
+
+  /* ============ 原文展开层（.src-panel）============ */
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.06vw,19px);line-height:1.95;margin:0 0 1.4em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+  .src-panel .src-body .tr-note{font-family:var(--mono);font-size:clamp(11px,.85vw,14px);letter-spacing:.06em;opacity:.6;line-height:1.6}
+  .src-panel .src-body ul{margin:0 0 1.4em 1.2em}
+  .src-panel .src-body li{font-family:var(--serif-zh);font-size:clamp(14px,1.06vw,19px);line-height:1.9;margin-bottom:.5em;opacity:.92}
+
+  /* ============ 动效 ============ */
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  /* ============ 导航 ============ */
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 1 章</div><div>Chapter I</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>How Do We Know What We Know</div>
+    <h1 class="h-hero" data-anim>我们如何知道</h1>
+    <h2 class="h-sub" data-anim>我们所知道的？</h2>
+    <p class="lead" style="max-width:62vw" data-anim>认知的本质不在于发现未知，而在于通过结构化，使现象从不可接近变为可构造的已知。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · Pan</span><span>·</span><span>2026.03.09</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 1 章</div><div>01 / 11</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第1章（来源：结构认知实验室 · 2026年3月9日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>当我们说「理解一个问题」，其实我们是在说：「我们已经能够将该问题纳入某种结构中」，这个结构使我们能够操作它、分析它、预测它、延伸它，也就是说，我们在结构中获得了行动的空间。这才是真正的「认知」。</p>
+      <p>本章依次展开：第1节 已知与未知的哲学边界；第2节 存在不是终点，而是问题本身；第3节 结构化是认知的第一机制；第4节 从现象到公式：E = s(t) 的发生前夜。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 前言 ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Prologue</div><div>02 / 11</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:76vh">
+    <div class="kicker" data-anim>前言 · 理解的真实含义</div>
+    <h2 class="h-xl" style="font-size:5.6vw" data-anim>理解一个问题 = 将它纳入某种结构</h2>
+    <div class="callout" style="max-width:72vw" data-anim>
+      <span class="q-big">"当我们说「理解一个问题」，其实我们是在说：「我们已经能够将该问题纳入某种结构中」——这个结构使我们能够操作它、分析它、预测它、延伸它。我们在结构中获得了行动的空间。这才是真正的「认知」。</span>
+      <span class="cite">第1章 · 前言</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 02 · 前言</div><div>Prologue</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 前言</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>前言</h4>
+      <p>当我们说「理解一个问题」，其实我们是在说：「我们已经能够将该问题纳入某种结构中」，这个结构使我们能够操作它、分析它、预测它、延伸它，也就是说，我们在结构中获得了行动的空间。这才是真正的「认知」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 已知与未知的哲学边界</div><div>03 / 11</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 最朴素却最被忽视的原理</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.3;max-width:80vw">
+      <span data-anim="line" style="display:block">认知的本质不是发现未知，</span>
+      <span data-anim="line" style="display:block">而是通过将现象转化为结构，</span>
+      <span data-anim="line" style="display:block">使其从不可接近变为可构造、可解释、可再现的已知。</span>
+    </blockquote>
+    <p class="lead" style="max-width:62vw;opacity:.75" data-anim>我们永远无法通过「未知」来验证「已知」——因为未知无法被认定为事实、无法被构造为结构、无法在语言或逻辑中被赋予确定性。</p>
+  </div>
+  <div class="foot"><div>Page 03 · 已知与未知</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 已知与未知的哲学边界</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节：已知与未知的哲学边界</h4>
+      <p>我们永远无法通过「未知」来验证「已知」。这是认知哲学中最朴素、却也最被忽视的一条原理性断语。因为未知无法被认定为事实、无法被构造为结构、无法在语言或逻辑中被赋予确定性，它因此也就无法构成我们认知的出发点。</p>
+      <p>人类的认知之所以能够展开，正是因为我们拥有某种被确认为「已知」的起点：一组经验、一段语言、一条路径、一个定义。所有这些起点都是被组织过的信息，即已经被我们纳入了某种结构系统，并获得了明确指向的内容性单位。</p>
+      <p>而任何「未知」只要它仍处在不可辨识、不可构造、不可组织的状态中就无法作为认知过程的组成部分。我们面对的不是「绝对的未知」，而是「尚未结构化的存在」。</p>
+      <p>这意味着：</p>
+      <p><strong>认知的本质不是发现未知，而是通过将现象转化为结构，使其从不可接近变为可构造、可解释、可再现的已知。</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第1节 三卡 ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · The Boundary</div><div>04 / 11</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>为什么未知不能作为起点</div>
+    <h2 class="h-xl" style="font-size:5.2vw;margin-bottom:5vh" data-anim>已知与未知的边界</h2>
+    <div class="grid-3">
+      <div data-anim style="border-top:1px solid currentColor;padding-top:2vh">
+        <div class="kicker">01</div>
+        <h3 class="h-md">已知 = 被组织的起点</h3>
+        <p class="body-zh" style="margin-top:2vh">一组经验、一段语言、一条路径、一个定义——都是被纳入结构系统、获得明确指向的内容性单位。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:2vh">
+        <div class="kicker">02</div>
+        <h3 class="h-md">未知的三不可</h3>
+        <p class="body-zh" style="margin-top:2vh">不可辨识、不可构造、不可组织——只要仍处在这种状态，就无法成为认知过程的组成部分。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:2vh">
+        <div class="kicker">03</div>
+        <h3 class="h-md">没有绝对的未知</h3>
+        <p class="body-zh" style="margin-top:2vh">我们面对的不是「绝对的未知」，而是「尚未结构化的存在」——差别只在结构化与否。</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>Page 04 · The Boundary</div><div>Section 1</div></div>
+</section>
+
+<!-- ========== P5 · 第2节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 2 节 · 存在不是终点</div><div>05 / 11</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 存在不是终点，而是问题本身</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">存在不是世界给予我们的起点，</span>
+      <span data-anim="line" style="display:block">而是我们以结构回应世界时生成的现象。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>我们认知中所有的「存在」，都是我们通过结构化方式，从混沌中提取、定义、赋形而来的结果。</p>
+  </div>
+  <div class="foot"><div>Page 05 · 存在即问题</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 存在不是终点，而是问题本身</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节：存在不是终点，而是问题本身</h4>
+      <p>当我们提出「存在」这个词时，往往预设了一种本体论的姿态：仿佛存在是一种无需证明的事实、一种被给予的真实、一种无须加工就可以被陈述的对象。但在结构哲学的视角下，任何存在一旦被提出，就已经进入了认知系统，它不再是「本质」，而是「结构现象」。</p>
+      <p>这意味着：</p>
+      <p><strong>我们所说的「存在」，从来都不是在世界之外、认知之前就在那里等候我们发现的「实在」。恰恰相反，我们认知中所有的「存在」，都是我们通过结构化方式，从混沌中提取、定义、赋形而来的结果。</strong></p>
+      <p>存在并不是终点，而是一个问题—— 一个必须被加工、被组织、被连接、被命名的问题。</p>
+      <p>在传统哲学中，我们被引导去追问「存在是什么」；而在ESC框架下，这个问题被转换为：我们是如何使某种现象被认知为「存在」的？这个视角的转变不是轻微的语言差异，而是整个认知架构的重置。它从「形而上本体论」撤回，转入「结构生成论」的哲学路径。</p>
+      <p>在这个路径中，存在并不是起点，而是结构化的结果。只有当某种输入在时间中被我们识别、组织、连接，并与既有认知图谱发生耦合时，它才「显现」为存在。</p>
+      <p>这也解释了一个关键哲学现象：</p>
+      <p><strong>我们无法脱离结构谈存在。一旦我们尝试用语言、符号、图式去描述它，我们就已经「参与」了它的构造过程。即便我们说「这是未经定义的纯粹存在」，这句话本身也是一个结构单元、一个认知输出。</strong></p>
+      <p>因此我们说：</p>
+      <p><strong>存在不是世界给予我们的起点，而是我们以结构回应世界时生成的现象。</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第2节 问题转换 ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · The Turn</div><div>06 / 11</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>视角的转变 = 整个认知架构的重置</div>
+    <h2 class="h-xl" style="font-size:5.2vw;margin-bottom:5vh" data-anim>问题的转换</h2>
+    <div class="grid-2">
+      <div data-anim style="padding:3vh 2vw;border-left:3px solid currentColor;opacity:.58">
+        <div class="kicker">传统哲学之问</div>
+        <h3 class="h-md">「存在是什么？」</h3>
+        <p class="body-zh" style="margin-top:2vh">预设存在是被给予的事实、无需加工即可陈述的对象——形而上本体论的路径。</p>
+      </div>
+      <div data-anim style="padding:3vh 2vw;border-left:3px solid currentColor">
+        <div class="kicker">ESC 之问</div>
+        <h3 class="h-md">「我们如何使某种现象被认知为『存在』？」</h3>
+        <p class="body-zh" style="margin-top:2vh">存在不是起点，而是结构化的结果：输入在时间中被识别、组织、连接、耦合，才「显现」为存在。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:72vw;margin-top:4vh" data-anim>
+      <span class="q-big">我们无法脱离结构谈存在。一旦用语言、符号、图式去描述它，我们就已经「参与」了它的构造过程。</span>
+      <span class="cite">从「形而上本体论」撤回，转入「结构生成论」</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 06 · The Turn</div><div>Section 2</div></div>
+</section>
+
+<!-- ========== P7 · 第3节 命题页 ========== -->
+<section class="slide light">
+  <div class="chrome"><div>第 3 节 · 第一机制</div><div>07 / 11</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 所有加工机制的共同底层</div>
+    <h2 class="h-xl" style="font-size:6vw" data-anim>结构化是认知的第一机制</h2>
+    <p class="lead" style="max-width:66vw" data-anim>视觉系统的图像形成、语言系统的符号指涉、逻辑系统的概念组织——它们的共同底层机制只有一个：结构化（Structuring）。</p>
+    <div class="callout" style="max-width:66vw" data-anim>
+      <span class="q-big">结构化不是工具性的技术手段，而是认知自身的本体性操作。没有结构化就没有认知。</span>
+      <span class="cite">Structuring · 认知的发生方式</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 07 · Structuring</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 结构化是认知的第一机制</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节：结构化是认知的第一机制</h4>
+      <p>我们无法直接感知「真实」。我们能感知的，永远是一种被加工过的「现象」。而这所有的加工机制 - 无论是视觉系统的图像形成，语言系统的符号指涉，还是逻辑系统的概念组织 - 它们的共同底层机制只有一个：<strong>结构化（Structuring）</strong>。</p>
+      <p>结构化并不是工具性的技术手段，而是认知自身的本体性操作。它将混沌的输入加工成有机的理解单位；它把海量的信息筛选、连接、压缩、封装；它使得认知成为可能。</p>
+      <p>因此，我们不再问「认知如何描述存在」，而是反过来问：结构化如何构成我们所能认知的「存在」？当哲学思考试图从「存在是什么」这个命题展开时，它常常误以为存在是一个可以被定义、被呈现、被归纳的终极实体。但我们必须明确指出：</p>
+      <p>存在不是一个给定的答案，而是一个持续被组织的结构性问题。</p>
+      <p>换句话说，我们无法跳出认知之外去讨论一个纯粹的「存在本体」。因为我们所称之为「存在」的一切，都是已经经过了认知系统的加工结构总和。</p>
+      <p>因此，「存在」不是哲学的终点，也不是世界的起点，而是一个在认知过程中被不断组织、显现、定义的结构性现象。它存在于我们的系统之中—— 以结构的方式显影。</p>
+      <p>我们并不是直接理解世界的。我们所理解的，是一个经过层层组织、不断加工之后，才在我们意识中显现出来的「世界结构」。而促成这一切的机制，正是结构化（S）。</p>
+      <p>结构化不是一个外部添加的技术环节，它不是认知之后的工具性操作，而是认知本身的发生方式。换言之，没有结构化就没有认知。<strong>认知不是某种对现实的反映，而是结构对现象的组织行为。</strong>我们对现实的任何接触：从视觉感知、语言理解，到科学建模、哲学判断都只能通过某种结构的形式完成。</p>
+      <p>结构化的过程包含多个关键层次：</p>
+      <p><strong>信息的筛选与过滤</strong>：认知系统并不接收全部输入，而是基于已有路径选择性处理信息；<br>
+      <strong>连接方式的调用</strong>：不同的信息之间被以逻辑、语义、图式或隐喻等方式建立起关系；<br>
+      <strong>结构模板的激活</strong>：结构化不是从零开始，而是建立在已有结构框架上形成新嵌套；<br>
+      <strong>反馈的修正机制</strong>：结构并非一次性完成，而是在使用与反馈中不断被调整和优化。</p>
+      <p>这些过程不是被动的，而是高度主动的建构行为。它体现了ESC理论的核心立场之一：</p>
+      <p><strong>认知不是模仿世界，而是组织世界。</strong></p>
+      <p>当我们说「理解一个问题」，其实我们是在说：「我们已经能够将该问题纳入某种结构中」，这个结构使我们能够操作它、分析它、预测它、延伸它，也就是说，我们在结构中获得了行动的空间。这才是真正的「认知」。</p>
+      <p>结构化因此成为一种哲学-认知-行为的桥梁机制。它不只是知识的来源，更是我们如何定义「现实」的方法。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第3节 四层次 pipeline ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Four Operations</div><div>08 / 11</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>结构化的四个关键层次</div>
+    <h2 class="h-xl" style="font-size:5.2vw;margin-bottom:5vh" data-anim>高度主动的建构行为</h2>
+    <div class="pipeline" data-cols="4">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">信息的筛选与过滤</div>
+        <div class="step-desc">认知系统并不接收全部输入，而是基于已有路径选择性处理信息。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">连接方式的调用</div>
+        <div class="step-desc">信息之间以逻辑、语义、图式或隐喻等方式建立起关系。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">结构模板的激活</div>
+        <div class="step-desc">不是从零开始，而是建立在已有结构框架上形成新嵌套。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iv</div>
+        <div class="step-title">反馈的修正机制</div>
+        <div class="step-desc">结构并非一次性完成，而是在使用与反馈中不断被调整和优化。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:60vw;margin-top:6vh" data-anim>
+      <span class="q-big">认知不是模仿世界，而是组织世界。</span>
+      <span class="cite">ESC 核心立场 · 第 3 节</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 08 · Four Operations</div><div>Section 3</div></div>
+</section>
+
+<!-- ========== P9 · 第4节 公式页 ========== -->
+<section class="slide dark" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 从现象到公式</div><div>09 / 11</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · ESC 第一个结构公式</div>
+    <h1 class="h-hero" style="font-size:7.4vw" data-anim>E = s(t)</h1>
+    <p class="meta" data-anim>存在 = 结构化（在时间中的展开）</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;max-width:82vw" data-anim>
+      <div><div class="kicker">E · 存在</div><p class="body-zh">不是本质，不是实体，而是结构化在时间中展开之后的显现，是认知机制的输出状态。</p></div>
+      <div><div class="kicker">s · 结构化</div><p class="body-zh">认知自身的运作方式：面对的「世界」不是原始输入的总和，而是我们所能处理、组织、调用的输出结构。</p></div>
+      <div><div class="kicker">t · 时间</div><p class="body-zh">结构化展开的维度——公式不是命题，而是通往理解存在的认知路径图。</p></div>
+    </div>
+  </div>
+  <div class="foot"><div>Page 09 · E = s(t)</div><div>Formula</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 从现象到公式：E = s(t) 的发生前夜</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节：从现象到公式：E = s(t) 的发生前夜</h4>
+      <p>一切结构哲学的出发点，不是世界给予了我们什么，而是我们如何从混沌中建立起某种可理解的秩序。在本章的前三节中，我们已逐步清晰地揭示出：<strong>我们所称为「存在」的任何东西，都是被我们认知系统结构化之后的结果；而结构化不是工具或装饰，而是认知自身的运作方式。</strong></p>
+      <p>这意味着，<strong>我们面对的「世界」本身并非原始输入的总和，而是我们所能处理、组织并在认知框架中调用的输出结构。</strong></p>
+      <p>正是在这个意义上，我们才可以从认知哲学跨入结构哲学，从「世界是什么」转向「结构如何生成我们所知的世界」。这个转向不是仅仅语言的转折，而是整个哲学坐标的重新标定：</p>
+      <p>存在不再是一个预设项，而是一个结构化生成项。</p>
+      <p>这一思想核心，正是 ESC 理论的第一个结构公式的理论前提：</p>
+      <p><strong>E = s(t)</strong></p>
+      <p><strong>存在 = 结构化（在时间中的展开）</strong></p>
+      <p>这条公式并不是一个命题，它不是告诉我们「存在等于什么」，而是提供了一条通往理解存在的认知路径图。</p>
+      <p>我们通过它确立一个根本性观点：</p>
+      <p><strong>存在不是本质；存在不是实体；存在是结构化在时间中展开之后的显现，是认知机制在与输入世界交互中的输出状态。</strong></p>
+      <p>在这个意义上，我们才能摆脱关于「存在的实在性」「存在的本质性」「存在的起源」等哲学困境，因为这些问题本身都是在预设「存在先于结构」的逻辑下提出的。而在ESC理论中，我们反过来说：</p>
+      <p><strong>没有结构，就没有被认知的存在。</strong></p>
+      <p>这句话不是一种比喻，而是一种逻辑底层的判定式。它使得我们可以从认知结构出发来重建哲学秩序，也为本书接下来的所有公式建立提供了根基。</p>
+      <p>本章我们完成了哲学语言向结构语言的过渡，也完成了「存在是什么」的问题被转换为「结构如何生成存在」的结构哲学转向。</p>
+      <p>因此，第2章将正式进入这条公式的结构化展开过程，分析结构化的动力机制、时间维度的角色以及存在如何在结构中发生。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第4节 判定式 ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · The Verdict</div><div>10 / 11</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>不是比喻，而是逻辑底层的判定式</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:5.4vw;line-height:1.25;max-width:80vw">
+      <span data-anim="line" style="display:block">没有结构，</span>
+      <span data-anim="line" style="display:block">就没有被认知的存在。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>它使我们摆脱「存在的实在性 / 本质性 / 起源」等哲学困境——这些问题本身都预设了「存在先于结构」。</p>
+  </div>
+  <div class="foot"><div>Page 10 · The Verdict</div><div>Section 4</div></div>
+</section>
+
+<!-- ========== P11 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>11 / 11</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:60vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:5.8vw" data-anim>从「存在是什么」<br>到「结构如何生成存在」</h1>
+    <p class="lead" style="max-width:70vw" data-anim>本章完成了哲学语言向结构语言的过渡：未知不能作为起点；存在是被组织出的问题；结构化是认知的第一机制；E = s(t) 为全书公式奠基。</p>
+    <p class="body-zh" style="max-width:72vw" data-anim>下一章将正式进入这条公式的结构化展开过程：分析结构化的动力机制、时间维度的角色，以及存在如何在结构中发生。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-03/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">序章 · 存在的显现</div></a>
+    <a href="../deck-codex-04/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 2 章 · 存在不是本质，而是结构显现</div></a>
+  </div>
+  <div class="foot"><div>第 2 章 · 存在不是本质</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  /* 翻页时收起原文层 */
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-03/index.html', chapterNext = '../deck-codex-04/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

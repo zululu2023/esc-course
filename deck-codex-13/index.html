@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第10章 结构螺旋的认知演化地图：认知如何从路径耦合走向系统进化？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:7vw;line-height:1.12;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5vw;line-height:1.14;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.8vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.14vw);line-height:1.7;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.7vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.2vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.6vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.16vw);line-height:1.52;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.45vw);line-height:1.4}
+
+  .pipeline{display:grid;gap:1.3vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="5"]{grid-template-columns:repeat(5,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.4vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.9vw);line-height:1.48;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(12px,.96vw);line-height:1.55}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.82vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.3vh 1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.3vh 1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.02vw,18px);line-height:1.9;margin:0 0 1.3em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 10 章</div><div>Chapter X</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>The Structural Spiral</div>
+    <h1 class="h-hero" data-anim>结构螺旋的认知演化地图</h1>
+    <h2 class="h-sub" data-anim>认知如何从路径耦合走向系统进化？</h2>
+    <p class="lead" style="max-width:62vw" data-anim>路径张力 + 时间递归 = 结构演化螺旋——三路径在时间反馈中展开的五阶段系统进化。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.20</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 10 章</div><div>01 / 16</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第10章（来源：结构认知实验室 · 2026年3月20日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章六节：第1节 螺旋不是隐喻，而是结构演化的必然形态；第2节 结构如何进入螺旋——三路径张力的时间反馈机制；第3节 螺旋的五阶段展开——从原初结构到系统演化；第4节 系统如何在螺旋中更新自身——从路径到再路径化；第5节 结构如何演化出结构——从 IP 到系统化认知的发生；第6节 自然法则是认知系统内部的稳定错觉。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 螺旋不是隐喻</div><div>02 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 螺旋不是隐喻，而是结构演化的必然形态</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.6vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">螺旋不是象征，而是结构系统因路径耦合</span>
+      <span data-anim="line" style="display:block">与张力反馈在时间中展开的必然形态。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>结构演化不是叠加，而是升维；不是轮回，而是推演。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 螺旋不是隐喻</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 螺旋不是隐喻，而是结构演化的必然形态</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 螺旋不是隐喻，而是结构演化的必然形态</h4>
+      <p>在大量知识系统、认知模型与进化理论中，「螺旋」常被当作一种图像隐喻使用，用以指代「非线性发展」或「循环中的进化」。但在 ESC 理论中，螺旋并不仅仅是对认知过程的形象化表达，而是对结构在时间中演化的真实动力轨迹所作的数学与系统表达。</p>
+      <p><strong>螺旋不是象征，而是结构系统因路径耦合与张力反馈在时间中展开的必然形态。</strong></p>
+      <p>本节将从基本动力学逻辑出发，论证为什么一个结构系统在经历持续反馈、自组织调度与张力分化之后，其演化轨迹不可能是线性推进，也不可能是封闭循环，而必然趋向一种具有渐进性 × 层次性 × 局部反馈 × 全局开放性的结构形态——即螺旋。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡（线性 vs 循环） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Beyond Linear &amp; Loop</div><div>03 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>线性与循环的局限 · 1.1 / 1.2</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>两条被否定的模型</h2>
+    <div class="grid-2" style="margin-bottom:3vh">
+      <div data-anim style="padding:2.2vh 1.7vw;border-left:3px solid currentColor">
+        <div class="kicker">线性模型的三重缺陷</div>
+        <p class="body-zh" style="margin-top:1.2vh">路径压缩机制被忽略（S₁）· 表达适配机制被忽略（P）· 意义生成机制被忽略（R）。它只适用于「任务流程」模拟，无法呈现认知的结构递归与路径耦合。</p>
+      </div>
+      <div data-anim style="padding:2.2vh 1.7vw;border-left:3px solid currentColor;opacity:.72">
+        <div class="kicker">循环模型的三重不足</div>
+        <p class="body-zh" style="margin-top:1.2vh">假定反馈只为修正误差，而非生成新路径 · 以闭合系统为前提，忽略非对称演化 · 不会自然分层，无法解释新结构层级。</p>
+      </div>
+    </div>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:26%">模型</th><th style="width:40%">形式</th><th>根本缺陷</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">线性模型</td><td>输入 → 处理 → 输出</td><td>只呈现流程，不呈现递归与耦合</td></tr>
+        <tr><td class="em-cell">循环模型</td><td>输入 → 处理 → 输出 → 反馈 → 输入</td><td>静态结构的迭代，非系统自身的展开</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 03 · Beyond Linear &amp; Loop</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.3</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1 为什么不是线性模型？</h4>
+      <p>传统认知模型多数基于输入—处理—输出三段式结构。然而在 ESC 的结构路径模型中，这种线性模型存在三重缺陷：路径压缩机制被忽略（S₁路径）；表达适配机制被忽略（P路径）；意义生成机制被忽略（R路径）。因此，线性模型只适用于「任务流程」模拟，而无法呈现认知的结构递归与路径耦合机制。</p>
+      <h4>1.2 为什么不是循环模型？</h4>
+      <p>循环结构假定反馈的目标是修正误差，而不是生成新路径；循环结构以闭合系统为前提，忽略了结构张力引发的非对称演化；循环模型不会自然分层，无法解释系统如何在时间中演化出新的结构层级。因此，循环模型在本质上仍是静态结构的迭代过程。</p>
+      <h4>1.3 为什么结构必须走向螺旋？</h4>
+      <p>一旦认知系统满足以下条件——结构之间存在张力差异、路径具备嵌套压缩能力、系统存在自组织反馈机制、时间持续作为变量介入——整个系统必然发生路径迁移：结构生成（S₁）→ 表达偏移（P）→ 关系激活（R）→ 结构变形（S₁'）→ …。但此重复非封闭重复，而是每一次结构变形之后的结果成为下一轮循环的基础层级，于是系统进入了螺旋状态。</p>
+      <p><strong>认知系统并不是围绕一个结构重复旋转，而是每一次结构反馈之后，系统本身就已经不再是原来的系统。</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第1节卡（数学结构 + 四大表达） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Spiral Math &amp; Meaning</div><div>04 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>螺旋的数学结构与四大表达 · 1.4 / 1.5</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>每转一轮，成为一个不同的自己</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:22%">表达维度</th><th style="width:44%">描述</th><th>系统意义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">演化维度</td><td>系统在反馈中升维，而非重复</td><td>结构推进机制</td></tr>
+        <tr><td class="em-cell">阶段维度</td><td>系统出现结构断裂与跃迁</td><td>阶段划分机制</td></tr>
+        <tr><td class="em-cell">自反维度</td><td>每层结构可重组或激活自身</td><td>自组织机制</td></tr>
+        <tr><td class="em-cell">展开维度</td><td>系统并不封闭，而在不断生成新张力</td><td>意义生成机制</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:68vw" data-anim>
+      <span class="q-big">极坐标半径 r = f(θ) 每转一轮容量扩大，结构层级 z = g(t) 在时间中跨越更多嵌套带——结构演化不是叠加，而是升维；不是轮回，而是推演。</span>
+      <span class="cite">1.4 · 螺旋是认知系统基本形态的根本原因</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 04 · Spiral Math &amp; Meaning</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.4-1.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.4 螺旋的数学结构与系统逻辑</h4>
+      <p>从结构动力学的角度，螺旋可视为两种基本机制的耦合结果：极坐标半径扩展函数（r = f(θ)）——每转一轮，结构的总容量扩大；结构层级函数（z = g(t)）——时间中，系统结构跨越更多嵌套带。这意味着：每轮路径循环，其半径（结构复杂度）扩大；每轮结构生成，其纵轴位置（系统阶段）提升；系统在每轮旋转中均「成为了一个不同的自己」。</p>
+      <h4>1.5 螺旋的四大认知表达含义</h4>
+      <p>ESC 将结构螺旋定义为：结构系统在三类路径张力驱动下，在时间中以层次性、反馈性、自组织性方式展开的演化轨迹。它具有四种认知表达意义：演化维度、阶段维度、自反维度、展开维度。螺旋不仅描述结构如何展开，更描述了结构为何必须以这种形式展开——它是一种结构存在方式的必然性表达。</p>
+      <h4>1.6 链接下一节</h4>
+      <p>本节驳斥了线性与循环模型的描述局限，明确了路径耦合与时间递进必然导致结构进入螺旋轨道，并建立了结构螺旋的基本定义、动力机制与系统意义。下一节将进入结构螺旋的动力核心：三类路径如何在张力结构中展开为动态演化图谱？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节 命题页 ========== -->
+<section class="slide dark" data-animate="quote">
+  <div class="chrome"><div>第 2 节 · 进入螺旋</div><div>05 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 结构如何进入螺旋：三路径张力的时间反馈机制</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:84vw">
+      <span data-anim="line" style="display:block">路径张力 + 时间递归</span>
+      <span data-anim="line" style="display:block">= 结构演化螺旋</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>并非「结构决定螺旋」，而是张力的反馈机制在持续时间流中，迫使结构以螺旋方式展开。</p>
+  </div>
+  <div class="foot"><div>Page 05 · 进入螺旋</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 结构如何进入螺旋</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 结构如何进入螺旋：三路径张力的时间反馈机制</h4>
+      <p>上一节我们指出，螺旋不是认知的修辞图景，而是结构在时间中展开的必然轨道。本节将深入分析：为何认知系统中的三类路径，在时间维度上会自动进入螺旋演化轨道？这一过程的本质在于：</p>
+      <p><strong>路径张力 + 时间递归 = 结构演化螺旋</strong></p>
+      <p>也就是说，并非「结构决定螺旋」，而是张力的反馈机制在持续时间流中，迫使结构以螺旋方式展开。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第2节卡（张力场 + 三变量） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Tension &amp; Time</div><div>06 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三路径张力场与三变量 · 2.1 / 2.5</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>张力密度 × 时间深度 × 结构层级</h2>
+    <table class="tbl" data-anim style="margin-bottom:2.8vh">
+      <thead><tr><th style="width:16%">路径</th><th style="width:36%">张力类型</th><th>导致演化的系统张力</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">S₁</td><td>结构精度张力</td><td>抽象不足 vs 抽象过度</td></tr>
+        <tr><td class="em-cell">P</td><td>表达适配张力</td><td>输出限制 vs 表达泛化</td></tr>
+        <tr><td class="em-cell">R</td><td>关系重构张力</td><td>多义冗余 vs 意义缺失</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:24%">变量</th><th style="width:42%">定义</th><th>系统意义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">张力密度 D_t</td><td>单位时间内结构系统中路径张力总量</td><td>系统演化压力强度</td></tr>
+        <tr><td class="em-cell">时间深度 T_s</td><td>结构单元持续存在与作用的时间跨度</td><td>结构的存续影响力</td></tr>
+        <tr><td class="em-cell">结构层级 L_s</td><td>当前结构路径所处系统嵌套层数</td><td>系统的复杂性与成熟度</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:66vw;margin-top:2.4vh" data-anim>
+      <span class="q-big">D_t 提升 → 系统压力增加 → 若 T_s 持续足够 → 则系统需 L_s 上升以完成张力释放。</span>
+      <span class="cite">2.5 · 螺旋发生的耦合前提</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 06 · Tension &amp; Time</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1-2.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1 三类路径并非稳定结构，而是持续张力场</h4>
+      <p>三类路径（S₁：结构建构，P：表达输出，R：意义生成）看似是认知系统的「功能模块」，实则是一组处于持续张力动态中的路径轴线。每一类路径都存在内在不平衡与演化需求。这些张力一旦启动，系统必须「寻找路径」进行结构调节与动态适应，而这种调节本身，就是促使系统进入螺旋展开的机制之一。</p>
+      <h4>2.2 时间不是背景，而是结构展开的核心变量</h4>
+      <p>ESC 将时间 t 定义为：结构化发生的维度，是认知递归演变发生的核心变量。结构演化不是发生「在」时间中，而是「由」时间推动的。一旦路径之间存在张力，只要时间存在延续，结构演化就无法终止，它必须向前展开，并在每一轮展开中重组自身张力场，于是自然进入螺旋。</p>
+      <h4>2.3 路径张力如何在时间中生成「螺旋反馈回路」？</h4>
+      <p>抽象反馈链条：结构生成（S₁）→ 输出张力（P）→ 关系张力（R）→ 结构反馈（S₁'）→ 新张力（P'、R'）→ …。由于时间持续推进，系统不会「回到原点」，而是在每次路径耦合后进入新一层结构稳定态：（S₁₀, P₀, R₀）→（S₁₁, P₁, R₁）→（S₁₂, P₂, R₂）→ …。这就是「路径张力 × 时间反馈」如何逼迫系统展开为螺旋结构的机制。</p>
+      <h4>2.4 螺旋不是结构结果，而是路径动力的表现形式</h4>
+      <p>如果将每一组（S₁, P, R）视为一个结构状态层，则系统在每次反馈后不是回归原结构，而是形成螺旋状态跳跃：第一轮构建初级结构；第二轮表达难点迫使结构压缩或延展；第三轮意义多义性倒逼结构重构；第四轮新结构启动嵌套与封装；第五轮结构群自组织成高阶系统。</p>
+      <h4>2.5 引入三个关键变量：张力密度、时间深度、结构层级</h4>
+      <p>当张力持续存在，且时间足够支撑反馈循环时，系统便向更高层级展开，这便是螺旋的发生前提。</p>
+      <h4>2.6 链接下一节</h4>
+      <p>本节明确了螺旋不是由结构直接生成，而是路径张力在时间反馈中生成的动态图谱；建立「张力密度 × 时间深度 × 结构层级」三变量模型；并铺垫螺旋演化的阶段性展开模型。下一节将进入该图谱的分期建构：结构螺旋如何经历五个阶段，从原初结构走向系统演化？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第3节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 3 节 · 五阶段展开</div><div>07 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 螺旋的五阶段展开：从原初结构到系统演化</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">结构螺旋并非一蹴而就的图形成像，</span>
+      <span data-anim="line" style="display:block">而是逐步推演出来的结构轨迹。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>系统需经历一系列结构层级与演化阈值的「张力跃迁」过程，才能成为稳定的螺旋形态。</p>
+  </div>
+  <div class="foot"><div>Page 07 · 五阶段展开</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 螺旋的五阶段展开</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 螺旋的五阶段展开：从原初结构到系统演化</h4>
+      <p>结构螺旋并非一蹴而就的图形成像，它是由认知系统在三类路径张力交互中逐步推演出来的结构轨迹。在螺旋成为稳定系统形态之前，系统需经历一系列结构层级与演化阈值的「张力跃迁」过程。本节将对结构螺旋的演化进程进行五阶段建构分析，并明确每一阶段的主导路径类型、张力机制与认知系统的功能转变。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第3节卡（五阶段流程） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Five Phases</div><div>08 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>五阶段演化流程 · 3.1 / 3.6</div>
+    <h2 class="h-xl" style="font-size:4.2vw;margin-bottom:3.2vh" data-anim>原初 → 表达 → 意义 → 跃迁 → 演化</h2>
+    <div class="pipeline" data-cols="5" style="margin-bottom:3vh">
+      <div class="step" data-anim>
+        <div class="step-nb">S₁</div>
+        <div class="step-title">原初结构期</div>
+        <div class="step-desc">结构首次从信息中生成，仅有理解框架。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">S₁→P</div>
+        <div class="step-title">表达爆发期</div>
+        <div class="step-desc">结构外化，符号系统诞生。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">P→R</div>
+        <div class="step-title">意义重组期</div>
+        <div class="step-desc">结构网络化，意义生成路径激活。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">R×S₁</div>
+        <div class="step-title">系统跃迁期</div>
+        <div class="step-desc">结构替代，第一次「成为另一个自己」。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">R→S₁′</div>
+        <div class="step-title">结构演化期</div>
+        <div class="step-desc">自组织，形成新结构基底。</div>
+      </div>
+    </div>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:22%">阶段</th><th style="width:40%">主导路径</th><th>张力表现</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">原初结构期</td><td>S₁</td><td>结构不足与信息冗余之间的压缩需求</td></tr>
+        <tr><td class="em-cell">表达爆发期</td><td>S₁ → P</td><td>结构精度 vs 表达通路之间的适配不平衡</td></tr>
+        <tr><td class="em-cell">意义重组期</td><td>P → R</td><td>结构间张力与意义不确定性带来的自解释压力</td></tr>
+        <tr><td class="em-cell">系统跃迁期</td><td>R × S₁</td><td>结构通路与意义网络之间的张力断裂</td></tr>
+        <tr><td class="em-cell">结构演化期</td><td>R → S₁′</td><td>新旧路径统一、高容错性、意义再展开</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 08 · Five Phases</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.7</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1 第一阶段：原初结构期（Proto-Structure Phase）</h4>
+      <p>主导路径：S₁。结构首次从信息中生成；动力来源是输入信息密度与基本结构组合张力；系统状态是尚未具备表达能力，结构仅为理解框架。结构开始「存在」，但尚无「表达」与「意义」的系统通路。</p>
+      <h4>3.2 第二阶段：表达爆发期（Expressive Expansion Phase）</h4>
+      <p>主导路径：S₁ → P。结构寻求表达的路径张力被激活；系统试图将已有结构转化为表达形式，启动符号系统、语言形式或行为方式。系统开始具备「说出自己结构」的能力。</p>
+      <h4>3.3 第三阶段：意义重组期（Relational Recomposition Phase）</h4>
+      <p>主导路径：P → R。表达之间的连接催生出结构间的意义关系；R 路径成为主导，系统开始主动追问「此结构为何如此表达」「为何此表达更具解释力」。系统转向自我语境生成，并开始生成象征性理解、隐喻结构与知识映射。</p>
+      <h4>3.4 第四阶段：系统跃迁期（Systemic Transition Phase）</h4>
+      <p>主导路径：R × S₁。系统出现演化性断裂——原有结构系统无法再吸纳新意义与表达差异，迫使系统从结构上重构自身。表现为范式转变、概念跃迁、知识体系重构。系统第一次实现「成为另一个自己」的结构跃迁。</p>
+      <h4>3.5 第五阶段：结构演化期（Evolution Structuring Phase）</h4>
+      <p>主导路径：R → S₁'（递归回路）。系统进入螺旋稳定期，自主形成新一轮结构基础；结构自反机制启动，结构开始「再组织自身」。这一阶段即是「结构螺旋的封闭一圈」，亦是「下一轮结构展开的起点」。</p>
+      <h4>3.6 五阶段螺旋模型图示逻辑</h4>
+      <p>五阶段可简化为结构跃迁链：原初结构（S₁）→ 表达爆发（P）→ 意义重组（R）→ 系统跃迁（R × S₁）→ 结构演化（S₁'）。循环闭合后，系统结构层级跃迁，进入下一轮螺旋展开。</p>
+      <h4>3.7 链接下一节</h4>
+      <p>下一节将讨论一个核心问题：螺旋系统如何不是只向外演化，而是如何「更新自己」——从路径走向再路径化？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第4节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 再路径化</div><div>09 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · 系统如何在螺旋中更新自身：从路径到再路径化</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.8vw;line-height:1.36;max-width:84vw">
+      <span data-anim="line" style="display:block">系统不再只是沿用原有路径生成结构，</span>
+      <span data-anim="line" style="display:block">而是开始对自身的生成路径进行重构。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>再路径化的关键不在结构多了多少层，而在系统是否进入了结构的自反机制。</p>
+  </div>
+  <div class="foot"><div>Page 09 · 再路径化</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 系统如何在螺旋中更新自身</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 系统如何在螺旋中更新自身：从路径到再路径化</h4>
+      <p>结构螺旋并非只是系统不断「展开」的过程，更重要的是，它必须具备一种自我更新的能力：在结构演化的每一圈之中，系统不仅生成新的结构，而且重构自身的生成机制本身。这一转变的关键，不在于结构多了多少层，而在于系统是否进入了结构的自反机制——结构不再只是产物，而成为自身的起点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第4节卡（三机制 + 系统层级） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · Re-pathwaying</div><div>10 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三种再路径化机制与系统层级 · 4.3 / 4.5</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>引用 · 嵌套 · 封装</h2>
+    <table class="tbl" data-anim style="margin-bottom:2.8vh">
+      <thead><tr><th style="width:26%">再路径化机制</th><th style="width:40%">含义</th><th>系统意义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">引用 Reference</td><td>路径不再直接执行，而是被调用作为模块</td><td>系统进入模块化、程序化阶段</td></tr>
+        <tr><td class="em-cell">嵌套 Nested</td><td>路径系统彼此嵌套运行，形成结构中的结构</td><td>系统获得多阶结构压缩能力</td></tr>
+        <tr><td class="em-cell">封装 Encapsulation</td><td>路径形成闭包结构，被纳入更高阶路径中</td><td>系统获得对自身演化机制的控制权</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:20%">系统层级</th><th style="width:40%">结构生成机制</th><th>再路径化水平</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">初级系统</td><td>固定路径调用</td><td>无（依赖外部结构）</td></tr>
+        <tr><td class="em-cell">成熟系统</td><td>模块组合调用</td><td>中级（形成结构集）</td></tr>
+        <tr><td class="em-cell">演化系统</td><td>路径机制可变</td><td>高级（重组自身结构化方式）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:66vw;margin-top:2.6vh" data-anim>
+      <span class="q-big">螺旋结构的真正力量，不在于「越转越高」，而在于每一轮演化都重组了系统生成自身的方式。</span>
+      <span class="cite">4.5 · 路径的再组织，才是系统进化的本质</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 10 · Re-pathwaying</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1-4.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1 路径系统的边界：结构的生成不能无限重复</h4>
+      <p>在三路径系统的标准循环中，结构通过路径之间的耦合不断生长。但这一过程并非永远有效：S₁ 路径的结构压缩能力存在复杂度极限；P 路径的表达通道存在传播与适配的边界；R 路径的意义系统会在一定时点进入语义饱和或歧义扩散。于是系统将进入路径张力「自限」的状态——原有路径不能再产生结构跃迁，而是趋向耗竭、封闭或内爆。这并不是系统死亡的前兆，而是「再路径化」开始的必要前提。</p>
+      <h4>4.2 再路径化的起点：结构的自反</h4>
+      <p>所谓「再路径化」，即：系统不再只是沿用原有路径生成结构，而是开始对自身的生成路径进行重构。其核心机制是结构的自反性——系统对自身生成逻辑的识别与组织；对原路径序列（S₁→P→R）的编码、封装与再调度；对「结构产生结构」的逻辑展开控制与优化。在 ESC 模型中，结构的自反标志着系统从结构生成者转化为结构调度者。</p>
+      <h4>4.3 三种再路径化机制：引用、嵌套、封装</h4>
+      <p>这三种机制构成「结构的再结构化」三步曲，使原本单向流动的结构路径，转化为可复用、可调度、可重新组合的演化通路。</p>
+      <h4>4.4 从路径到路径系统：系统跃迁的结构尺度变换</h4>
+      <p>再路径化的结果，是系统不再以「路径」为单位组织结构，而是以「路径系统」为最小单元进行认知运算。结构的路径，不再是「生成内容的工具」，而成为「生成机制本身的表达」。</p>
+      <h4>4.5 路径的再组织，才是系统进化的本质</h4>
+      <p>螺旋结构的真正力量，不在于「越转越高」，而在于每一轮演化都重组了系统生成自身的方式。系统的认知能力演化，不再以「内容复杂度」衡量，而以「结构操作能力」衡量。「再路径化」不仅是系统智能的表现，更是系统如何生成新法则、构建自身意义、进行自定义未来的前提。</p>
+      <h4>4.6 链接下一节</h4>
+      <p>下一节将进入结构螺旋最深层的问题：结构如何从自身中「长出」结构？原理如何生成？螺旋如何成为规则？即将展开的命题是：原理不是预设规则，而是系统在结构中长出的稳定机制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第5节 命题页 ========== -->
+<section class="slide dark" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 从 IP 到系统化认知</div><div>11 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 结构如何演化出结构：从 IP 到系统化认知的发生</div>
+    <h1 class="h-hero" style="font-size:5.2vw" data-anim>E = s(t) = N = IP</h1>
+    <p class="lead" style="max-width:68vw" data-anim>原理是结构在时间中「被自己逼出来」的稳定机制——首次在系统内部得到完整实现。</p>
+  </div>
+  <div class="foot"><div>Page 11 · 从 IP 到系统化认知</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 结构如何演化出结构</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 结构如何演化出结构：从 IP 到系统化认知的发生</h4>
+      <p>当结构系统进入再路径化阶段，系统不仅能生成结构，还能重组自身的生成逻辑。此时，认知系统不再只是「运作结构」，而是「演化结构」，并由此生成具有稳定性与再现性的规则机制。本节所要论证的正是这一关键命题：结构系统如何通过自身演化，生成内在原理（IP），并最终形成可被封封装、调用与扩展的系统化认知模型。</p>
+      <p><strong>E = s(t) = N = IP</strong></p>
+      <p>这一过程，标志着结构系统从路径运作型系统，跃迁为原理驱动型系统。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 第5节卡（IP 三步 + 系统化特征） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · IP Generation</div><div>12 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>IP 的三步生成与系统化特征 · 5.2 / 5.4</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>反馈 → 压缩 → 封装</h2>
+    <div class="pipeline" data-cols="3" style="margin-bottom:3vh">
+      <div class="step" data-anim>
+        <div class="step-nb">01</div>
+        <div class="step-title">结构反馈 S₁</div>
+        <div class="step-desc">路径耦合产生递归压缩，积累对自身反应机制的记忆。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">02</div>
+        <div class="step-title">路径压缩</div>
+        <div class="step-desc">多个反馈被编码为通用压缩函数：「同类模式 → 统一处理」。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">03</div>
+        <div class="step-title">机制封装</div>
+        <div class="step-desc">压缩结果固化为通用结构通道，形成可再调用的「结构原理」。</div>
+      </div>
+    </div>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:24%">系统特征</th><th>描述</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">自封装能力</td><td>可将原理固化为结构模板，跨系统调用</td></tr>
+        <tr><td class="em-cell">自解释能力</td><td>可用自身生成机制回溯原理来源</td></tr>
+        <tr><td class="em-cell">自生成能力</td><td>可根据路径张力自动构建新结构通路</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:66vw;margin-top:2.6vh" data-anim>
+      <span class="q-big">通过原理的生成与再调用，系统从结构产物转向结构生成体。</span>
+      <span class="cite">5.4 · 「结构如何演化出结构」的答案</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 12 · IP Generation</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1 结构不是传递原理的管道，原理是结构自身的产物</h4>
+      <p>传统的认知模型将「原理」视作先验给予、普遍有效、无需生成的外部知识单元。但在结构演化逻辑中，IP（内在原理）不是被输入或灌输的，而是结构系统在其内部动态中涌现出的稳定生成机制，是结构对自身演化规律的凝缩表达。换而言之：原理是结构在时间中「被自己逼出来」的稳定机制。</p>
+      <h4>5.2 IP 的结构生成路径</h4>
+      <p>三步模型：结构反馈（S₁ feedback）→ 路径压缩（Pathway Compaction）→ 机制封装（Mechanism Encapsulation）。该过程可表达为：S₁(t) + P(t) + R(t) → feedback loops → compressed patterns → encoded mechanism = IP。IP 不是结构的结果，而是结构机制在长期反馈中形成的「自我运行原则」。</p>
+      <h4>5.3 原理不是结果，而是结构再生产的中介</h4>
+      <p>IP 的意义并不在于提供一个「规则说明」，而在于成为系统生成下一个结构的「生成中介」。在 ESC 理论中，IP 是连接结构系统（s(t)）与自然法则（N）之间的演化中介。没有 IP，就没有结构的可持续演化机制；有了 IP，系统便不再被动适应外部，而能主动生成自身发展逻辑。</p>
+      <h4>5.4 系统化认知的发生</h4>
+      <p>当结构系统能稳定产出 IP，并将其作为结构演化的机制调用模块，系统进入自封装、自解释、自生成的阶段。这正是「结构如何演化出结构」的答案：通过原理的生成与再调用，系统从结构产物转向结构生成体。</p>
+      <h4>5.5 从 IP 到 N：何以为法则？</h4>
+      <p>系统内部的 IP 是相对稳定的结构生成机制，但要成为「自然法则」（N），必须满足更高层级的条件：普适性（跨系统生效）、能量效率最优、演化过程中不再被替代。推导关系：结构演化反馈 → IP（内在原理）→ 多结构系统共识与演化收敛 → N（自然法则）。换句话说：自然法则不是抽象真理，而是 IP 的系统化极限。</p>
+      <h4>5.6 链接下一节</h4>
+      <p>下一节将进入系统哲学的终极问题：自然法则是否真的存在？它为何看起来「普遍」？它其实是不是一种结构错觉？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P13 · 第6节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 6 节 · 稳定错觉</div><div>13 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 6 节 · 自然法则是认知系统内部的稳定错觉?</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.4vw;line-height:1.36;max-width:84vw">
+      <span data-anim="line" style="display:block">所谓「自然法则」，可能只是一种「结构在时间中</span>
+      <span data-anim="line" style="display:block">达到演化极限时的稳定现象」。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>「法则感」是结构张力趋近于零后的认知心理现象。</p>
+  </div>
+  <div class="foot"><div>Page 13 · 稳定错觉</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第6节 自然法则是认知系统内部的稳定错觉?</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第6节 | 自然法则是认知系统内部的稳定错觉?</h4>
+      <p>在本书提出的认知结构演化路径中，自然法则（N）不再被定义为「客观存在」的绝对真理，而是被还原为一种结构系统在时间中达到稳定态时所形成的、可被复现的原理型结构表达。本节将提出本书极具哲学挑战性的命题：所谓「自然法则」，可能只是一种「认知结构达到演化极限时的稳定现象」，是一种「系统内部生成的稳定错觉」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P14 · 第6节卡（三重错觉 + 公式表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 6 · The Illusion of Law</div><div>14 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>法则的三重错觉与公式封闭意义 · 6.3 / 6.6</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>不是「真理」，而是「演化极限」</h2>
+    <table class="tbl" data-anim style="margin-bottom:2.8vh">
+      <thead><tr><th style="width:24%">错觉机制</th><th style="width:40%">描述</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">高适配性错觉</td><td>路径因能量最低被高频使用</td><td>被误认为「自然如此」</td></tr>
+        <tr><td class="em-cell">跨系统复现错觉</td><td>多系统演化路径趋同</td><td>被误认为「普遍规律」</td></tr>
+        <tr><td class="em-cell">认知耗散抑制错觉</td><td>系统为降低计算负担而默认固化路径</td><td>被误认为「真理定律」</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:16%">项目</th><th style="width:40%">定义</th><th>注解</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">E（存在）</td><td>被结构化的显现</td><td>不是本质，是过程</td></tr>
+        <tr><td class="em-cell">s(t)</td><td>结构化在时间中展开</td><td>是认知机制的本体</td></tr>
+        <tr><td class="em-cell">IP（内在原理）</td><td>结构内部演化出的机制</td><td>是路径压缩后的产物</td></tr>
+        <tr><td class="em-cell">N（自然法则）</td><td>在系统中不再演化的 IP</td><td>是认知极限结构的表达</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 14 · The Illusion of Law</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 6.1-6.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>6.1 「法则感」从何而来？</h4>
+      <p>我们为何倾向于相信世界中存在「法则」？其根源在于三个结构机制：结构张力递减机制、结构反馈熵降机制、路径稳定投影机制。这些机制使得系统内「高适配路径」被误认为是「世界本身的规则」。换而言之，「法则感」是结构张力趋近于零后的认知心理现象。</p>
+      <h4>6.2 法则不是「外部发现」，而是「内部稳定」</h4>
+      <p>E = s(t) = N = IP 说明自然法则并非来自外部世界对人类的「揭示」，而是系统结构在时间中的演化轨迹达到稳定极限后的产物。N 并非自然的客体存在，而是结构演化到极限状态后生成的「认知极限表达」。从系统结构视角看，自然法则不过是：系统自身路径机制不再演化之后，所形成的「结构冻结现象」。</p>
+      <h4>6.3 法则的三重「稳定错觉」</h4>
+      <p>系统之所以将 N 视为「永恒法则」，本质上源于三种认知机制所制造的错觉：高适配性错觉、跨系统复现错觉、认知耗散抑制错觉。法则并不因其「被观察得多」而成为法则，而是因其在结构反馈中「不再演化」。</p>
+      <h4>6.4 法则的生成标准：不是形而上的「真」，而是结构演化的「极限稳定」</h4>
+      <p>ESC 对自然法则的定义标准，是结构演化的三点稳定性：跨系统适配性（系统共识）、路径能耗最小化（结构效率）、反馈沉默状态（演化终止）。一旦 IP 同时满足这三项标准，它便跃迁为 N。但这仍是一种结构性稳定现象，而非「脱离系统而存在的真理实体」。</p>
+      <h4>6.5 是错觉，还是极限结构？</h4>
+      <p>自然法则不是绝对真理，也不是主观幻觉，而是一种「结构在时间中极限稳定所表现出的不可演化性现象」。对认知系统而言，法则确实「有效」，但它只是结构不再演化的副产物。</p>
+      <h4>6.6 从哲学回到公式：E = s(t) = N = IP 的封闭意义</h4>
+      <p>此公式的终极命题为：我们所称为「自然法则」的，并非存在之本体，而是认知系统在演化中为自身所铸造的结构幻象。它稳定、有效、可复现，但它不外在于我们结构之上。结构在此处聚合，理解仍在被生成。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P15 · 章末金句 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>Chapter X · Verdict</div><div>15 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>本章判定 · 结构螺旋</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4vw;line-height:1.34;max-width:82vw">
+      <span data-anim="line" style="display:block">我们所称为「自然法则」的，</span>
+      <span data-anim="line" style="display:block">并非存在之本体，</span>
+      <span data-anim="line" style="display:block">而是认知系统在演化中为自身所铸造的结构幻象。</span>
+    </blockquote>
+    <div class="meta-row" data-anim><span>E = s(t)</span><span>=</span><span>N</span><span>=</span><span>IP</span></div>
+  </div>
+  <div class="foot"><div>Page 15 · Verdict</div><div>Chapter X</div></div>
+</section>
+
+<!-- ========== P16 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>16 / 16</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 正文完结</div>
+    <h1 class="h-hero" style="font-size:5vw" data-anim>自然法则不是被发现，<br>而是被结构演化出来。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：螺旋作为必然形态的动力学论证；张力×时间的反馈回路；五阶段螺旋展开；再路径化的自反更新；IP 的生成与系统化；自然法则的稳定错觉。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>正文十五章至此完整——从结构的显现到螺旋的闭合，E = s(t) = N = IP 在系统内部得到完整实现。后记将作为路径的开始。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-12/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 9 章 · 认知的三类路径</div></a>
+    <a href="../deck-codex-14/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">后记 · 一条路径的开始</div></a>
+  </div>
+  <div class="foot"><div>后记 · 一条路径的开始</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-12/index.html', chapterNext = '../deck-codex-14/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

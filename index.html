@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC:结构化认知的演化路径 · 全书目录</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{padding:7vh 8vw 10vh}
+
+  /* 微弱晕光，呼应 deck 亮色页的纸感 */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(60vw 60vh at 82% 8%, rgba(31,26,20,.05), transparent 70%),
+      radial-gradient(50vw 50vh at 8% 92%, rgba(31,26,20,.04), transparent 70%)}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6}
+  .chrome{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:max(11px,.8vw);letter-spacing:.2em;text-transform:uppercase;opacity:.65;margin-bottom:7vh}
+
+  header h1{font-family:var(--serif-zh);font-weight:900;font-size:clamp(34px,4.8vw,72px);line-height:1.12;letter-spacing:-.01em;margin-bottom:1.6vh}
+  header .sub{font-family:var(--serif-zh);font-weight:500;font-size:clamp(16px,1.6vw,26px);opacity:.72;margin-bottom:3vh}
+  header .desc{font-family:var(--serif-zh);font-size:clamp(14px,1.15vw,19px);line-height:1.8;opacity:.78;max-width:72ch;margin-bottom:1.2vh}
+  header .meta-row{display:flex;gap:1.4em;flex-wrap:wrap;font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.16em;text-transform:uppercase;opacity:.55;margin-bottom:5vh}
+
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin-bottom:2vh}
+
+  /* 目录列表：rowline 式 */
+  .toc{display:flex;flex-direction:column}
+  a.row{display:grid;grid-template-columns:6ch 1fr auto;gap:2.5vw;align-items:baseline;padding:2.6vh 1vw;border-top:1px solid rgba(31,26,20,.18);color:inherit;text-decoration:none;transition:background .25s ease,padding-left .25s ease}
+  a.row:last-child{border-bottom:1px solid rgba(31,26,20,.18)}
+  a.row:hover{background:rgba(31,26,20,.05);padding-left:1.8vw}
+  .row .nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:clamp(15px,1.3vw,22px);opacity:.5}
+  .row .t{font-family:var(--serif-zh);font-weight:600;font-size:clamp(16px,1.55vw,26px);line-height:1.35}
+  .row .t small{display:block;font-family:var(--sans-zh);font-weight:400;font-size:clamp(12px,.92vw,16px);opacity:.62;margin-top:.5vh}
+  .row .go{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.22em;text-transform:uppercase;opacity:.45;white-space:nowrap;transition:opacity .25s}
+  a.row:hover .go{opacity:.9}
+
+  .part{margin-top:5vh;margin-bottom:1.6vh;display:flex;align-items:baseline;gap:1.5em}
+  .part .p-k{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.26em;text-transform:uppercase;opacity:.5}
+  .part .p-line{flex:1;height:1px;background:currentColor;opacity:.15}
+
+  footer{margin-top:8vh;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:max(11px,.8vw);letter-spacing:.18em;text-transform:uppercase;opacity:.45}
+  footer .formula{font-family:var(--serif-en);font-style:italic;font-size:clamp(16px,1.7vw,28px);opacity:.85;letter-spacing:.02em;text-transform:none}
+
+  @media (max-width:760px){
+    body{padding:5vh 6vw 8vh}
+    a.row{grid-template-columns:4ch 1fr;gap:4vw}
+    .row .go{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome"><div>ESC Series · Index</div><div>结构认知实验室</div></div>
+
+<header>
+  <div class="kicker" style="margin-bottom:2vh">结构认知实验室 · 原创 · P. · 已完结</div>
+  <h1>ESC:结构化认知的演化路径</h1>
+  <div class="sub">幻灯片课程版 · 全书目录</div>
+  <p class="desc">《ESC:结构化认知的演化路径》内容是 ESC 结构认知理解公式，命题和论证。这是作为结构系统实践者对人类成长、理解与世界本体的深刻困惑，于是用系统建构的能力来对如何理解「理解」的机制进行拆解的尝试。</p>
+  <div class="meta-row"><span>15 篇 · 已完结</span><span>·</span><span>共 10 章 40+ 小节</span><span>·</span><span>每页按 E 展开逐字原文</span></div>
+</header>
+
+<div class="rule"></div>
+
+<nav class="toc">
+  <div class="part"><span class="p-k">卷首</span><span class="p-line"></span></div>
+  <a class="row" href="deck-codex/index.html"><span class="nb">01</span><span class="t">前言｜缘起<small>无法认知世界，就无法理解成长</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-02/index.html"><span class="nb">02</span><span class="t">导读<small>结构符号</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-03/index.html"><span class="nb">03</span><span class="t">序章｜存在的显现<small>从已知出发的认知结构之路</small></span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">正文 · 第一乐章</span><span class="p-line"></span></div>
+  <a class="row" href="deck-codex-05/index.html"><span class="nb">04</span><span class="t">第1章｜我们如何知道我们所知道的？<small>E = s(t) 的发生前夜</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-04/index.html"><span class="nb">05</span><span class="t">第2章｜存在不是本质，而是结构显现<small>本体论的陷阱 · 显现视角</small></span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">正文 · 第二乐章</span><span class="p-line"></span></div>
+  <a class="row" href="deck-codex-06/index.html"><span class="nb">06</span><span class="t">第3章｜认知不是复制，而是构造<small>三条构造路径 · 人类构造 H · 边界对</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-07/index.html"><span class="nb">07</span><span class="t">第4章｜结构化是理解发生的方式<small>连接 × 模式 × 时间 · s(t) → IP</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-08/index.html"><span class="nb">08</span><span class="t">第5章｜从结构到原理：IP 的生成机制<small>调用 × 嵌套 × 反馈 · 局部稳定结构</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-09/index.html"><span class="nb">09</span><span class="t">第6章｜自然法则不是被发现的，而是被结构演化出来的<small>极限稳定 · 三大生成条件 · 真理幻觉</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-10/index.html"><span class="nb">10</span><span class="t">第7章｜知识系统是对结构法则的反向映射<small>知识 = 结构路径 × 命名 × 再调用</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-11/index.html"><span class="nb">11</span><span class="t">第8章｜认知的自组织机制<small>反馈 × 嵌套 × 再组合 · 结构分化</small></span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">正文 · 第三乐章</span><span class="p-line"></span></div>
+  <a class="row" href="deck-codex-12/index.html"><span class="nb">12</span><span class="t">第9章｜认知的三类路径<small>S₁ 结构路径 · P 投影路径 · R 关系路径</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-13/index.html"><span class="nb">13</span><span class="t">第10章｜结构螺旋的认知演化地图<small>五阶段展开 · 再路径化 · 稳定错觉</small></span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">卷尾</span><span class="p-line"></span></div>
+  <a class="row" href="deck-codex-14/index.html"><span class="nb">14</span><span class="t">后记｜一条路径的开始<small>写于结构仍在生长的时刻</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-15/index.html"><span class="nb">15</span><span class="t">附录 I｜ESC 术语<small>基础公式主构项 · 辅助术语 · 路径系统 · 公式</small></span><span class="go">进入 →</span></a>
+</nav>
+
+<footer>
+  <div>ESC 系列课程 · 幻灯片版 · 共 15 单元</div>
+  <div class="formula">E = s(t) = N = IP</div>
+</footer>
+
+</body>
+</html>

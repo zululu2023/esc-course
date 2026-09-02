@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第8章 认知的自组织机制</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:8.4vw;line-height:1.08;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5.2vw;line-height:1.14;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.8vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.16vw);line-height:1.72;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.72vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.8vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.18vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.5vw);line-height:1.42}
+
+  .pipeline{display:grid;gap:1.4vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.42vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.92vw);line-height:1.5;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1vw);line-height:1.6}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.84vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.4vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.4vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.05vw,19px);line-height:1.92;margin:0 0 1.35em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 8 章</div><div>Chapter VIII</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>Cognitive Self-Organization</div>
+    <h1 class="h-hero" data-anim>认知的自组织机制</h1>
+    <p class="lead" style="max-width:62vw" data-anim>自组织 = 结构反馈 × 路径复制 × 连接重组——系统组织能力不来源于外部输入，而来源于内部已有结构的可变组合方式。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.18</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 8 章</div><div>01 / 12</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第8章（来源：结构认知实验室 · 2026年3月18日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章五节：第1节 什么是自组织——从结构反馈到结构生成；第2节 自组织的三大驱动机制——反馈 × 嵌套 × 再组合；第3节 结构如何「自己生成自己」——从路径压缩到新路径生成；第4节 认知不是响应输入，而是激活已有结构的组合方式；第5节 结构如何分化出不同的认知路径。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide dark" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 什么是自组织</div><div>02 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 从结构反馈到结构生成</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">自组织 = 结构反馈 × 路径复制 × 连接重组</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>它不是单纯的秩序显现，而是结构系统基于内部路径反馈而不断衍生新结构的能力——外部世界不是稳定输入项，而是不确定现象流；唯有自组织能力，才能应对变动现实。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 什么是自组织</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 什么是自组织？从结构反馈到结构生成</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 什么是自组织？从结构反馈到结构生成</h4>
+      <p>在此前的章节中，我们已将「知识」从静态内容转化为动态路径，将「理解」从事实表述转化为结构调用，也将「自然法则」从先验真理还原为系统趋稳的结构表现。这一切铺垫，最终指向一个核心命题：</p>
+      <p><strong>认知系统不是线性响应结构，而是动态自组织系统。</strong></p>
+      <p>所谓「自组织」，不是指系统自行运作的表面现象，而是指系统内部结构通过反馈机制不断生成新路径、重构连接关系、提升整体复杂度的一种动态机制。认知之所以能够演化，并非因为环境提供了新的内容，而是因为结构自身具备了重构自身的能力。</p>
+      <h4>1.1 自组织不是「无序中的秩序」，而是「反馈中的结构生成」</h4>
+      <p>传统对于「自组织」的理解常陷入两种误区：</p>
+      <p>一是将其等同于混乱中出现某种模式（如粒子聚集、斑图形成），强调的是系统状态的「宏观可见性」；<br>
+      二是将其等同于不依赖外力干预的自发秩序化过程，强调的是「去中心化」的调控方式。</p>
+      <p>但ESC重新定义自组织的核心含义：</p>
+      <p><strong>自组织 = 结构反馈 × 路径复制 × 连接重组</strong></p>
+      <p>它不是单纯的秩序显现，而是结构系统基于内部路径反馈而不断衍生新结构的能力。系统的组织能力并不来源于外部输入或元规则的注入，而来源于它内部已有结构的可变组合方式。</p>
+      <h4>1.2 为什么认知系统必须是自组织的？</h4>
+      <p>认知之为认知，意味着它必须面对「未知」与「变化」。如果结构不能重构自身、提升适配能力，系统便会陷入僵化而退化。</p>
+      <p>ESC提出：</p>
+      <p>外部世界不是稳定输入项，而是不确定现象流；<br>
+      人类构造（H）注定带有局限性与适配延迟；<br>
+      唯有认知系统具备自组织能力，才能不断从既有结构中生成新路径，应对变动现实。</p>
+      <p>因此：</p>
+      <p><strong>自组织不是认知系统的可选能力，而是其存在的前提。</strong></p>
+      <p>认知若要持续存在，便必须能以已有结构为材料，构建出新的理解方式。这正是「理解作为结构演化」的含义核心。</p>
+      <h4>1.3 自组织的核心机制：结构反馈如何成为生成起点？</h4>
+      <p>自组织的关键不在于某种神秘的「生成能力」，而在于系统是否具备将反馈转化为新结构的能力。</p>
+      <p>ESC指出：</p>
+      <p>每一次结构路径的调用，都会产生「是否适配」的反馈；<br>
+      若结构适配，则路径趋稳并可能被固化为知识；<br>
+      若结构不适配，系统将进入结构修正与路径重组阶段；<br>
+      正是这种反馈 → 修正 → 重组的连续机制，使系统具备了「结构自生」的能力。</p>
+      <p>因此，自组织的本质不是静态结构的自维护，而是反馈驱动下的结构组合机制。</p>
+      <h4>1.4 结构生成不是随机变异，而是路径逻辑的展开</h4>
+      <p>与某些「复杂系统论」倾向于强调随机性不同，ESC明确指出：</p>
+      <p><strong>结构的自组织演化并非源于随机扰动，而是源于路径逻辑的内在展开。</strong></p>
+      <p>每一个新的结构单元的出现，背后都有三项机制作为支撑：</p>
+      <p>结构压缩机制：已有路径能否被压缩为更高阶的抽象单元；<br>
+      结构拓展机制：已有单元是否能嵌套出更大范围的适配逻辑；<br>
+      结构变形机制：当反馈出现偏差时，系统是否能在不彻底解构的前提下调整连接方式。</p>
+      <p>正是这三种结构处理方式，使得「自组织」不是混沌演化的结果，而是结构理性在系统内部的自然生长逻辑。</p>
+      <h4>1.5 小结与过渡：自组织是认知系统的发生条件</h4>
+      <p>本节确立了ESC对「自组织」的定义与在认知系统中的定位：</p>
+      <p>自组织是无中心的秩序显现 → 自组织是结构反馈驱动的生成机制；<br>
+      自组织是系统的稳定性表现 → 自组织是系统的进化能力表现；<br>
+      自组织是物理过程的偶发性规律 → 自组织是结构逻辑的连续性展开。</p>
+      <p>认知之所以可能，正是因为系统拥有基于路径反馈生成结构的能力。下一节将进入具体机制的拆解：</p>
+      <p><strong>结构如何通过反馈、嵌套与再组合三大机制生成自身？</strong></p>
+      <p>这也将是认知演化机制真正的「发动机」，是结构系统从稳定转向繁殖，从已知走向未知的核心动力。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡（命题对照） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Redefined</div><div>03 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>传统观点 vs ESC 视角 · 1.1-1.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>自组织是认知系统的发生条件</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:44%">传统观点</th><th>ESC 视角</th></tr></thead>
+      <tbody>
+        <tr><td>自组织是无中心的秩序显现</td><td class="em-cell">自组织是结构反馈驱动的生成机制</td></tr>
+        <tr><td>自组织是系统的稳定性表现</td><td class="em-cell">自组织是系统的进化能力表现</td></tr>
+        <tr><td>自组织是物理过程的偶发性规律</td><td class="em-cell">自组织是结构逻辑的连续性展开</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:70vw" data-anim>
+      <span class="q-big">结构生成不是随机变异，而是路径逻辑的内在展开——三项支撑机制：结构压缩（抽象单元）× 结构拓展（适配逻辑）× 结构变形（调整连接）。</span>
+      <span class="cite">1.4 / 1.5 · 反馈 → 修正 → 重组的连续机制，使系统具备「结构自生」能力</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 03 · Redefined</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1 自组织不是「无序中的秩序」，而是「反馈中的结构生成」</h4>
+      <p>传统对于「自组织」的理解常陷入两种误区：</p>
+      <p>一是将其等同于混乱中出现某种模式（如粒子聚集、斑图形成），强调的是系统状态的「宏观可见性」；<br>
+      二是将其等同于不依赖外力干预的自发秩序化过程，强调的是「去中心化」的调控方式。</p>
+      <p>但ESC重新定义自组织的核心含义：</p>
+      <p><strong>自组织 = 结构反馈 × 路径复制 × 连接重组</strong></p>
+      <p>它不是单纯的秩序显现，而是结构系统基于内部路径反馈而不断衍生新结构的能力。系统的组织能力并不来源于外部输入或元规则的注入，而来源于它内部已有结构的可变组合方式。</p>
+      <h4>1.2 为什么认知系统必须是自组织的？</h4>
+      <p>认知之为认知，意味着它必须面对「未知」与「变化」。如果结构不能重构自身、提升适配能力，系统便会陷入僵化而退化。</p>
+      <p>ESC提出：</p>
+      <p>外部世界不是稳定输入项，而是不确定现象流；<br>
+      人类构造（H）注定带有局限性与适配延迟；<br>
+      唯有认知系统具备自组织能力，才能不断从既有结构中生成新路径，应对变动现实。</p>
+      <p>因此：</p>
+      <p><strong>自组织不是认知系统的可选能力，而是其存在的前提。</strong></p>
+      <p>认知若要持续存在，便必须能以已有结构为材料，构建出新的理解方式。这正是「理解作为结构演化」的含义核心。</p>
+      <h4>1.3 自组织的核心机制：结构反馈如何成为生成起点？</h4>
+      <p>自组织的关键不在于某种神秘的「生成能力」，而在于系统是否具备将反馈转化为新结构的能力。</p>
+      <p>ESC指出：</p>
+      <p>每一次结构路径的调用，都会产生「是否适配」的反馈；<br>
+      若结构适配，则路径趋稳并可能被固化为知识；<br>
+      若结构不适配，系统将进入结构修正与路径重组阶段；<br>
+      正是这种反馈 → 修正 → 重组的连续机制，使系统具备了「结构自生」的能力。</p>
+      <p>因此，自组织的本质不是静态结构的自维护，而是反馈驱动下的结构组合机制。</p>
+      <h4>1.4 结构生成不是随机变异，而是路径逻辑的展开</h4>
+      <p>与某些「复杂系统论」倾向于强调随机性不同，ESC明确指出：</p>
+      <p><strong>结构的自组织演化并非源于随机扰动，而是源于路径逻辑的内在展开。</strong></p>
+      <p>每一个新的结构单元的出现，背后都有三项机制作为支撑：</p>
+      <p>结构压缩机制：已有路径能否被压缩为更高阶的抽象单元；<br>
+      结构拓展机制：已有单元是否能嵌套出更大范围的适配逻辑；<br>
+      结构变形机制：当反馈出现偏差时，系统是否能在不彻底解构的前提下调整连接方式。</p>
+      <p>正是这三种结构处理方式，使得「自组织」不是混沌演化的结果，而是结构理性在系统内部的自然生长逻辑。</p>
+      <h4>1.5 小结与过渡：自组织是认知系统的发生条件</h4>
+      <p>本节确立了ESC对「自组织」的定义与在认知系统中的定位：</p>
+      <p>自组织是无中心的秩序显现 → 自组织是结构反馈驱动的生成机制；<br>
+      自组织是系统的稳定性表现 → 自组织是系统的进化能力表现；<br>
+      自组织是物理过程的偶发性规律 → 自组织是结构逻辑的连续性展开。</p>
+      <p>认知之所以可能，正是因为系统拥有基于路径反馈生成结构的能力。下一节将进入具体机制的拆解：</p>
+      <p><strong>结构如何通过反馈、嵌套与再组合三大机制生成自身？</strong></p>
+      <p>这也将是认知演化机制真正的「发动机」，是结构系统从稳定转向繁殖，从已知走向未知的核心动力。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第2节 命题页 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>第 2 节 · 三大驱动机制</div><div>04 / 12</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 认知系统的动力基础</div>
+    <h1 class="h-hero" style="font-size:6vw" data-anim>反馈 × 嵌套 × 再组合</h1>
+    <p class="lead" style="max-width:66vw" data-anim>三者共同构成认知系统从「既有路径」生成「新结构」的动力基础——在时间维度上递进、在结构维度上耦合的一个自生成回路。</p>
+  </div>
+  <div class="foot"><div>Page 04 · 三大驱动机制</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 自组织的三大驱动机制：反馈 × 嵌套 × 再组合</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 自组织的三大驱动机制：反馈 × 嵌套 × 再组合</h4>
+      <p>自组织是一种结构演化机制，而非偶发的复杂现象。在ESC框架中，认知的自组织之所以成为可能，是因为系统内部存在三种基本的结构性驱动机制：</p>
+      <p><strong>反馈 × 嵌套 × 再组合</strong></p>
+      <p>这三者共同构成了认知系统从「既有路径」生成「新结构」的动力基础。它们并非彼此割裂的过程，而是在时间维度上递进、在结构维度上耦合的一个自生成回路，使认知系统得以在没有外部指令的前提下不断演化自身。</p>
+      <h4>2.1 反馈：结构自检与更新的触发机制</h4>
+      <p>反馈是结构系统内部的基本监测机制。每当一个结构路径被调用，它都会在系统层面产生以下三类反馈信号：</p>
+      <p>结构适配性：该路径是否匹配输入类型与输出要求；<br>
+      路径能耗：该路径是否是最简、最快、最有效的选择；<br>
+      系统稳定性：该路径是否在系统整体运行中引发不稳定因素。</p>
+      <p>这些反馈并非外部输入，而是结构系统内生的诊断机制。它们决定了结构路径是否：</p>
+      <p>被保留、固化、上升为知识单元；<br>
+      被修改、压缩、拓展；<br>
+      被舍弃、替换、废弃。</p>
+      <p>因此：</p>
+      <p><strong>反馈不是结构之外的评价标准，而是结构本身在运行中的动态反应。</strong></p>
+      <p><strong>认知系统正是在每一次路径调用中，对结构适配性产生反应，并据此形成调整的必要性，这成为「自组织」的第一推动力。</strong></p>
+      <h4>2.2 嵌套：结构单元的多层组合机制</h4>
+      <p>一旦反馈提示结构需要调整，系统不会直接重建全新路径，而会优先尝试将已有路径进行嵌套组合。所谓「嵌套」，是指：</p>
+      <p>将已有结构路径作为模块组合成更高阶的路径单元。</p>
+      <p>嵌套机制包含如下操作方式：</p>
+      <p>模块压缩：将多段路径合并为一个可调用单元；<br>
+      层级提升：将低阶结构嵌入高阶概念中，形成层级表达；<br>
+      路径共享：多个结构路径共享部分子结构，提升系统经济性与冗余度；<br>
+      边界设定：在嵌套中明确结构适用条件，控制其调用上下文。</p>
+      <p>嵌套机制的作用在于：不依赖生成新结构，而通过组织既有结构来实现结构更新。它是认知系统「以旧构新」的第一策略。</p>
+      <p>例如：</p>
+      <p>我们不必重新「发现」速度与时间的关系，而是可以将「位置变化」与「单位时间」嵌套成「速度」；<br>
+      不必重新发明「因果关系」，而是可以将「事件顺序 × 状态转变 × 条件触发」嵌套成因果逻辑结构。</p>
+      <p>嵌套机制使系统能够以最小代价生成新结构，而无需完全推翻原有路径。</p>
+      <h4>2.3 再组合：结构系统的横向变异机制</h4>
+      <p>当嵌套无法满足新的结构需求时，系统将激活「再组合机制」，也就是：</p>
+      <p><strong>将不同路径结构的子单元重新排列、链接，以生成新的路径走向与逻辑模型。</strong></p>
+      <p>再组合机制的特征包括：</p>
+      <p>非线性连接：打破原有顺序，重新定义调用逻辑；<br>
+      跨结构迁移：将原本位于不同模块的结构单元合并使用；<br>
+      变量替代：将原路径中的部分输入、运算逻辑、输出类型替换为新元素；<br>
+      适配变异：将相似结构进行局部修改，以生成结构「变种」。</p>
+      <p>再组合机制不是嵌套的延伸，而是系统的变异机制。它使系统能够突破嵌套逻辑的上限，探索潜在的新结构可能性。</p>
+      <p>举例而言：</p>
+      <p>多学科理论的交叉建构（如「神经经济学」）本质上就是对两个结构系统的再组合；<br>
+      隐喻思维中「把X看作Y」的过程，也是将两种原本不同的结构系统进行暂时性结构耦合，产生理解路径。</p>
+      <h4>2.4 三者关系：自组织的动态展开式</h4>
+      <p>这三大机制之间不是平行存在，而是在结构运行中呈现递进、递归、耦合关系：</p>
+      <p>反馈：判断路径是否需要调整——基础路径级——每次调用；<br>
+      嵌套：优化已有路径结构——中层模块级——多次调用或路径聚集；<br>
+      再组合：生成新结构走向——高阶系统级——嵌套受限或结构迁移需求。</p>
+      <p>这一结构展开式意味着：</p>
+      <p><strong>认知系统的演化路径，并非「发现—理解—表达」式的线性路径，而是「调用—反馈—嵌套—再组合」的动态自组织螺旋。</strong></p>
+      <p>系统从路径到路径，演化的是结构之间的组织方式，而不是信息内容本身。</p>
+      <h4>2.5 链接下一节：结构如何「自己生成自己」？</h4>
+      <p>我们已经看到：反馈、嵌套与再组合为认知系统提供了结构更新的内部机制。但「自组织」不只是结构更新，而是结构生成自身。因此我们必须更进一步回答：</p>
+      <p>认知系统如何在没有外部赋值的情况下，从既有结构中生成出「前所未有」的新结构？</p>
+      <p>这一问题，才是结构螺旋真正展开的起点，也是真正将认知系统从「反应机制」推进为「生成机制」的关键入口。</p>
+      <p>下一节将进入ESC关于「结构自生逻辑」的核心命题。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节卡（三机制） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Three Drivers</div><div>05 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三大驱动机制的定位 · 2.1-2.4</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>调用—反馈—嵌套—再组合：<br>动态自组织螺旋</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:18%">驱动机制</th><th style="width:30%">功能定位</th><th style="width:24%">结构层级</th><th>激活条件</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">反馈</td><td>判断路径是否需要调整</td><td>基础路径级</td><td>每次调用</td></tr>
+        <tr><td class="em-cell">嵌套</td><td>优化已有路径结构</td><td>中层模块级</td><td>多次调用或路径聚集</td></tr>
+        <tr><td class="em-cell">再组合</td><td>生成新结构走向</td><td>高阶系统级</td><td>嵌套受限或结构迁移需求</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:70vw" data-anim>
+      <span class="q-big">嵌套是「以旧构新」的第一策略——将「位置变化 × 单位时间」嵌套成「速度」；再组合是变异机制——「神经经济学」式的跨结构迁移。系统从路径到路径，演化的是结构之间的组织方式，而不是信息内容本身。</span>
+      <span class="cite">2.2 / 2.3 / 2.4</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 05 · Three Drivers</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1-2.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1 反馈：结构自检与更新的触发机制</h4>
+      <p>反馈是结构系统内部的基本监测机制。每当一个结构路径被调用，它都会在系统层面产生以下三类反馈信号：</p>
+      <p>结构适配性：该路径是否匹配输入类型与输出要求；<br>
+      路径能耗：该路径是否是最简、最快、最有效的选择；<br>
+      系统稳定性：该路径是否在系统整体运行中引发不稳定因素。</p>
+      <p>这些反馈并非外部输入，而是结构系统内生的诊断机制。它们决定了结构路径是否：</p>
+      <p>被保留、固化、上升为知识单元；<br>
+      被修改、压缩、拓展；<br>
+      被舍弃、替换、废弃。</p>
+      <p>因此：</p>
+      <p><strong>反馈不是结构之外的评价标准，而是结构本身在运行中的动态反应。</strong></p>
+      <p><strong>认知系统正是在每一次路径调用中，对结构适配性产生反应，并据此形成调整的必要性，这成为「自组织」的第一推动力。</strong></p>
+      <h4>2.2 嵌套：结构单元的多层组合机制</h4>
+      <p>一旦反馈提示结构需要调整，系统不会直接重建全新路径，而会优先尝试将已有路径进行嵌套组合。所谓「嵌套」，是指：</p>
+      <p>将已有结构路径作为模块组合成更高阶的路径单元。</p>
+      <p>嵌套机制包含如下操作方式：</p>
+      <p>模块压缩：将多段路径合并为一个可调用单元；<br>
+      层级提升：将低阶结构嵌入高阶概念中，形成层级表达；<br>
+      路径共享：多个结构路径共享部分子结构，提升系统经济性与冗余度；<br>
+      边界设定：在嵌套中明确结构适用条件，控制其调用上下文。</p>
+      <p>嵌套机制的作用在于：不依赖生成新结构，而通过组织既有结构来实现结构更新。它是认知系统「以旧构新」的第一策略。</p>
+      <p>例如：</p>
+      <p>我们不必重新「发现」速度与时间的关系，而是可以将「位置变化」与「单位时间」嵌套成「速度」；<br>
+      不必重新发明「因果关系」，而是可以将「事件顺序 × 状态转变 × 条件触发」嵌套成因果逻辑结构。</p>
+      <p>嵌套机制使系统能够以最小代价生成新结构，而无需完全推翻原有路径。</p>
+      <h4>2.3 再组合：结构系统的横向变异机制</h4>
+      <p>当嵌套无法满足新的结构需求时，系统将激活「再组合机制」，也就是：</p>
+      <p><strong>将不同路径结构的子单元重新排列、链接，以生成新的路径走向与逻辑模型。</strong></p>
+      <p>再组合机制的特征包括：</p>
+      <p>非线性连接：打破原有顺序，重新定义调用逻辑；<br>
+      跨结构迁移：将原本位于不同模块的结构单元合并使用；<br>
+      变量替代：将原路径中的部分输入、运算逻辑、输出类型替换为新元素；<br>
+      适配变异：将相似结构进行局部修改，以生成结构「变种」。</p>
+      <p>再组合机制不是嵌套的延伸，而是系统的变异机制。它使系统能够突破嵌套逻辑的上限，探索潜在的新结构可能性。</p>
+      <p>举例而言：</p>
+      <p>多学科理论的交叉建构（如「神经经济学」）本质上就是对两个结构系统的再组合；<br>
+      隐喻思维中「把X看作Y」的过程，也是将两种原本不同的结构系统进行暂时性结构耦合，产生理解路径。</p>
+      <h4>2.4 三者关系：自组织的动态展开式</h4>
+      <p>这三大机制之间不是平行存在，而是在结构运行中呈现递进、递归、耦合关系：</p>
+      <p>反馈：判断路径是否需要调整——基础路径级——每次调用；<br>
+      嵌套：优化已有路径结构——中层模块级——多次调用或路径聚集；<br>
+      再组合：生成新结构走向——高阶系统级——嵌套受限或结构迁移需求。</p>
+      <p>这一结构展开式意味着：</p>
+      <p><strong>认知系统的演化路径，并非「发现—理解—表达」式的线性路径，而是「调用—反馈—嵌套—再组合」的动态自组织螺旋。</strong></p>
+      <p>系统从路径到路径，演化的是结构之间的组织方式，而不是信息内容本身。</p>
+      <h4>2.5 链接下一节：结构如何「自己生成自己」？</h4>
+      <p>我们已经看到：反馈、嵌套与再组合为认知系统提供了结构更新的内部机制。但「自组织」不只是结构更新，而是结构生成自身。因此我们必须更进一步回答：</p>
+      <p>认知系统如何在没有外部赋值的情况下，从既有结构中生成出「前所未有」的新结构？</p>
+      <p>这一问题，才是结构螺旋真正展开的起点，也是真正将认知系统从「反应机制」推进为「生成机制」的关键入口。</p>
+      <p>下一节将进入ESC关于「结构自生逻辑」的核心命题。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第3节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 3 节 · 结构自生</div><div>06 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 从路径压缩到新路径生成</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">路径之于结构系统，</span>
+      <span data-anim="line" style="display:block">正如基因之于生命系统。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>路径是结构连接方式的历史记录——具备连接性、稳定性、演化性三重属性，是所有结构生成的内在重构机制的基础。</p>
+  </div>
+  <div class="foot"><div>Page 06 · 结构自生</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 结构如何「自己生成自己」：从路径压缩到新路径生成</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 结构如何「自己生成自己」：从路径压缩到新路径生成</h4>
+      <p>在前两节中，我们确立了自组织系统的三个驱动机制：反馈、嵌套与再组合，它们构成了认知结构的动态演化基础。然而，「演化」仍未触及一个根本性的问题：</p>
+      <p><strong>结构如何「生成」出新结构？</strong></p>
+      <p>这不是指结构被替换、被扩展、被变异，而是指系统如何在既有结构的基础上，生成从未存在过的新结构走向与组织方式。这一问题决定了自组织是否具备真正的生成力，也决定了认知系统是否具有开放性演化的能力。</p>
+      <p>ESC将在本节中展开如下论证：结构系统之所以能够生成自身，并非源于随机扰动或外部赋值，而是因为系统具备一套路径压缩→结构嵌套→连接变形→新路径生成的自展机制。这一机制是认知演化的真正「内驱引擎」。</p>
+      <h4>3.1 结构的最小单位：路径</h4>
+      <p>要理解结构如何生成自身，必须回到其最基本的构成单位—— 路径。在ESC视角中，路径不是信息通道，而是结构连接方式的历史记录。</p>
+      <p>路径具备三种属性：</p>
+      <p>连接性：它将输入与输出、节点与节点、概念与概念连接；<br>
+      稳定性：它可以重复调用，体现结构的熟练度与能耗效率；<br>
+      演化性：它可以变形、复制、嵌套，成为更大结构的构建单元。</p>
+      <p>路径之于结构系统，正如基因之于生命系统。所有的结构生成，必须建立在路径系统的内在重构机制之上。</p>
+      <h4>3.2 路径压缩：结构生成的起点</h4>
+      <p>路径压缩，是指系统将多个重复使用的路径段封装为一个更高阶的调用单元，这一机制使结构拥有了「可重用模块」。路径压缩发生时，系统完成三项转换：</p>
+      <p>从操作转向函数：原本依赖具体内容执行的路径，被抽象为通用结构；<br>
+      从过程转向单位：路径不再是一连串行为，而是成为可以被引用的模块；<br>
+      从线性转向层级：结构中出现「结构中包含结构」的层级组织形式。</p>
+      <p>这意味着压缩不是删减，而是信息组织方式的演化。结构正是在压缩中获得模块性，在模块性中获得重组能力。</p>
+      <h4>3.3 路径嵌套与复制：结构系统的「繁殖机制」</h4>
+      <p>当路径被压缩，它就具备了嵌套的能力。嵌套使得系统可以将已有结构嵌入更大结构中，从而扩大复杂度。与此同时：</p>
+      <p>压缩后的路径单元还具备「复制」能力，即可多次调用、在不同上下文中被激活。</p>
+      <p>这一「路径复制—嵌套组合」的机制构成了结构系统的「繁殖机制」，是其复杂化与多样化的来源。<strong>系统之所以能够不断生成新结构，并不是因为发现了新输入，而是因为在原有路径的基础上反复嵌套与复制，从而在连接方式上形成新的组织模式。</strong></p>
+      <h4>3.4 路径变形：新路径如何从旧路径「变出来」</h4>
+      <p>结构生成不是原地复制，而是带有微变与偏移的再组合过程。ESC称这一过程为路径变形（path deformation），它指的是：</p>
+      <p><strong>结构路径在被多次调用与组合后，出现偏移、突变、异构组合等现象，从而衍生出与原路径不同的新连接方式。</strong></p>
+      <p>路径变形包括以下机制：</p>
+      <p>位移性变形：连接点顺序被重排，生成新通路；<br>
+      嵌套性变形：嵌套结构被压平，产生结构降维再升维的转换；<br>
+      组合性变形：多个路径被强制组合，形成混合模型；<br>
+      概念性变形：路径的语义标签在新结构中被重新定义（如隐喻机制）；</p>
+      <p>变形不是失效，而是系统在适配失衡中发起的结构自塑行为。</p>
+      <h4>3.5 新路径生成：结构螺旋的展开机制</h4>
+      <p>当路径变形发生，系统便处于一个临界点—— 原有结构无法完全适配输入，但系统又具备足够的路径资源进行组合与重构。这一结构临界状态将触发：</p>
+      <p><strong>新路径生成机制。</strong></p>
+      <p>ESC称之为结构螺旋的展开点，即：</p>
+      <p>在路径压缩的支持下，系统具有模块；<br>
+      在路径复制的机制中，系统具备素材；<br>
+      在路径嵌套的组合中，系统形成层级；<br>
+      在路径变形的动态中，系统进入非线性重组；<br>
+      最终系统以新路径形式完成结构自生的闭环。</p>
+      <p>这一过程不是线性进化，而是递归反馈 × 非线性叠加 × 结构再生的动态系统展开，构成了ESC关于「结构演化」的内在发生模型。</p>
+      <h4>3.6 小结与过渡：结构演化不是演绎真理，而是生成连接</h4>
+      <p>本节确立了ESC理论对结构生成机制的根本理解：</p>
+      <p>结构生成并非靠外部输入，而是内部路径系统的变形、嵌套与重组；<br>
+      新路径不是被「发现」的事实，而是结构系统在临界状态下的组织性产物；<br>
+      结构演化不是为了表达某种真理，而是为持续生成新的连接模式。</p>
+      <p>下一节将进一步打破「输入—输出」模式，提出ESC结构模型的核心认知公式：</p>
+      <p>认知不是对输入的反应，而是对结构的激活与重组。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第3节卡（路径机制链） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Path Mechanics</div><div>07 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>自展机制 · 3.2-3.5</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.6vh" data-anim>压缩 → 复制嵌套 → 变形 → 新路径生成</h2>
+    <div class="pipeline" data-cols="4">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">路径压缩</div>
+        <div class="step-desc">操作→函数 · 过程→单位 · 线性→层级。压缩不是删减，而是信息组织方式的演化。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">嵌套与复制</div>
+        <div class="step-desc">结构系统的「繁殖机制」——反复嵌套与复制形成新的组织模式。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">路径变形</div>
+        <div class="step-desc">位移性 / 嵌套性 / 组合性 / 概念性四类变形——变形不是失效，而是结构自塑。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iv</div>
+        <div class="step-title">新路径生成</div>
+        <div class="step-desc">结构临界状态触发——递归反馈 × 非线性叠加 × 结构再生。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:66vw;margin-top:4.5vh" data-anim>
+      <span class="q-big">压缩不是删减，而是信息组织方式的演化。结构正是在压缩中获得模块性，在模块性中获得重组能力。</span>
+      <span class="cite">3.2 · 路径三属性：连接性 × 稳定性 × 演化性</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 07 · Path Mechanics</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1 结构的最小单位：路径</h4>
+      <p>要理解结构如何生成自身，必须回到其最基本的构成单位—— 路径。在ESC视角中，路径不是信息通道，而是结构连接方式的历史记录。</p>
+      <p>路径具备三种属性：</p>
+      <p>连接性：它将输入与输出、节点与节点、概念与概念连接；<br>
+      稳定性：它可以重复调用，体现结构的熟练度与能耗效率；<br>
+      演化性：它可以变形、复制、嵌套，成为更大结构的构建单元。</p>
+      <p>路径之于结构系统，正如基因之于生命系统。所有的结构生成，必须建立在路径系统的内在重构机制之上。</p>
+      <h4>3.2 路径压缩：结构生成的起点</h4>
+      <p>路径压缩，是指系统将多个重复使用的路径段封装为一个更高阶的调用单元，这一机制使结构拥有了「可重用模块」。路径压缩发生时，系统完成三项转换：</p>
+      <p>从操作转向函数：原本依赖具体内容执行的路径，被抽象为通用结构；<br>
+      从过程转向单位：路径不再是一连串行为，而是成为可以被引用的模块；<br>
+      从线性转向层级：结构中出现「结构中包含结构」的层级组织形式。</p>
+      <p>这意味着压缩不是删减，而是信息组织方式的演化。结构正是在压缩中获得模块性，在模块性中获得重组能力。</p>
+      <h4>3.3 路径嵌套与复制：结构系统的「繁殖机制」</h4>
+      <p>当路径被压缩，它就具备了嵌套的能力。嵌套使得系统可以将已有结构嵌入更大结构中，从而扩大复杂度。与此同时：</p>
+      <p>压缩后的路径单元还具备「复制」能力，即可多次调用、在不同上下文中被激活。</p>
+      <p>这一「路径复制—嵌套组合」的机制构成了结构系统的「繁殖机制」，是其复杂化与多样化的来源。<strong>系统之所以能够不断生成新结构，并不是因为发现了新输入，而是因为在原有路径的基础上反复嵌套与复制，从而在连接方式上形成新的组织模式。</strong></p>
+      <h4>3.4 路径变形：新路径如何从旧路径「变出来」</h4>
+      <p>结构生成不是原地复制，而是带有微变与偏移的再组合过程。ESC称这一过程为路径变形（path deformation），它指的是：</p>
+      <p><strong>结构路径在被多次调用与组合后，出现偏移、突变、异构组合等现象，从而衍生出与原路径不同的新连接方式。</strong></p>
+      <p>路径变形包括以下机制：</p>
+      <p>位移性变形：连接点顺序被重排，生成新通路；<br>
+      嵌套性变形：嵌套结构被压平，产生结构降维再升维的转换；<br>
+      组合性变形：多个路径被强制组合，形成混合模型；<br>
+      概念性变形：路径的语义标签在新结构中被重新定义（如隐喻机制）；</p>
+      <p>变形不是失效，而是系统在适配失衡中发起的结构自塑行为。</p>
+      <h4>3.5 新路径生成：结构螺旋的展开机制</h4>
+      <p>当路径变形发生，系统便处于一个临界点—— 原有结构无法完全适配输入，但系统又具备足够的路径资源进行组合与重构。这一结构临界状态将触发：</p>
+      <p><strong>新路径生成机制。</strong></p>
+      <p>ESC称之为结构螺旋的展开点，即：</p>
+      <p>在路径压缩的支持下，系统具有模块；<br>
+      在路径复制的机制中，系统具备素材；<br>
+      在路径嵌套的组合中，系统形成层级；<br>
+      在路径变形的动态中，系统进入非线性重组；<br>
+      最终系统以新路径形式完成结构自生的闭环。</p>
+      <p>这一过程不是线性进化，而是递归反馈 × 非线性叠加 × 结构再生的动态系统展开，构成了ESC关于「结构演化」的内在发生模型。</p>
+      <h4>3.6 小结与过渡：结构演化不是演绎真理，而是生成连接</h4>
+      <p>本节确立了ESC理论对结构生成机制的根本理解：</p>
+      <p>结构生成并非靠外部输入，而是内部路径系统的变形、嵌套与重组；<br>
+      新路径不是被「发现」的事实，而是结构系统在临界状态下的组织性产物；<br>
+      结构演化不是为了表达某种真理，而是为持续生成新的连接模式。</p>
+      <p>下一节将进一步打破「输入—输出」模式，提出ESC结构模型的核心认知公式：</p>
+      <p>认知不是对输入的反应，而是对结构的激活与重组。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第4节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 激活与重组</div><div>08 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · 认知不是响应输入</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">认知的本质不是接收信息，而是调度路径。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>输入不是原料而是触发机制——我们并不是「处理输入」，而是「用结构回应输入」。认知差异的本质，是结构调用图谱的差异。</p>
+  </div>
+  <div class="foot"><div>Page 08 · 激活与重组</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 认知不是响应输入，而是激活已有结构的组合方式</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 认知不是响应输入，而是激活已有结构的组合方式</h4>
+      <p>传统的认知模型通常建立在一种线性流程之上：个体接收到外部输入信息，通过处理、判断与计算得出输出结果。这种「输入→处理→输出」的图式广泛应用于心理学、信息科学乃至人工智能领域。然而，ESC打破这一图式，指出：</p>
+      <p>认知并非以输入为核心驱动变量，而是以结构的激活与组合为发生机制。</p>
+      <p>换句话说，认知行为并不是从信息出发，而是从结构开始。输入不是认知发生的起点，而只是激活结构系统的「触发信号」。真正产生理解、判断、建构意义的，不是输入内容本身，而是系统内部已有结构的调度、组织与再组合能力。</p>
+      <p>本节将从根本上重构对「认知过程」的理解，明确提出：认知是一种结构调用机制，而非信息处理装置。</p>
+      <h4>4.1 输入不是原料，而是触发机制</h4>
+      <p>在传统认知论中，输入被看作信息处理的原材料，是理解行为的前提。但ESC指出，输入本身不携带任何「结构信息」，它只是现象流中某种被感知的扰动或变化。系统之所以能「理解」输入，是因为它能够：</p>
+      <p>在已有结构中定位与该输入相关的路径；<br>
+      调用相关路径所组织的结构单元；<br>
+      对结构连接进行调度与优化；<br>
+      在结构适配后产生意义、判断或行动倾向。</p>
+      <p>因此，输入不是认知的起点，而是认知结构被激活的导火索。我们并不是「处理输入」，而是「用结构回应输入」。</p>
+      <h4>4.2 认知的基本单位不是信息，而是路径</h4>
+      <p>这一认知观转变背后，隐含着认知构成单位的根本差异。</p>
+      <p>在信息处理模型中，认知的单位是「信息位元」或「符号」，其主要特征是数量、位置、内容；<br>
+      而在ESC结构模型中，认知的单位是路径，即结构之间的连接方式。</p>
+      <p>路径是系统已知的结构调用方式，具备如下特征：</p>
+      <p>可重用性：同一路径可用于不同输入情境；<br>
+      嵌套性：路径可组合、层级化，生成复杂结构；<br>
+      反馈性：路径在调用中产生适配或不适配反馈；<br>
+      生成性：路径组合构成新理解、新表达、新概念。</p>
+      <p>因此：</p>
+      <p><strong>认知的本质不是接收信息，而是调度路径。</strong></p>
+      <h4>4.3 认知发生的三阶段机制</h4>
+      <p>ESC将认知发生过程划分为三个结构性阶段：</p>
+      <p><strong>（1）结构激活（Activation）</strong></p>
+      <p>当输入信号进入系统，系统通过比对与匹配，在既有结构图谱中寻找可响应路径。这是认知的启动阶段，关键在于「系统认出了什么结构」。</p>
+      <p><strong>（2）结构组合（Composition）</strong></p>
+      <p>系统将多个被激活的结构路径进行嵌套、连接与再构，形成新的组合方式。这一阶段决定了系统最终对输入所做的解释方式。</p>
+      <p><strong>（3）结构输出（Projection）</strong></p>
+      <p>系统根据组合结果生成判断、行为、语言、图式等「输出形式」，并将其重新投射到外部。这一投射不反映输入，而反映结构激活的组合结果。</p>
+      <p>简言之：</p>
+      <p><strong>认知的实质，是「结构—结构」之间的组合活动，而不是「输入—输出」的线性加工。</strong></p>
+      <h4>4.4 输入相同，结构不同，认知结果不同</h4>
+      <p>一个最具说明性的现象是：当不同的个体面对相同输入时，所产生的理解和反应往往大相径庭。传统解释认为这是「经验不同」、「知识储备不同」、「情绪状态不同」等因素造成的差异。</p>
+      <p>ESC指出：这背后的根本原因是结构配置不同：</p>
+      <p>个体A在该输入上激活的是结构路径 X；<br>
+      个体B在同样输入上激活的是路径 Y；<br>
+      结构差异导致了认知走向的彻底分化。</p>
+      <p>由此可见：</p>
+      <p><strong>认知差异的本质，是结构调用图谱的差异。</strong></p>
+      <p>这也是为何教育、经验、语言、文化能够深刻影响认知：它们不是「改变信息处理规则」，而是改变了认知结构的组织图谱。</p>
+      <h4>4.5 认知的关键能力是结构调用能力</h4>
+      <p>基于以上分析，ESC明确提出：认知能力的核心不是处理信息的速度或容量，而是调用结构的能力。</p>
+      <p>这一能力包括：</p>
+      <p>路径识别力：是否能识别新输入与哪些结构相关；<br>
+      组合灵活性：是否能将已知结构以新方式连接；<br>
+      反馈调节性：是否能根据调用结果实时修正结构选择；<br>
+      嵌套生成力：是否能将组合结果封装为新路径，供未来使用。</p>
+      <p>换言之：</p>
+      <p><strong>认知之为认知，不在于「知道什么」，而在于「如何调度结构」。</strong></p>
+      <p>这是ESC理论对「理解」、「思维」、「知识」的统一认知模型。</p>
+      <h4>4.6 链接下一节：从结构调用到结构分化</h4>
+      <p>本节重构了认知的基本机制，确立如下观点：</p>
+      <p>（1）输入不是源头，而是触发；<br>
+      （2）信息不是基础，路径才是；<br>
+      （3）理解不是处理，而是组合；<br>
+      （4）认知不是再现，而是构造。</p>
+      <p>下一节将进一步展开这一逻辑，进入结构自组织系统的下一阶段：结构如何从组合中分化出不同方向的认知路径？我们将进入ESC理论关于「认知路径分化逻辑」的分析，这是理解「多元理解」、「知识系统演化」、「系统创新」现象的关键基础。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第4节卡（三阶段） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · Three Stages</div><div>09 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>认知发生的三阶段机制 · 4.3 / 4.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>「结构—结构」的组合活动，<br>而非「输入—输出」的线性加工</h2>
+    <div class="pipeline" data-cols="3">
+      <div class="step" data-anim>
+        <div class="step-nb">01</div>
+        <div class="step-title">结构激活 Activation</div>
+        <div class="step-desc">在既有结构图谱中寻找可响应路径——系统认出了什么结构。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">02</div>
+        <div class="step-title">结构组合 Composition</div>
+        <div class="step-desc">多条路径嵌套、连接、再构——决定最终解释方式。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">03</div>
+        <div class="step-title">结构输出 Projection</div>
+        <div class="step-desc">生成判断、行为、语言、图式——投射反映组合结果，不反映输入。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:70vw;margin-top:4.5vh" data-anim>
+      <span class="q-big">结构调用能力的四要素：路径识别力 × 组合灵活性 × 反馈调节性 × 嵌套生成力。认知之为认知，不在于「知道什么」，而在于「如何调度结构」。</span>
+      <span class="cite">4.5 · 认知差异的本质 = 结构调用图谱的差异</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 09 · Three Stages</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1-4.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1 输入不是原料，而是触发机制</h4>
+      <p>在传统认知论中，输入被看作信息处理的原材料，是理解行为的前提。但ESC指出，输入本身不携带任何「结构信息」，它只是现象流中某种被感知的扰动或变化。系统之所以能「理解」输入，是因为它能够：</p>
+      <p>在已有结构中定位与该输入相关的路径；<br>
+      调用相关路径所组织的结构单元；<br>
+      对结构连接进行调度与优化；<br>
+      在结构适配后产生意义、判断或行动倾向。</p>
+      <p>因此，输入不是认知的起点，而是认知结构被激活的导火索。我们并不是「处理输入」，而是「用结构回应输入」。</p>
+      <h4>4.2 认知的基本单位不是信息，而是路径</h4>
+      <p>这一认知观转变背后，隐含着认知构成单位的根本差异。</p>
+      <p>在信息处理模型中，认知的单位是「信息位元」或「符号」，其主要特征是数量、位置、内容；<br>
+      而在ESC结构模型中，认知的单位是路径，即结构之间的连接方式。</p>
+      <p>路径是系统已知的结构调用方式，具备如下特征：</p>
+      <p>可重用性：同一路径可用于不同输入情境；<br>
+      嵌套性：路径可组合、层级化，生成复杂结构；<br>
+      反馈性：路径在调用中产生适配或不适配反馈；<br>
+      生成性：路径组合构成新理解、新表达、新概念。</p>
+      <p>因此：</p>
+      <p><strong>认知的本质不是接收信息，而是调度路径。</strong></p>
+      <h4>4.3 认知发生的三阶段机制</h4>
+      <p>ESC将认知发生过程划分为三个结构性阶段：</p>
+      <p><strong>（1）结构激活（Activation）</strong></p>
+      <p>当输入信号进入系统，系统通过比对与匹配，在既有结构图谱中寻找可响应路径。这是认知的启动阶段，关键在于「系统认出了什么结构」。</p>
+      <p><strong>（2）结构组合（Composition）</strong></p>
+      <p>系统将多个被激活的结构路径进行嵌套、连接与再构，形成新的组合方式。这一阶段决定了系统最终对输入所做的解释方式。</p>
+      <p><strong>（3）结构输出（Projection）</strong></p>
+      <p>系统根据组合结果生成判断、行为、语言、图式等「输出形式」，并将其重新投射到外部。这一投射不反映输入，而反映结构激活的组合结果。</p>
+      <p>简言之：</p>
+      <p><strong>认知的实质，是「结构—结构」之间的组合活动，而不是「输入—输出」的线性加工。</strong></p>
+      <h4>4.4 输入相同，结构不同，认知结果不同</h4>
+      <p>一个最具说明性的现象是：当不同的个体面对相同输入时，所产生的理解和反应往往大相径庭。传统解释认为这是「经验不同」、「知识储备不同」、「情绪状态不同」等因素造成的差异。</p>
+      <p>ESC指出：这背后的根本原因是结构配置不同：</p>
+      <p>个体A在该输入上激活的是结构路径 X；<br>
+      个体B在同样输入上激活的是路径 Y；<br>
+      结构差异导致了认知走向的彻底分化。</p>
+      <p>由此可见：</p>
+      <p><strong>认知差异的本质，是结构调用图谱的差异。</strong></p>
+      <p>这也是为何教育、经验、语言、文化能够深刻影响认知：它们不是「改变信息处理规则」，而是改变了认知结构的组织图谱。</p>
+      <h4>4.5 认知的关键能力是结构调用能力</h4>
+      <p>基于以上分析，ESC明确提出：认知能力的核心不是处理信息的速度或容量，而是调用结构的能力。</p>
+      <p>这一能力包括：</p>
+      <p>路径识别力：是否能识别新输入与哪些结构相关；<br>
+      组合灵活性：是否能将已知结构以新方式连接；<br>
+      反馈调节性：是否能根据调用结果实时修正结构选择；<br>
+      嵌套生成力：是否能将组合结果封装为新路径，供未来使用。</p>
+      <p>换言之：</p>
+      <p><strong>认知之为认知，不在于「知道什么」，而在于「如何调度结构」。</strong></p>
+      <p>这是ESC理论对「理解」、「思维」、「知识」的统一认知模型。</p>
+      <h4>4.6 链接下一节：从结构调用到结构分化</h4>
+      <p>本节重构了认知的基本机制，确立如下观点：</p>
+      <p>（1）输入不是源头，而是触发；<br>
+      （2）信息不是基础，路径才是；<br>
+      （3）理解不是处理，而是组合；<br>
+      （4）认知不是再现，而是构造。</p>
+      <p>下一节将进一步展开这一逻辑，进入结构自组织系统的下一阶段：结构如何从组合中分化出不同方向的认知路径？我们将进入ESC理论关于「认知路径分化逻辑」的分析，这是理解「多元理解」、「知识系统演化」、「系统创新」现象的关键基础。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第5节 命题页（分化） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 结构分化</div><div>10 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 分化不是分裂</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">分化是一种「同源异构」机制——</span>
+      <span data-anim="line" style="display:block">系统在保留核心结构图谱的前提下，演化出多种功能性路径。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>分化不是结构失控，不是认知混乱——分化是认知系统获得复杂性与生成力的必要路径。</p>
+  </div>
+  <div class="foot"><div>Page 10 · 结构分化</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 结构如何分化出不同的认知路径？</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 结构如何分化出不同的认知路径？</h4>
+      <p>自组织意味着系统内部结构具备了自我激活、自我组合与自我生成的能力。在前四节中，我们已经确立了认知系统如何通过结构反馈、嵌套与再组合来生成自身的逻辑，并指出认知不是输入的处理，而是结构路径的激活与再建构。</p>
+      <p>然而，认知系统之所以能够适应现实、发展知识、创造意义，不仅仅因为它能够生成结构，还因为它具备结构路径的分化能力。</p>
+      <p>换言之，真正推动认知系统复杂化的，是「结构如何朝不同方向展开」这一机制。</p>
+      <p>本节作为本章的收束与下一章的开启，将聚焦如下核心问题：</p>
+      <p>同一个认知系统为何会生成多种不同类型的结构路径？<br>
+      结构路径的分化机制如何导致不同认知形态？<br>
+      ESC如何解释人类认知路径在构成方式上的「分类基础」？</p>
+      <h4>5.1 分化是结构演化的「乘法机制」</h4>
+      <p>生成结构是一种线性扩展机制，但结构分化却是非线性演化机制。ESC指出：</p>
+      <p>认知系统的进化，不仅来自于结构的「多」，更来自于结构的「多样」。</p>
+      <p>系统在生成多个路径之后，若所有路径都指向同一类型、同一方式、同一结果，那么系统再复杂也是低维的。而结构一旦开始分化，即：</p>
+      <p>出现不同的构造方式；<br>
+      对同一输入产生多重响应逻辑；<br>
+      在路径压缩方式、嵌套规则、再组合策略上形成差异；</p>
+      <p>那么系统就具备了「维度跃迁」的可能。这就是从结构生成走向结构分化的关键跳跃。</p>
+      <h4>5.2 分化的四个基础条件</h4>
+      <p>ESC将结构路径的分化归因于四种系统条件：</p>
+      <p>路径重叠：多条路径共享部分结构单元——引发分支、重组与偏移；<br>
+      上下文漂移：输入情境发生微小变化——导致激活路径方向变化；<br>
+      调用冲突：两条路径被同时激活但逻辑不兼容——触发路径重新组合或变形；<br>
+      反馈增压：某路径反复调用导致能耗提升——促使系统寻找替代结构。</p>
+      <p>这些条件不是人为控制的，而是结构系统在时间中的自然反馈结果。也就是说，结构分化不是偶发性现象，而是自组织机制演化到一定阶段后的自然产物。</p>
+      <h4>5.3 分化的三种结果：三类认知路径的萌芽</h4>
+      <p>在满足以上分化条件的背景下，系统内部逐步涌现出三种具有本质差异的结构走向。ESC将在下一章完整展开这三种路径，但在此提前构建其生成逻辑基础：</p>
+      <p>路径 S₁（Structure Path）：结构抽象路径，追求结构内在一致性与精度——来源于嵌套机制压缩演化；<br>
+      路径 P（Projection Path）：外部投影路径，关注结构的表达性与适配性——来源于输出机制的反馈迭代；<br>
+      路径 R（Relational Path）：关系映射路径，优先处理交互、意义与定位——来源于连接方式的非线性组合。</p>
+      <p>这三种路径并不是人类「选择」的，而是系统在结构分化中自然浮现的三种生成方向，构成认知结构复杂化的核心轴线。</p>
+      <h4>5.4 分化不是分裂，而是系统的内部多向展开</h4>
+      <p>重要的是理解：<strong>结构分化≠认知分裂。</strong></p>
+      <p>ESC明确指出：</p>
+      <p><strong>分化是一种「同源异构」机制，即系统在保留核心结构图谱的前提下，演化出多种功能性路径。</strong></p>
+      <p>这就像一个语言系统既可以表达逻辑推演（S₁），也可以生成诗意隐喻（R），还可以构建现实描述（P）。它们不是相互冲突的，而是在结构演化中产生的多轴展开方式。</p>
+      <p>因此：</p>
+      <p>分化不是结构失控；<br>
+      分化不是认知的混乱；<br>
+      分化是认知系统获得复杂性与生成力的必要路径。</p>
+      <h4>5.5 链接下一章：三类认知路径如何构成认知多样性的基础?</h4>
+      <p>至此，第8章已完成如下结构构建：</p>
+      <p>认知系统是结构的自组织系统；<br>
+      认知行为是结构路径的激活与组合；<br>
+      自组织机制使系统能够生成新路径；<br>
+      分化机制使系统能够展开多种路径逻辑。</p>
+      <p>下一章将进入ESC理论对认知路径的正式分类与结构分析：</p>
+      <p>我们如何从同一个结构系统中，生成出不同类型的认知路径，并据此构成认知的三类演化机制？</p>
+      <p>这将是对于认知结构「横向分类机制」的首次完整建构，也是ESC理论向「认知多样性」与「系统生成力」展开的关键章节。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第5节卡（四条件+三路径） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · Differentiation</div><div>11 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>分化的条件与结果 · 5.2 / 5.3</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>四个基础条件，三类路径萌芽</h2>
+    <table class="tbl" data-anim style="margin-bottom:2.6vh">
+      <thead><tr><th style="width:22%">条件</th><th style="width:42%">含义</th><th>分化效应</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">路径重叠</td><td>多条路径共享部分结构单元</td><td>引发分支、重组与偏移</td></tr>
+        <tr><td class="em-cell">上下文漂移</td><td>输入情境发生微小变化</td><td>导致激活路径方向变化</td></tr>
+        <tr><td class="em-cell">调用冲突</td><td>两条路径同时激活但逻辑不兼容</td><td>触发路径重新组合或变形</td></tr>
+        <tr><td class="em-cell">反馈增压</td><td>某路径反复调用导致能耗提升</td><td>促使系统寻找替代结构</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:34%">类型</th><th style="width:38%">简述</th><th>分化依据</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">路径 S₁ Structure Path</td><td>结构抽象路径：内在一致性与精度</td><td>来源于嵌套机制压缩演化</td></tr>
+        <tr><td class="em-cell">路径 P Projection Path</td><td>外部投影路径：表达性与适配性</td><td>来源于输出机制的反馈迭代</td></tr>
+        <tr><td class="em-cell">路径 R Relational Path</td><td>关系映射路径：交互、意义与定位</td><td>来源于连接方式的非线性组合</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 11 · Differentiation</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1 分化是结构演化的「乘法机制」</h4>
+      <p>生成结构是一种线性扩展机制，但结构分化却是非线性演化机制。ESC指出：</p>
+      <p>认知系统的进化，不仅来自于结构的「多」，更来自于结构的「多样」。</p>
+      <p>系统在生成多个路径之后，若所有路径都指向同一类型、同一方式、同一结果，那么系统再复杂也是低维的。而结构一旦开始分化，即：</p>
+      <p>出现不同的构造方式；<br>
+      对同一输入产生多重响应逻辑；<br>
+      在路径压缩方式、嵌套规则、再组合策略上形成差异；</p>
+      <p>那么系统就具备了「维度跃迁」的可能。这就是从结构生成走向结构分化的关键跳跃。</p>
+      <h4>5.2 分化的四个基础条件</h4>
+      <p>ESC将结构路径的分化归因于四种系统条件：</p>
+      <p>路径重叠：多条路径共享部分结构单元——引发分支、重组与偏移；<br>
+      上下文漂移：输入情境发生微小变化——导致激活路径方向变化；<br>
+      调用冲突：两条路径被同时激活但逻辑不兼容——触发路径重新组合或变形；<br>
+      反馈增压：某路径反复调用导致能耗提升——促使系统寻找替代结构。</p>
+      <p>这些条件不是人为控制的，而是结构系统在时间中的自然反馈结果。也就是说，结构分化不是偶发性现象，而是自组织机制演化到一定阶段后的自然产物。</p>
+      <h4>5.3 分化的三种结果：三类认知路径的萌芽</h4>
+      <p>在满足以上分化条件的背景下，系统内部逐步涌现出三种具有本质差异的结构走向。ESC将在下一章完整展开这三种路径，但在此提前构建其生成逻辑基础：</p>
+      <p>路径 S₁（Structure Path）：结构抽象路径，追求结构内在一致性与精度——来源于嵌套机制压缩演化；<br>
+      路径 P（Projection Path）：外部投影路径，关注结构的表达性与适配性——来源于输出机制的反馈迭代；<br>
+      路径 R（Relational Path）：关系映射路径，优先处理交互、意义与定位——来源于连接方式的非线性组合。</p>
+      <p>这三种路径并不是人类「选择」的，而是系统在结构分化中自然浮现的三种生成方向，构成认知结构复杂化的核心轴线。</p>
+      <h4>5.4 分化不是分裂，而是系统的内部多向展开</h4>
+      <p>重要的是理解：<strong>结构分化≠认知分裂。</strong></p>
+      <p>ESC明确指出：</p>
+      <p><strong>分化是一种「同源异构」机制，即系统在保留核心结构图谱的前提下，演化出多种功能性路径。</strong></p>
+      <p>这就像一个语言系统既可以表达逻辑推演（S₁），也可以生成诗意隐喻（R），还可以构建现实描述（P）。它们不是相互冲突的，而是在结构演化中产生的多轴展开方式。</p>
+      <p>因此：</p>
+      <p>分化不是结构失控；<br>
+      分化不是认知的混乱；<br>
+      分化是认知系统获得复杂性与生成力的必要路径。</p>
+      <h4>5.5 链接下一章：三类认知路径如何构成认知多样性的基础?</h4>
+      <p>至此，第8章已完成如下结构构建：</p>
+      <p>认知系统是结构的自组织系统；<br>
+      认知行为是结构路径的激活与组合；<br>
+      自组织机制使系统能够生成新路径；<br>
+      分化机制使系统能够展开多种路径逻辑。</p>
+      <p>下一章将进入ESC理论对认知路径的正式分类与结构分析：</p>
+      <p>我们如何从同一个结构系统中，生成出不同类型的认知路径，并据此构成认知的三类演化机制？</p>
+      <p>这将是对于认知结构「横向分类机制」的首次完整建构，也是ESC理论向「认知多样性」与「系统生成力」展开的关键章节。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>12 / 12</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:5vw" data-anim>认知的本质不是接收信息，<br>而是调度路径。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：自组织的重新定义；反馈 × 嵌套 × 再组合三大驱动；路径压缩→复制→变形→新路径生成的自展机制；认知的三阶段发生；结构分化的条件与三类路径萌芽。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>下一章将正式展开：认知的三类路径——结构分化如何生成三种认知机制（S₁ / P / R）。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-10/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 7 章 · 知识系统是对结构法则的反向映射</div></a>
+    <a href="../deck-codex-12/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 9 章 · 认知的三类路径</div></a>
+  </div>
+  <div class="foot"><div>第 9 章 · 认知的三类路径</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-10/index.html', chapterNext = '../deck-codex-12/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第7章 知识系统是对结构法则的反向映射</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:7.6vw;line-height:1.12;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5.2vw;line-height:1.14;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.8vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.16vw);line-height:1.72;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.72vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.8vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.18vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.5vw);line-height:1.42}
+
+  .pipeline{display:grid;gap:1.4vw}
+  .pipeline[data-cols="5"]{grid-template-columns:repeat(5,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.42vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.92vw);line-height:1.5;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1vw);line-height:1.6}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.84vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.4vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.4vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.05vw,19px);line-height:1.92;margin:0 0 1.35em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 7 章</div><div>Chapter VII</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>Knowledge as Reverse Mapping</div>
+    <h1 class="h-hero" data-anim>知识系统<br>是对结构法则的反向映射</h1>
+    <p class="lead" style="max-width:62vw" data-anim>知识不是事实的镜像，而是结构的使用说明书——它的存在不是为了还原世界，而是为了控制复杂性。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.17</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 7 章</div><div>01 / 12</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第7章（来源：结构认知实验室 · 2026年3月17日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章五节：第1节 为何说知识不是事实，而是结构的组织性投影；第2节 知识如何生成——从结构封装到语义编码；第3节 知识系统的本体性——不是描述世界，而是组织世界；第4节 知识的反馈系统——如何维护、调整与更新「已知」；第5节 认知系统何以自组织——知识如何成为结构演化的起点。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 组织性投影</div><div>02 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 知识不是事实，而是结构的组织性投影</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">知识不是事实的记录，而是结构路径的组织性投影。</span>
+      <span data-anim="line" style="display:block">它不是「对世界的描述」，而是「对结构的调用」。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>不再把知识当作「镜像」看待，而应当把它理解为认知系统内对结构法则的封装结果。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 组织性投影</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 为何说知识不是事实，而是结构的组织性投影</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 为何说知识不是事实，而是结构的组织性投影</h4>
+      <p>人类自觉拥有知识，但却很少追问「知识是什么」，更少追问「知识如何生成」。我们惯常将知识视为事实的集合、真理的陈述、经验的总结，仿佛知识是世界本身的忠实写照。然而，ESC从结构认知的视角出发，提出一个根本性观点：</p>
+      <p><strong>知识不是事实的记录，而是结构路径的组织性投影。</strong></p>
+      <p><strong>它不是「对世界的描述」，而是「对结构的调用」，不是「发现了什么」，而是「如何组织结构性调用才能稳定运行」。</strong>从这个角度出发，我们需要彻底重构知识的哲学基础—— 不再把知识当作「镜像」看待，而应当把它理解为认知系统内对结构法则的封装结果。</p>
+      <h4>1.1. 知识并不等于事实的陈述</h4>
+      <p>传统认识论常假设：世界中存在着客观事实，知识的任务是将这些事实转化为命题，从而建立起真理体系。然而这一设定包含两个未被揭露的前提：</p>
+      <p>1.事实是被动存在的、不依赖结构的输入项；</p>
+      <p>2.知识是中立表达的、不会改变事实的输出项。</p>
+      <p>ESC打破这两个前提：</p>
+      <p>首先，所谓「事实」本身就已经是结构性选择的结果；<br>
+      其次，知识不是表达结构，而是以结构为前提进行的再组织行为。</p>
+      <p>换言之：</p>
+      <p><strong>知识并不来自世界的「事实」，而来自结构系统对稳定路径的反复嵌套、调用与命名。</strong></p>
+      <h4>1.2. 知识是结构路径的封装结果</h4>
+      <p>结构系统在长期运行中，会自然涌现出一些「低能耗、低反馈、高复用」的路径（参见第6章论述）。这些路径一旦长期稳定，就进入了系统的「默认调用」层。</p>
+      <p>此时，认知系统便会：</p>
+      <p>将该路径封装为一个概念、命题、范畴或定义；<br>
+      将其语言化、命名化、可传播化；<br>
+      并通过教育、工具、社会结构进行再分发。</p>
+      <p>这个过程的产物，正是「知识」。<br>
+      我们可以说：</p>
+      <p><strong>知识 = 结构路径 × 命名 × 再调用</strong></p>
+      <p><strong>它不再是事实的镜像，而是结构的使用说明书。它的存在不是为了还原世界，而是为了控制复杂性，使认知系统在处理输入时可以压缩路径、提升效率。</strong></p>
+      <h4>1.3. 知识具有组织性，而非反映性</h4>
+      <p>知识不是现实的倒影，而是认知系统的组织逻辑在输出层的投影结构。每一个知识条目都可以拆解为：</p>
+      <p>结构来源：它基于哪个结构路径生成；<br>
+      调用目的：它被用来解决什么系统任务；<br>
+      封装方式：它如何以语言、模型、范畴形式被固定；<br>
+      扩展结构：它能否被嵌套进更大的结构网络中。</p>
+      <p>这些都表明：<strong>知识是组织，而不是观察；是路径，而不是陈述；是生成机制，而不是存储结果。</strong></p>
+      <p>从结构哲学的角度看，<strong>知识是一种经过结构筛选、路径验证、反馈压缩之后生成的稳定性封装单元。</strong></p>
+      <h4>1.4. 举例说明：从力学知识到结构映射</h4>
+      <p>以力学知识为例：</p>
+      <p>「力等于质量乘以加速度」（F = ma）这一定律，常被认为是「自然的事实」；<br>
+      实则，它是一个结构路径的表达；<br>
+      它源于牛顿力学体系中对动量变化率的结构化观察；<br>
+      并且已在物理、工程、教学、工具、算法等多系统中实现调用封装；<br>
+      最终被认知系统内建为一个不可动摇的结构性调用单元—— 即「知识」。</p>
+      <p>因此，它不是世界本身的真实样貌，而是认知系统组织世界的一种路径选择。它告诉我们的不是「世界怎样」，而是「怎样组织结构路径能在系统内稳定运作」。</p>
+      <h4>1.5. 链接下一节：知识是如何生成的？</h4>
+      <p>如果知识并非事实陈述，而是结构路径的封装与调用，那么下一步就必须回答：</p>
+      <p>认知系统是如何将结构路径转化为知识单位的？</p>
+      <p>下一节将展开如下内容：（1）结构趋稳路径如何转化为知识；（2）命名与语言如何介入结构封装；（3）分类系统如何固化路径结构；（4）图谱、模型、教材如何实现再调用。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡（知识公式） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Not Mirror</div><div>03 / 12</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>知识的生成公式 · 1.2 / 1.4</div>
+    <h1 class="h-hero" style="font-size:4.6vw" data-anim>知识 = 结构路径 × 命名 × 再调用</h1>
+    <p class="lead" style="max-width:68vw" data-anim>它不再是事实的镜像，而是结构的使用说明书——不是为了还原世界，而是为了控制复杂性、压缩路径、提升效率。</p>
+    <div class="callout" style="max-width:70vw" data-anim>
+      <span class="q-big">以 F = ma 为例：它不是「自然的事实」，而是一个结构路径的表达——源于动量变化率的结构化观察，在物理、工程、教学、算法中实现调用封装，最终被内建为不可动摇的结构性调用单元。它告诉我们的是「怎样组织结构路径能在系统内稳定运作」。</span>
+      <span class="cite">1.4 · 知识是组织，而不是观察；是路径，而不是陈述</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 03 · Not Mirror</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1. 知识并不等于事实的陈述</h4>
+      <p>传统认识论常假设：世界中存在着客观事实，知识的任务是将这些事实转化为命题，从而建立起真理体系。然而这一设定包含两个未被揭露的前提：</p>
+      <p>1.事实是被动存在的、不依赖结构的输入项；</p>
+      <p>2.知识是中立表达的、不会改变事实的输出项。</p>
+      <p>ESC打破这两个前提：</p>
+      <p>首先，所谓「事实」本身就已经是结构性选择的结果；<br>
+      其次，知识不是表达结构，而是以结构为前提进行的再组织行为。</p>
+      <p>换言之：</p>
+      <p><strong>知识并不来自世界的「事实」，而来自结构系统对稳定路径的反复嵌套、调用与命名。</strong></p>
+      <h4>1.2. 知识是结构路径的封装结果</h4>
+      <p>结构系统在长期运行中，会自然涌现出一些「低能耗、低反馈、高复用」的路径（参见第6章论述）。这些路径一旦长期稳定，就进入了系统的「默认调用」层。</p>
+      <p>此时，认知系统便会：</p>
+      <p>将该路径封装为一个概念、命题、范畴或定义；<br>
+      将其语言化、命名化、可传播化；<br>
+      并通过教育、工具、社会结构进行再分发。</p>
+      <p>这个过程的产物，正是「知识」。<br>
+      我们可以说：</p>
+      <p><strong>知识 = 结构路径 × 命名 × 再调用</strong></p>
+      <p><strong>它不再是事实的镜像，而是结构的使用说明书。它的存在不是为了还原世界，而是为了控制复杂性，使认知系统在处理输入时可以压缩路径、提升效率。</strong></p>
+      <h4>1.3. 知识具有组织性，而非反映性</h4>
+      <p>知识不是现实的倒影，而是认知系统的组织逻辑在输出层的投影结构。每一个知识条目都可以拆解为：</p>
+      <p>结构来源：它基于哪个结构路径生成；<br>
+      调用目的：它被用来解决什么系统任务；<br>
+      封装方式：它如何以语言、模型、范畴形式被固定；<br>
+      扩展结构：它能否被嵌套进更大的结构网络中。</p>
+      <p>这些都表明：<strong>知识是组织，而不是观察；是路径，而不是陈述；是生成机制，而不是存储结果。</strong></p>
+      <p>从结构哲学的角度看，<strong>知识是一种经过结构筛选、路径验证、反馈压缩之后生成的稳定性封装单元。</strong></p>
+      <h4>1.4. 举例说明：从力学知识到结构映射</h4>
+      <p>以力学知识为例：</p>
+      <p>「力等于质量乘以加速度」（F = ma）这一定律，常被认为是「自然的事实」；<br>
+      实则，它是一个结构路径的表达；<br>
+      它源于牛顿力学体系中对动量变化率的结构化观察；<br>
+      并且已在物理、工程、教学、工具、算法等多系统中实现调用封装；<br>
+      最终被认知系统内建为一个不可动摇的结构性调用单元—— 即「知识」。</p>
+      <p>因此，它不是世界本身的真实样貌，而是认知系统组织世界的一种路径选择。它告诉我们的不是「世界怎样」，而是「怎样组织结构路径能在系统内稳定运作」。</p>
+      <h4>1.5. 链接下一节：知识是如何生成的？</h4>
+      <p>如果知识并非事实陈述，而是结构路径的封装与调用，那么下一步就必须回答：</p>
+      <p>认知系统是如何将结构路径转化为知识单位的？</p>
+      <p>下一节将展开如下内容：（1）结构趋稳路径如何转化为知识；（2）命名与语言如何介入结构封装；（3）分类系统如何固化路径结构；（4）图谱、模型、教材如何实现再调用。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第2节 命题页（五环节） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>第 2 节 · 知识的生成</div><div>04 / 12</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 「结构封装—语义编码机制」</div>
+    <h1 class="h-hero" style="font-size:5.4vw" data-anim>结构路径如何成为知识单位</h1>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1.6vw;max-width:88vw" data-anim>
+      <div><div class="kicker">01</div><p class="body-zh">结构趋稳</p></div>
+      <div><div class="kicker">02</div><p class="body-zh">命名生成</p></div>
+      <div><div class="kicker">03</div><p class="body-zh">概念封装</p></div>
+      <div><div class="kicker">04</div><p class="body-zh">语义编码</p></div>
+      <div><div class="kicker">05</div><p class="body-zh">系统调用</p></div>
+    </div>
+    <p class="lead" style="max-width:64vw" data-anim>通过这五步，一个结构路径得以从系统内部的运行机制转化为「知识」，并获得认知系统的长期调用权。</p>
+  </div>
+  <div class="foot"><div>Page 04 · 知识的生成</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 知识如何生成：从结构封装到语义编码</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 知识如何生成：从结构封装到语义编码</h4>
+      <p>如果知识不是世界的镜像，而是结构路径的封装性表达，那么我们就必须解答一个根本性的问题：</p>
+      <p><strong>认知系统是如何将一个结构趋稳路径，转化为一个知识单位的？</strong></p>
+      <p>这个转化并非自然发生，而是一个由多个步骤组成的结构性机制，它使得原本嵌套于认知系统中的复杂结构路径，得以以语义化、调用化、再分化的方式固定下来。ESC在此将这一机制命名为：</p>
+      <p><strong>「结构封装—语义编码机制」。</strong></p>
+      <p>本节将剖析该机制的五个核心环节：</p>
+      <p>1.结构趋稳；<br>
+      2.命名生成；<br>
+      3.概念封装；<br>
+      4.语义编码；<br>
+      5.系统调用。</p>
+      <p>通过这五步，一个结构路径得以从系统内部的运行机制转化为「知识」，并获得认知系统的长期调用权。</p>
+      <h4>2.1. 结构趋稳：知识生成的前置条件</h4>
+      <p>所有知识的生成，都以一个前提条件为起点：结构路径的长期稳定。当某一路径在认知系统中反复使用、反馈消失、能耗最低，它便进入系统的默认状态。</p>
+      <p>此时，该路径具备三个特征：</p>
+      <p>反馈静默：不再触发结构修正；<br>
+      路径惰性：不再寻求替代连接方式；<br>
+      调用优先级上升：成为系统的默认决策通路。</p>
+      <p>正是在这种稳定条件下，结构路径开始被系统识别为「可命名、可调用、可传播」的潜在知识单元。</p>
+      <h4>2.2. 命名生成：从结构到符号的跃迁</h4>
+      <p>结构路径一旦趋于稳定，认知系统的语言机制便介入，通过命名机制将其压缩为一个符号单位。这一过程可视为：</p>
+      <p><strong>路径封装 × 符号标签化</strong></p>
+      <p>它不仅是一种语言行为，更是一种结构编码行为。命名的本质是将结构路径压缩为一个调用接口，使其能在更大系统中被快速嵌套与引用。</p>
+      <p>例如：</p>
+      <p>「重力」并不是一个实体，而是「物体在特定结构系统中表现出下落加速度」的路径命名；<br>
+      「演化」并不是一段历史，而是「种群基因频率在选择压力下产生变化」的结构路径命名。</p>
+      <p>命名是结构路径进入知识系统的第一关。</p>
+      <h4>2.3. 概念封装：知识单元的生成机制</h4>
+      <p>命名之后，认知系统会通过一系列概念操作将其固化为知识单元。这一阶段，系统会进行：</p>
+      <p>边界划定：该路径适用于哪些输入条件；<br>
+      模式提取：有哪些典型调用场景；<br>
+      属性归约：抽取哪些稳定因子作为核心特征；<br>
+      排他机制：区分该概念与其他路径的边界；</p>
+      <p>这些操作完成后，知识就形成了具备系统调用能力的「概念包」或「结构模块」。<strong>概念不是现实的代表物，而是结构系统内部的组织形式。</strong></p>
+      <h4>2.4. 语义编码：结构路径如何变成语言内容</h4>
+      <p>在封装为概念之后，该结构路径还需要进入语义层，成为可以在语言、文本、公式、模型中被表达的知识形式。这一过程涉及：</p>
+      <p>符号系统的介入：结构必须借助语音、文字、图形等被表达；<br>
+      语法机制的嵌套：结构必须适配语言的句式、范畴、修辞逻辑；<br>
+      叙述模板的拟合：结构路径被归类为「规律」「定义」「原理」等语义框架中；</p>
+      <p>语义编码不是表达结构，而是投影结构—— 它让结构路径在语言中以「知识形态」被引用、教学、讨论与继承。知识之所以可以被语言承载，不是因为语言能还原结构，而是因为语言能调用被封装的结构单元。</p>
+      <h4>2.5. 系统调用：知识的认知功能</h4>
+      <p>最终，这一被封装、命名、语义化的结构单元就进入了认知系统的调用层。此时，它拥有以下特征：</p>
+      <p>可复用：可嵌入多种任务与问题中；<br>
+      可传播：可作为教育、交流与工具的一部分；<br>
+      可更新：在新的结构反馈下可被调整或替换；<br>
+      可积累：可被用于构建更大规模的结构系统（如学科、理论、模型）；</p>
+      <p>此时，知识不再是「信息」，而成为结构投影 × 认知功能的合体，是认知系统运行中不可或缺的调用机制。</p>
+      <h4>2.6. 链接下一节：知识不是描述，而是组织</h4>
+      <p>本节揭示了一个关键认知事实：知识之为知识，不在于它说了什么，而在于它如何嵌套结构与组织理解。它不是关于世界的陈述，而是关于路径的组织。</p>
+      <p>尽管我们并不以本体论的方式理解「存在」，但在进入知识系统的结构分析时，仍需识别一个关键机制：每一个知识系统，必然通过某种设定，界定「它所组织的世界」—— 即它内部结构路径的起点。这个设定，在语言上通常被称为「本体论定位」。在此语境中，它不再指向某种先验实在，而是指向系统内部如何生成「可被组织之物」的结构入口。</p>
+      <p>下一节将从这一视角展开知识系统的本体论定位：</p>
+      <p>知识并不向世界外部对话，而向认知内部对接；<br>
+      知识不是从经验中抽象出真理，而是从结构中抽象出路径；<br>
+      知识系统并非观察系统，而是调用系统，是认知对结构法则的组织机制本身。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节卡（五环节细化） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Five Steps</div><div>05 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>五个核心环节 · 2.1-2.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>从运行机制到长期调用权</h2>
+    <div class="pipeline" data-cols="5">
+      <div class="step" data-anim>
+        <div class="step-nb">01</div>
+        <div class="step-title">结构趋稳</div>
+        <div class="step-desc">反馈静默 × 路径惰性 × 调用优先级上升——知识生成的前置条件。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">02</div>
+        <div class="step-title">命名生成</div>
+        <div class="step-desc">路径封装 × 符号标签化——「重力」「演化」都是路径命名，而非实体。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">03</div>
+        <div class="step-title">概念封装</div>
+        <div class="step-desc">边界划定 · 模式提取 · 属性归约 · 排他机制——生成「概念包」。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">04</div>
+        <div class="step-title">语义编码</div>
+        <div class="step-desc">符号介入 × 语法嵌套 × 叙述拟合——投影结构而非表达结构。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">05</div>
+        <div class="step-title">系统调用</div>
+        <div class="step-desc">可复用 · 可传播 · 可更新 · 可积累——知识进入调用层。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:66vw;margin-top:4.5vh" data-anim>
+      <span class="q-big">语义编码不是表达结构，而是投影结构——知识之所以可以被语言承载，不是因为语言能还原结构，而是因为语言能调用被封装的结构单元。</span>
+      <span class="cite">2.4 · 命名是结构路径进入知识系统的第一关</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 05 · Five Steps</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1-2.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1. 结构趋稳：知识生成的前置条件</h4>
+      <p>所有知识的生成，都以一个前提条件为起点：结构路径的长期稳定。当某一路径在认知系统中反复使用、反馈消失、能耗最低，它便进入系统的默认状态。</p>
+      <p>此时，该路径具备三个特征：</p>
+      <p>反馈静默：不再触发结构修正；<br>
+      路径惰性：不再寻求替代连接方式；<br>
+      调用优先级上升：成为系统的默认决策通路。</p>
+      <p>正是在这种稳定条件下，结构路径开始被系统识别为「可命名、可调用、可传播」的潜在知识单元。</p>
+      <h4>2.2. 命名生成：从结构到符号的跃迁</h4>
+      <p>结构路径一旦趋于稳定，认知系统的语言机制便介入，通过命名机制将其压缩为一个符号单位。这一过程可视为：</p>
+      <p><strong>路径封装 × 符号标签化</strong></p>
+      <p>它不仅是一种语言行为，更是一种结构编码行为。命名的本质是将结构路径压缩为一个调用接口，使其能在更大系统中被快速嵌套与引用。</p>
+      <p>例如：</p>
+      <p>「重力」并不是一个实体，而是「物体在特定结构系统中表现出下落加速度」的路径命名；<br>
+      「演化」并不是一段历史，而是「种群基因频率在选择压力下产生变化」的结构路径命名。</p>
+      <p>命名是结构路径进入知识系统的第一关。</p>
+      <h4>2.3. 概念封装：知识单元的生成机制</h4>
+      <p>命名之后，认知系统会通过一系列概念操作将其固化为知识单元。这一阶段，系统会进行：</p>
+      <p>边界划定：该路径适用于哪些输入条件；<br>
+      模式提取：有哪些典型调用场景；<br>
+      属性归约：抽取哪些稳定因子作为核心特征；<br>
+      排他机制：区分该概念与其他路径的边界；</p>
+      <p>这些操作完成后，知识就形成了具备系统调用能力的「概念包」或「结构模块」。<strong>概念不是现实的代表物，而是结构系统内部的组织形式。</strong></p>
+      <h4>2.4. 语义编码：结构路径如何变成语言内容</h4>
+      <p>在封装为概念之后，该结构路径还需要进入语义层，成为可以在语言、文本、公式、模型中被表达的知识形式。这一过程涉及：</p>
+      <p>符号系统的介入：结构必须借助语音、文字、图形等被表达；<br>
+      语法机制的嵌套：结构必须适配语言的句式、范畴、修辞逻辑；<br>
+      叙述模板的拟合：结构路径被归类为「规律」「定义」「原理」等语义框架中；</p>
+      <p>语义编码不是表达结构，而是投影结构—— 它让结构路径在语言中以「知识形态」被引用、教学、讨论与继承。知识之所以可以被语言承载，不是因为语言能还原结构，而是因为语言能调用被封装的结构单元。</p>
+      <h4>2.5. 系统调用：知识的认知功能</h4>
+      <p>最终，这一被封装、命名、语义化的结构单元就进入了认知系统的调用层。此时，它拥有以下特征：</p>
+      <p>可复用：可嵌入多种任务与问题中；<br>
+      可传播：可作为教育、交流与工具的一部分；<br>
+      可更新：在新的结构反馈下可被调整或替换；<br>
+      可积累：可被用于构建更大规模的结构系统（如学科、理论、模型）；</p>
+      <p>此时，知识不再是「信息」，而成为结构投影 × 认知功能的合体，是认知系统运行中不可或缺的调用机制。</p>
+      <h4>2.6. 链接下一节：知识不是描述，而是组织</h4>
+      <p>本节揭示了一个关键认知事实：知识之为知识，不在于它说了什么，而在于它如何嵌套结构与组织理解。它不是关于世界的陈述，而是关于路径的组织。</p>
+      <p>尽管我们并不以本体论的方式理解「存在」，但在进入知识系统的结构分析时，仍需识别一个关键机制：每一个知识系统，必然通过某种设定，界定「它所组织的世界」—— 即它内部结构路径的起点。这个设定，在语言上通常被称为「本体论定位」。在此语境中，它不再指向某种先验实在，而是指向系统内部如何生成「可被组织之物」的结构入口。</p>
+      <p>下一节将从这一视角展开知识系统的本体论定位：</p>
+      <p>知识并不向世界外部对话，而向认知内部对接；<br>
+      知识不是从经验中抽象出真理，而是从结构中抽象出路径；<br>
+      知识系统并非观察系统，而是调用系统，是认知对结构法则的组织机制本身。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第3节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 3 节 · 本体性</div><div>06 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 不是描述世界，而是组织世界</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">知识之为知识，</span>
+      <span data-anim="line" style="display:block">不在其所说，而在其所连。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>知识的本体性，不是关于「世界是什么」，而是关于「知识如何界定它的世界」——知识系统不是描述世界的结构集合，而是组织理解的结构机制。</p>
+  </div>
+  <div class="foot"><div>Page 06 · 本体性</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 知识系统的本体性：不是描述世界，而是组织世界</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 知识系统的本体性：不是描述世界，而是组织世界</h4>
+      <p>知识系统常被理解为对世界的描述装置，是一种从经验中提取事实、从现象中归纳真理的认知工具。在这一经典图式中：</p>
+      <p>世界是客观实在；<br>
+      知识是语言命题的组合；<br>
+      真理是知识与世界之间的对应关系。</p>
+      <p>本节所讨论的「知识的本体性」并不涉及哲学意义上的本体论立场，并不试图判断某种世界是否真实存在或先验给定。我们所关心的，是知识系统作为认知结构，如何在其内部生成「被组织之物」的入口机制，以及它如何通过结构设定、语言配置与路径调用，构造出它所处理的「世界」。</p>
+      <p>换言之，知识的本体性，不是关于「世界是什么」，而是关于「知识如何界定它的世界」。这一界定，不依赖实在论的对应逻辑，而是一种结构生成逻辑：知识系统通过其内部机制，设定结构路径的起点，进而组织理解的发生。</p>
+      <p>但这一图式忽略了一个根本事实：知识并不以「再现世界」为目标，而是以「组织结构」为机制。ESC从结构哲学出发，重新定义知识系统的本体性：</p>
+      <p><strong>知识系统不是描述世界的结构集合，而是组织理解的结构机制。</strong></p>
+      <p>它存在的方式不是作为「世界的映像」，而是作为认知结构的接口集，是对结构路径的系统封装与调用网络。</p>
+      <h4>3.1. 知识的首要功能不是「再现」，而是「调用」</h4>
+      <p>当认知系统面对输入信息时，它不以「是否真实」作为第一判断标准，而以「是否可调用」为首要目标。系统只会保留那些能够：</p>
+      <p>快速定位结构路径；<br>
+      成为其他路径的嵌套单位；<br>
+      支撑系统行为生成；<br>
+      在反馈中保持稳定的表达方式。</p>
+      <p>而这些路径封装体，正是「知识单元」的核心机制。这意味着：</p>
+      <p><strong>知识从未以「描述世界」为首要目的，它的首要任务，是「如何组织理解世界」。</strong></p>
+      <p>它的运行机制不是符合，而是适配；不是还原，而是调度。</p>
+      <h4>3.2. 知识是对结构法则的接口调用</h4>
+      <p>知识并不是一整套法则的陈列柜，而是一整套法则路径的接口调用机制。结构法则一旦趋稳，知识系统便会围绕其进行如下操作：</p>
+      <p>接口化：将路径封装为可复用的模块；<br>
+      语义化：赋予名称、概念、定义与语法格式；<br>
+      组合化：通过逻辑、分类、模型等方式嵌套在更大结构中；<br>
+      传递化：通过教育、工具、技术、制度向认知共同体扩散；</p>
+      <p>因此，知识不是法则的表达体，而是对结构路径的组织性再分发系统。</p>
+      <p>它的本体不是「事实集」，而是「结构机制集」。</p>
+      <h4>3.3. 知识系统是结构系统的二级封装层</h4>
+      <p>如果我们将结构系统视为「信息→结构路径→系统输出」的运行装置，那么知识系统则是这一运行装置的抽象接口层，是对结构系统进行的第二重封装。</p>
+      <p>ESC称之为：结构—知识二级模型：</p>
+      <p>第一级：结构系统运行路径；<br>
+      第二级：知识系统接口调用机制。</p>
+      <p>这意味着我们理解一个知识单位时，理解的并不是「它陈述了什么」，而是「它在结构系统中完成了什么样的封装、连接、调用任务」。</p>
+      <p>例如：</p>
+      <p>欧几里得几何并不是关于「空间的事实」，而是一个结构系统中关于「如何组织空间逻辑结构」的稳定封装；<br>
+      达尔文进化论不是关于「生命的终极真相」，而是一个描述「种群结构在时间中如何变化」的路径模型；<br>
+      牛顿三定律不是自然的语言，而是物理系统中最低反馈路径的语义化表达结构。</p>
+      <p><strong>知识之为知识，不在其所说，而在其所连。</strong></p>
+      <h4>3.4. 知识系统是一种结构映射装置</h4>
+      <p>ESC进一步指出，知识系统是认知结构对结构法则进行的反向映射行为。这不是一种静态表达，而是一种动态组织活动。</p>
+      <p>它不仅「封装了结构」，还：</p>
+      <p>通过分类系统将不同路径编入图谱；<br>
+      通过逻辑结构设定调用次序与优先级；<br>
+      通过模型化技术压缩路径变量；<br>
+      通过语言化形式实现再生产与传播。</p>
+      <p>这意味着：</p>
+      <p><strong>知识不是事实的静态聚合，而是结构法则在认知系统中的组织性映射结果。</strong></p>
+      <p><strong>知识是认知结构映射世界的语言，而不是世界反射在语言中的痕迹。</strong></p>
+      <h4>3.5. 小结与过渡：知识不是关于世界，而是关于结构</h4>
+      <p>本节确立了ESC对知识系统的本体定位：（1）它不是关于世界的再现，而是关于结构路径的组织；（2）它不是事实的命题表达，而是系统行为的调用网络；（3）它不是真理的表达器，而是路径的封装器。</p>
+      <p>下一节将转向一个关键问题：如果知识是路径的组织单元，那么它如何更新？如何反馈？如何进化？我们将进入结构认知的动态机制，讨论知识的反馈与更新如何反向影响结构系统本身，从而进入 ESC 自组织认知模型的核心入口。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第3节卡（二级模型） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Two-Level Model</div><div>07 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>结构—知识二级模型 · 3.1-3.4</div>
+    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>结构—知识二级模型</h2>
+    <div class="grid-2">
+      <div data-anim style="padding:2.4vh 1.8vw;border-left:3px solid currentColor;opacity:.72">
+        <div class="kicker">第一级 · 结构系统</div>
+        <p class="body-zh" style="margin-top:1.2vh">信息 → 结构路径 → 系统输出的运行装置。</p>
+      </div>
+      <div data-anim style="padding:2.4vh 1.8vw;border-left:3px solid currentColor">
+        <div class="kicker">第二级 · 知识系统</div>
+        <p class="body-zh" style="margin-top:1.2vh">抽象接口层：接口化 · 语义化 · 组合化 · 传递化——对结构路径的组织性再分发系统。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:72vw;margin-top:4vh" data-anim>
+      <span class="q-big">欧几里得几何不是「空间的事实」，而是「如何组织空间逻辑结构」的稳定封装；进化论是「种群结构在时间中如何变化」的路径模型；牛顿三定律是物理系统中最低反馈路径的语义化表达结构。</span>
+      <span class="cite">3.3 · 理解一个知识单位 = 理解它在结构系统中完成了什么封装、连接、调用任务</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 07 · Two-Level Model</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1. 知识的首要功能不是「再现」，而是「调用」</h4>
+      <p>当认知系统面对输入信息时，它不以「是否真实」作为第一判断标准，而以「是否可调用」为首要目标。系统只会保留那些能够：</p>
+      <p>快速定位结构路径；<br>
+      成为其他路径的嵌套单位；<br>
+      支撑系统行为生成；<br>
+      在反馈中保持稳定的表达方式。</p>
+      <p>而这些路径封装体，正是「知识单元」的核心机制。这意味着：</p>
+      <p><strong>知识从未以「描述世界」为首要目的，它的首要任务，是「如何组织理解世界」。</strong></p>
+      <p>它的运行机制不是符合，而是适配；不是还原，而是调度。</p>
+      <h4>3.2. 知识是对结构法则的接口调用</h4>
+      <p>知识并不是一整套法则的陈列柜，而是一整套法则路径的接口调用机制。结构法则一旦趋稳，知识系统便会围绕其进行如下操作：</p>
+      <p>接口化：将路径封装为可复用的模块；<br>
+      语义化：赋予名称、概念、定义与语法格式；<br>
+      组合化：通过逻辑、分类、模型等方式嵌套在更大结构中；<br>
+      传递化：通过教育、工具、技术、制度向认知共同体扩散；</p>
+      <p>因此，知识不是法则的表达体，而是对结构路径的组织性再分发系统。</p>
+      <p>它的本体不是「事实集」，而是「结构机制集」。</p>
+      <h4>3.3. 知识系统是结构系统的二级封装层</h4>
+      <p>如果我们将结构系统视为「信息→结构路径→系统输出」的运行装置，那么知识系统则是这一运行装置的抽象接口层，是对结构系统进行的第二重封装。</p>
+      <p>ESC称之为：结构—知识二级模型：</p>
+      <p>第一级：结构系统运行路径；<br>
+      第二级：知识系统接口调用机制。</p>
+      <p>这意味着我们理解一个知识单位时，理解的并不是「它陈述了什么」，而是「它在结构系统中完成了什么样的封装、连接、调用任务」。</p>
+      <p>例如：</p>
+      <p>欧几里得几何并不是关于「空间的事实」，而是一个结构系统中关于「如何组织空间逻辑结构」的稳定封装；<br>
+      达尔文进化论不是关于「生命的终极真相」，而是一个描述「种群结构在时间中如何变化」的路径模型；<br>
+      牛顿三定律不是自然的语言，而是物理系统中最低反馈路径的语义化表达结构。</p>
+      <p><strong>知识之为知识，不在其所说，而在其所连。</strong></p>
+      <h4>3.4. 知识系统是一种结构映射装置</h4>
+      <p>ESC进一步指出，知识系统是认知结构对结构法则进行的反向映射行为。这不是一种静态表达，而是一种动态组织活动。</p>
+      <p>它不仅「封装了结构」，还：</p>
+      <p>通过分类系统将不同路径编入图谱；<br>
+      通过逻辑结构设定调用次序与优先级；<br>
+      通过模型化技术压缩路径变量；<br>
+      通过语言化形式实现再生产与传播。</p>
+      <p>这意味着：</p>
+      <p><strong>知识不是事实的静态聚合，而是结构法则在认知系统中的组织性映射结果。</strong></p>
+      <p><strong>知识是认知结构映射世界的语言，而不是世界反射在语言中的痕迹。</strong></p>
+      <h4>3.5. 小结与过渡：知识不是关于世界，而是关于结构</h4>
+      <p>本节确立了ESC对知识系统的本体定位：（1）它不是关于世界的再现，而是关于结构路径的组织；（2）它不是事实的命题表达，而是系统行为的调用网络；（3）它不是真理的表达器，而是路径的封装器。</p>
+      <p>下一节将转向一个关键问题：如果知识是路径的组织单元，那么它如何更新？如何反馈？如何进化？我们将进入结构认知的动态机制，讨论知识的反馈与更新如何反向影响结构系统本身，从而进入 ESC 自组织认知模型的核心入口。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第4节 命题页（反馈系统） ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>第 4 节 · 反馈系统</div><div>08 / 12</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · 如何维护、调整与更新「已知」</div>
+    <h1 class="h-hero" style="font-size:5.2vw" data-anim>知识的「更新」不是修正内容，<br>而是重写路径</h1>
+    <p class="lead" style="max-width:66vw" data-anim>知识系统不是固化已知的仓库，而是动态维护结构路径稳定性的调度层——三层反馈系统：调用反馈机制 × 路径调整机制 × 再封装机制。</p>
+    <div class="callout" style="max-width:64vw" data-anim>
+      <span class="q-big">知识系统并不等待外部「发现错误」，它内部就自带试错机制。其演化不是由真伪判断驱动，而由结构稳定性驱动。</span>
+      <span class="cite">4.1 · 每一次失败的调用，都是一次潜在的知识更新契机</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 08 · 反馈系统</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 知识的反馈系统：如何维护、调整与更新「已知」</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 知识的反馈系统：如何维护、调整与更新「已知」</h4>
+      <p>知识从来不是一劳永逸的静态结构。任何知识一旦成为认知系统的调用单元，它的运行状态便开始与输入变化、结构演化、系统反馈产生持续交互。在这个意义上：</p>
+      <p>「已知」并不是系统稳定的终点，而是反馈机制不断优化、调整和重构的中介节点。</p>
+      <p>ESC在此提出一个重要转向：知识系统本身具有反馈机制，它不是固化已知的仓库，而是动态维护结构路径稳定性的调度层。当输入信息、环境结构或系统目标发生变化时，知识系统将作为认知的中介层，通过以下三种方式完成自我更新：</p>
+      <p>1.调用反馈机制；<br>
+      2.路径调整机制；<br>
+      3.再封装机制。</p>
+      <p>本节将详细展开这一三层反馈系统，并说明知识如何不是「被更新」的结果，而是在结构压力下主动演化的路径容器。</p>
+      <h4>4.1. 调用反馈机制：知识系统的感知前线</h4>
+      <p>每一次知识的使用，都是对其结构路径有效性的「实验」。当调用路径成功适配输入时，系统对该知识单元的依赖性增强；反之，若路径产生偏差、能耗升高或输出失效，系统将触发「反馈机制」。</p>
+      <p>这意味着：</p>
+      <p>知识系统具备自感应能力：能判断某一知识路径是否仍适用于当前输入；<br>
+      知识的可靠性不是逻辑判断的结果，而是结构适配性的不断验证；<br>
+      每一次失败的调用，都是一次潜在的知识更新契机。</p>
+      <p>知识系统并不等待外部「发现错误」，它内部就自带试错机制。其演化不是由真伪判断驱动，而由结构稳定性驱动。</p>
+      <h4>4.2. 路径调整机制：知识的结构层重构</h4>
+      <p>当反馈机制指示某一知识单元不再适配系统需求时，认知结构会对其底层路径进行调整。这一调整包括：</p>
+      <p>路径重组：将旧路径分解为多个更小结构单元重新排列；<br>
+      连接方式改变：改变该知识单元嵌套于更大系统中的方式；<br>
+      变量拓展：引入新的参数以适应新的输入环境；<br>
+      限制条件重设：重新划定该知识适用的边界范围。</p>
+      <p>这些调整不是「内容的更新」，而是结构连接的重新组织。从ESC视角看：</p>
+      <p><strong>知识的「更新」不是修正内容，而是重写路径。</strong></p>
+      <p>这一点彻底区别于传统「知识积累」观，而确立了知识结构演化观。</p>
+      <h4>4.3. 再封装机制：知识的演化存档</h4>
+      <p>路径一旦调整完成，认知系统并不会将其孤立使用，而会对其重新命名、概念化、语义编码，重新进入知识系统。这就是「再封装机制」。</p>
+      <p>再封装机制具有以下特点：</p>
+      <p>更新单元可沿用旧名称（如理论修订）或生成新概念（如新范式）；<br>
+      原路径与新路径可并存于系统中（典型于科学中的「经典理论」与「现代理论」）；<br>
+      系统会动态分配优先级，以确定调用权重（如「主要解释框架」与「辅助模型」）。</p>
+      <p>再封装机制保障了知识系统的连续性与演化性，使其既能响应结构变化，又能维持系统运行不被频繁中断。</p>
+      <h4>4.4. ESC视角下的「知识进化」</h4>
+      <p>ESC将整个知识更新过程理解为：</p>
+      <p><strong>结构调用→反馈生成→路径重构→知识再封装</strong></p>
+      <p>这一过程不是认知系统之外的修正机制，而是认知系统内部的组织逻辑。知识之所以不断更新，并非世界在变化，而是结构适配条件在演化。</p>
+      <p>从这一角度出发，我们可以得出如下结论：</p>
+      <p>知识不是静态事实，而是动态路径集合；<br>
+      「错误知识」不是因逻辑失效，而是因结构路径不再稳定；<br>
+      「新知识」不是发现结果，而是结构系统重新适配的表现；<br>
+      「知识进化」不是思想演进，而是系统结构压缩策略的动态调整过程。</p>
+      <h4>4.5. 链接下一节：知识如何反向影响结构生成？</h4>
+      <p>本节建立了知识系统的反馈更新机制，指出知识并非一套静态事实集合，而是认知系统不断进行结构调度的接口层。然而，当知识系统不只是被动适配结构变化，而开始反向影响结构选择、路径生成与系统组织方式时，认知系统便不再是简单的反应机制，而成为一种「自组织系统」。这也将进入本章最后一节的核心命题：</p>
+      <p>知识不是结构的终点，而是新结构生成的起点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第4节卡（三层反馈） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · Three Layers</div><div>09 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三层反馈系统 · 知识进化链 · 4.1-4.4</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.4vh" data-anim>结构调用 → 反馈生成 → 路径重构 → 知识再封装</h2>
+    <div class="pipeline" data-cols="3">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">调用反馈机制</div>
+        <div class="step-desc">每一次使用都是对路径有效性的「实验」——知识系统自带试错机制。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">路径调整机制</div>
+        <div class="step-desc">路径重组 · 连接改变 · 变量拓展 · 边界重设——结构连接的重新组织。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">再封装机制</div>
+        <div class="step-desc">重新命名与编码——新旧路径可并存（经典理论 × 现代理论），动态分配调用权重。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:72vw;margin-top:4.5vh" data-anim>
+      <span class="q-big">知识不是静态事实，而是动态路径集合；「错误知识」不是因逻辑失效，而是因结构路径不再稳定；「新知识」不是发现结果，而是结构系统重新适配的表现。</span>
+      <span class="cite">4.4 · 知识之所以不断更新，并非世界在变化，而是结构适配条件在演化</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 09 · Three Layers</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1-4.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1. 调用反馈机制：知识系统的感知前线</h4>
+      <p>每一次知识的使用，都是对其结构路径有效性的「实验」。当调用路径成功适配输入时，系统对该知识单元的依赖性增强；反之，若路径产生偏差、能耗升高或输出失效，系统将触发「反馈机制」。</p>
+      <p>这意味着：</p>
+      <p>知识系统具备自感应能力：能判断某一知识路径是否仍适用于当前输入；<br>
+      知识的可靠性不是逻辑判断的结果，而是结构适配性的不断验证；<br>
+      每一次失败的调用，都是一次潜在的知识更新契机。</p>
+      <p>知识系统并不等待外部「发现错误」，它内部就自带试错机制。其演化不是由真伪判断驱动，而由结构稳定性驱动。</p>
+      <h4>4.2. 路径调整机制：知识的结构层重构</h4>
+      <p>当反馈机制指示某一知识单元不再适配系统需求时，认知结构会对其底层路径进行调整。这一调整包括：</p>
+      <p>路径重组：将旧路径分解为多个更小结构单元重新排列；<br>
+      连接方式改变：改变该知识单元嵌套于更大系统中的方式；<br>
+      变量拓展：引入新的参数以适应新的输入环境；<br>
+      限制条件重设：重新划定该知识适用的边界范围。</p>
+      <p>这些调整不是「内容的更新」，而是结构连接的重新组织。从ESC视角看：</p>
+      <p><strong>知识的「更新」不是修正内容，而是重写路径。</strong></p>
+      <p>这一点彻底区别于传统「知识积累」观，而确立了知识结构演化观。</p>
+      <h4>4.3. 再封装机制：知识的演化存档</h4>
+      <p>路径一旦调整完成，认知系统并不会将其孤立使用，而会对其重新命名、概念化、语义编码，重新进入知识系统。这就是「再封装机制」。</p>
+      <p>再封装机制具有以下特点：</p>
+      <p>更新单元可沿用旧名称（如理论修订）或生成新概念（如新范式）；<br>
+      原路径与新路径可并存于系统中（典型于科学中的「经典理论」与「现代理论」）；<br>
+      系统会动态分配优先级，以确定调用权重（如「主要解释框架」与「辅助模型」）。</p>
+      <p>再封装机制保障了知识系统的连续性与演化性，使其既能响应结构变化，又能维持系统运行不被频繁中断。</p>
+      <h4>4.4. ESC视角下的「知识进化」</h4>
+      <p>ESC将整个知识更新过程理解为：</p>
+      <p><strong>结构调用→反馈生成→路径重构→知识再封装</strong></p>
+      <p>这一过程不是认知系统之外的修正机制，而是认知系统内部的组织逻辑。知识之所以不断更新，并非世界在变化，而是结构适配条件在演化。</p>
+      <p>从这一角度出发，我们可以得出如下结论：</p>
+      <p>知识不是静态事实，而是动态路径集合；<br>
+      「错误知识」不是因逻辑失效，而是因结构路径不再稳定；<br>
+      「新知识」不是发现结果，而是结构系统重新适配的表现；<br>
+      「知识进化」不是思想演进，而是系统结构压缩策略的动态调整过程。</p>
+      <h4>4.5. 链接下一节：知识如何反向影响结构生成？</h4>
+      <p>本节建立了知识系统的反馈更新机制，指出知识并非一套静态事实集合，而是认知系统不断进行结构调度的接口层。然而，当知识系统不只是被动适配结构变化，而开始反向影响结构选择、路径生成与系统组织方式时，认知系统便不再是简单的反应机制，而成为一种「自组织系统」。这也将进入本章最后一节的核心命题：</p>
+      <p>知识不是结构的终点，而是新结构生成的起点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第5节 命题页（自组织起点） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 演化起点</div><div>10 / 12</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 知识如何成为结构演化的起点</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">知识是「结构完成」的表现，</span>
+      <span data-anim="line" style="display:block">更是「结构开始」的工具。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>知识系统既是结构系统的反馈节点，又是结构演化的发生起点——如同「中继站」与「发电机」，同时承担反馈与生成的双重职责。</p>
+  </div>
+  <div class="foot"><div>Page 10 · 演化起点</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 认知系统何以自组织？知识如何成为结构演化的起点？</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 认知系统何以自组织？知识如何成为结构演化的起点？</h4>
+      <p>到目前为止，我们已经完成了对知识系统的结构性定义与动态机制解析：知识不再被视作事实的陈列，而被理解为结构路径的封装与调用装置；知识系统也不再是静态记忆库，而是嵌套在认知系统中的反馈结构，能够感知结构失效、重组路径、再行封装。</p>
+      <p>然而，知识系统的作用不仅仅止步于「反应结构」，它更进一步，成为新结构生成的发源地。这意味着：</p>
+      <p><strong>知识不是认知的终点，而是认知结构自组织过程中的起点机制。</strong></p>
+      <p>从这一视角展开，我们便进入了ESC理论的又一个核心命题：「认知的自组织机制」。本节将为这一主题搭建过渡逻辑，并完成如下三项理论工作：</p>
+      <p>1.明确知识如何内嵌于结构演化过程；<br>
+      2.阐明认知系统为何具备「自组织」的能力；<br>
+      3.链接第8章：认知系统如何从知识中涌现出新结构。</p>
+      <h4>5.1. 知识不是稳定结果，而是演化起点</h4>
+      <p>知识通常被理解为结构过程的「结果」—— 结构稳定了，于是被封装成知识。然而，ESC指出，在结构趋稳之后，知识并不是被动放置，而是被调用、嵌套、链接、重组，成为下一轮结构演化的输入资源。</p>
+      <p>也就是说：</p>
+      <p><strong>知识是「结构完成」的表现；</strong></p>
+      <p><strong>更是「结构开始」的工具。</strong></p>
+      <p>它以「路径封装」的形式，为系统提供了可复用的构造单元。在新的输入、新的任务或新的系统目标面前，知识并不是「去找」的，而是「被调用去建」的。它是认知演化中「系统自构」的原材料。</p>
+      <h4>5.2. 知识如何驱动结构自组织？</h4>
+      <p>认知系统之所以具备自组织能力，根本在于：它不只是被动适应输入，更会以既有知识为原型，主动重建结构路径以适配新局面。这个过程包括：</p>
+      <p>类比迁移：将已有知识路径转移到新问题域中尝试结构适配；<br>
+      重构组合：将多个知识单元重新组合，尝试生成更高阶结构；<br>
+      元认知调度：系统内部对调用模式、反馈优先级、连接方式等的主动调整。</p>
+      <p>上述三种机制构成了「结构重建」的起点，而这个起点，不是外部输入，不是随机突变，而正是知识系统的有序调动结果。这便是认知的「自组织性」：它不等待世界改变它，而是通过已有结构反复重组，创造自身结构更新的可能性。</p>
+      <h4>5.3. 知识系统的双重角色：回路节点与发生起点</h4>
+      <p>ESC在此明确提出一个关键定位：</p>
+      <p><strong>知识系统既是结构系统的反馈节点，又是结构演化的发生起点。</strong></p>
+      <p>这意味着知识在认知系统中的角色并不是「存储已知」，而是：</p>
+      <p>在系统向后看时，充当已知结构的反馈验证机制；<br>
+      在系统向前走时，成为新结构构建的初始资源池。</p>
+      <p>其地位如同结构系统的「中继站」与「发电机」—— 同时承担反馈与生成的双重职责。</p>
+      <p>知识是系统反应机制与生成机制的交汇点。</p>
+      <h4>5.4. 知识的组织性如何带来系统涌现？</h4>
+      <p>认知系统之所以能够生成新结构，关键在于知识系统内部的组织方式。这种组织不是简单的知识分类或信息排布，而是：</p>
+      <p><strong>（1）结构路径的压缩模式（使知识具有调用性）；</strong></p>
+      <p><strong>（2）概念之间的连接方式（使知识具有组合性）；</strong></p>
+      <p><strong>（3）结构反馈的迭代机制（使知识具有演化性）。</strong></p>
+      <p>当这些机制相互叠加时，系统便能够基于已有知识生成新的路径逻辑、新的行为算法、新的理解方式，最终使结构系统进入「自我构建、自我优化、自我重组」的动态状态。这就是「<strong>认知的自组织性</strong>」。</p>
+      <h4>5.5. 链接第8章：从知识到结构系统的自组织机制</h4>
+      <p>本章至此已完成如下核心转化路径：</p>
+      <p>知识不是事实——而是结构路径的封装体；<br>
+      知识不是描述——而是结构调用机制；<br>
+      知识不是静态对象——而是结构反馈与演化的组织单位；<br>
+      知识不是终点——而是认知系统自组织过程的起点。</p>
+      <p>下一章将全面展开这一结构机制，进入ESC理论的核心进化模型之一：认知的自组织机制。</p>
+      <p>（1）结构系统如何基于自身结构生成新结构？</p>
+      <p>（2）反馈、路径、嵌套、重构如何共同构成「认知的自演化条件」？</p>
+      <p>（3）知识系统如何成为整个系统「内生成秩序」的催化因子？</p>
+      <p>下一章将展开自组织系统的五级演化逻辑，并建立ESC关于「认知演化」的完整结构框架。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第5节卡（命题表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · Starting Point</div><div>11 / 12</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>本章核心转化路径 · 5.1-5.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>知识的四重命题转换</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:36%">命题</th><th>意义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">知识不是事实</td><td>而是结构路径的封装体</td></tr>
+        <tr><td class="em-cell">知识不是描述</td><td>而是结构调用机制</td></tr>
+        <tr><td class="em-cell">知识不是静态对象</td><td>而是结构反馈与演化的组织单位</td></tr>
+        <tr><td class="em-cell">知识不是终点</td><td>而是认知系统自组织过程的起点</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:70vw" data-anim>
+      <span class="q-big">组织性的三重来源：结构路径的压缩模式（调用性）× 概念之间的连接方式（组合性）× 结构反馈的迭代机制（演化性）——叠加后使系统进入自我构建、自我优化、自我重组的动态状态。</span>
+      <span class="cite">5.4 · 认知的自组织性</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 11 · Starting Point</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1. 知识不是稳定结果，而是演化起点</h4>
+      <p>知识通常被理解为结构过程的「结果」—— 结构稳定了，于是被封装成知识。然而，ESC指出，在结构趋稳之后，知识并不是被动放置，而是被调用、嵌套、链接、重组，成为下一轮结构演化的输入资源。</p>
+      <p>也就是说：</p>
+      <p><strong>知识是「结构完成」的表现；</strong></p>
+      <p><strong>更是「结构开始」的工具。</strong></p>
+      <p>它以「路径封装」的形式，为系统提供了可复用的构造单元。在新的输入、新的任务或新的系统目标面前，知识并不是「去找」的，而是「被调用去建」的。它是认知演化中「系统自构」的原材料。</p>
+      <h4>5.2. 知识如何驱动结构自组织？</h4>
+      <p>认知系统之所以具备自组织能力，根本在于：它不只是被动适应输入，更会以既有知识为原型，主动重建结构路径以适配新局面。这个过程包括：</p>
+      <p>类比迁移：将已有知识路径转移到新问题域中尝试结构适配；<br>
+      重构组合：将多个知识单元重新组合，尝试生成更高阶结构；<br>
+      元认知调度：系统内部对调用模式、反馈优先级、连接方式等的主动调整。</p>
+      <p>上述三种机制构成了「结构重建」的起点，而这个起点，不是外部输入，不是随机突变，而正是知识系统的有序调动结果。这便是认知的「自组织性」：它不等待世界改变它，而是通过已有结构反复重组，创造自身结构更新的可能性。</p>
+      <h4>5.3. 知识系统的双重角色：回路节点与发生起点</h4>
+      <p>ESC在此明确提出一个关键定位：</p>
+      <p><strong>知识系统既是结构系统的反馈节点，又是结构演化的发生起点。</strong></p>
+      <p>这意味着知识在认知系统中的角色并不是「存储已知」，而是：</p>
+      <p>在系统向后看时，充当已知结构的反馈验证机制；<br>
+      在系统向前走时，成为新结构构建的初始资源池。</p>
+      <p>其地位如同结构系统的「中继站」与「发电机」—— 同时承担反馈与生成的双重职责。</p>
+      <p>知识是系统反应机制与生成机制的交汇点。</p>
+      <h4>5.4. 知识的组织性如何带来系统涌现？</h4>
+      <p>认知系统之所以能够生成新结构，关键在于知识系统内部的组织方式。这种组织不是简单的知识分类或信息排布，而是：</p>
+      <p><strong>（1）结构路径的压缩模式（使知识具有调用性）；</strong></p>
+      <p><strong>（2）概念之间的连接方式（使知识具有组合性）；</strong></p>
+      <p><strong>（3）结构反馈的迭代机制（使知识具有演化性）。</strong></p>
+      <p>当这些机制相互叠加时，系统便能够基于已有知识生成新的路径逻辑、新的行为算法、新的理解方式，最终使结构系统进入「自我构建、自我优化、自我重组」的动态状态。这就是「<strong>认知的自组织性</strong>」。</p>
+      <h4>5.5. 链接第8章：从知识到结构系统的自组织机制</h4>
+      <p>本章至此已完成如下核心转化路径：</p>
+      <p>知识不是事实——而是结构路径的封装体；<br>
+      知识不是描述——而是结构调用机制；<br>
+      知识不是静态对象——而是结构反馈与演化的组织单位；<br>
+      知识不是终点——而是认知系统自组织过程的起点。</p>
+      <p>下一章将全面展开这一结构机制，进入ESC理论的核心进化模型之一：认知的自组织机制。</p>
+      <p>（1）结构系统如何基于自身结构生成新结构？</p>
+      <p>（2）反馈、路径、嵌套、重构如何共同构成「认知的自演化条件」？</p>
+      <p>（3）知识系统如何成为整个系统「内生成秩序」的催化因子？</p>
+      <p>下一章将展开自组织系统的五级演化逻辑，并建立ESC关于「认知演化」的完整结构框架。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>12 / 12</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:5vw" data-anim>知识不是事实的镜像，<br>而是结构的使用说明书。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：知识 = 结构路径 × 命名 × 再调用；结构封装—语义编码五环节；结构—知识二级模型；三层反馈系统；知识作为自组织的起点。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>下一章将全面展开：认知的自组织机制——反馈 × 嵌套 × 再组合如何使系统生成新结构。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-09/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 6 章 · 自然法则不是被发现的，而是被结构演化出来的</div></a>
+    <a href="../deck-codex-11/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 8 章 · 认知的自组织机制</div></a>
+  </div>
+  <div class="foot"><div>第 8 章 · 认知的自组织机制</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-09/index.html', chapterNext = '../deck-codex-11/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

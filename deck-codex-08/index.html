@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第5章 从结构到原理：IP 的生成机制</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:9vw;line-height:1.06;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5.6vw;line-height:1.12;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.16vw);line-height:1.72;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.8vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.18vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.5vw);line-height:1.42}
+
+  .pipeline{display:grid;gap:1.4vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="5"]{grid-template-columns:repeat(5,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.42vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.92vw);line-height:1.5;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1vw);line-height:1.6}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.84vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.4vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.4vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.05vw,19px);line-height:1.92;margin:0 0 1.35em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+  .src-panel .src-body .tr-note{font-family:var(--mono);font-size:clamp(11px,.85vw,14px);letter-spacing:.06em;opacity:.6;line-height:1.6}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 5 章</div><div>Chapter V</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>From Structure to Principle</div>
+    <h1 class="h-hero" data-anim>从结构到原理</h1>
+    <h2 class="h-sub" data-anim>IP 的生成机制</h2>
+    <p class="lead" style="max-width:62vw" data-anim>原理不是被设定的规则，而是系统自我演化中「长出来」的秩序结构——调用 × 嵌套 × 反馈。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.13</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 5 章</div><div>01 / 16</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第5章（来源：结构认知实验室 · 2026年3月13日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章六节：第1节 从结构到原理——何谓「内在原理」IP；第2节 结构趋稳的三种机制——调用、嵌套、反馈；第3节 原理是如何在系统中「长出来」的；第4节 结构演化的转折点——从路径到规则的跃迁；第5节 原理不是普遍命题，而是局部稳定结构；第6节 何以为法则——从原理到自然法则（N）。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 何谓 IP</div><div>02 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · Intrinsic Principles</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">结构在系统内部通过时间递归演化之后生成的、</span>
+      <span data-anim="line" style="display:block">高度稳定、可反复调用的路径性秩序。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>IP 不源自世界本身，而是系统自身对世界的组织方式中长期稳定下来的产物。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 何谓 IP</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 从结构到原理：何谓「内在原理」IP?</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 从结构到原理：何谓「内在原理」IP?</h4>
+      <p>我们在前章中已明确指出：理解不是复制世界的过程，而是结构在认知系统中不断生成、嵌套、反馈与沉淀的结果。而知识，则是结构在系统中被验证并稳定调用之后的表达形式。</p>
+      <p>然而，并非所有结构都能长期稳定地生存在认知系统中。真正能穿越个体差异、语境边界、时间演化并在系统中保持高稳定度的结构，才有可能进入一个更深层次的认知地位。这类结构，正是ESC理论中提出的核心术语之一：内在原理（IP, Intrinsic Principles）。</p>
+      <h4>1.1. 什么是「内在原理」？</h4>
+      <p>内在原理（IP）并不是指「世界本身的某种真理」，也不是某种脱离系统存在的本体性规律。相反，IP是指：</p>
+      <p><strong>结构在系统内部通过时间递归演化之后生成的、高度稳定、可反复调用的路径性秩序。</strong></p>
+      <p>它是结构的高级演化形式，是认知系统通过自身反馈与优化机制所「生长」出的稳定机制。IP并不源自世界本身，而是系统自身对世界的组织方式中长期稳定下来的产物。</p>
+      <h4>1.2. IP ≠ 结构，也 ≠ 自然法则</h4>
+      <p>为了避免误解，必须明确区分三个层次：</p>
+      <p>结构（Structure）：系统中生成与调用的单位——可变、反馈性强、情境适配；<br>
+      内在原理（IP）：系统内部演化出的稳定结构路径——稳定、高调用率、深嵌套；<br>
+      自然法则（N）：超越系统边界的极限普适结构——跨系统有效、不可替代、最小演化性。</p>
+      <p>结构是系统的生成单元，IP是系统的演化产物，而N则是跨系统结构演化的稳定极限。</p>
+      <p>从结构走向原理，再走向法则，是一条连续但有质变的演化链。</p>
+      <h4>1.3. 为什么IP是「内在」的？</h4>
+      <p>ESC称之为内在原理，是因为：</p>
+      <p>它不是外部赋予的；<br>
+      它不是「被发现」的；<br>
+      它不是「存在于事物中的必然性」。</p>
+      <p>它之所以存在，是因为系统内部在结构调用中不断递归、在反馈中不断优化、在时间中不断筛选，最终沉淀出可重复调用的稳定模式。这一模式不依赖于外部输入，而依赖于结构演化的历史轨迹，因此是系统「内在生成」的。</p>
+      <p><strong>原理的内在性，不是来源于主观或客观，而来源于结构系统自身的演化轨迹。</strong></p>
+      <h4>1.4. IP的哲学定位：秩序是生成的，不是发现的</h4>
+      <p>传统哲学与科学往往将「原理」视作自然本身的属性，是人类通过理性或经验「发现」的客观真理。这种观点假设世界中原本就存在某种秩序，人类的任务只是将其揭示。</p>
+      <p>ESC对此提出根本转向：</p>
+      <p><strong>我们不是发现原理，而是制造原理。</strong></p>
+      <p>我们所谓的「原理」，是系统对输入信息组织后，反复生成、反馈筛选、稳定调用之后所形成的结构路径。原理不是存在于事物中，而是存在于我们对事物组织的方式之中。</p>
+      <p>它不是宇宙的特征，而是我们认知系统对复杂性最优回应路径的结果。</p>
+      <h4>1.5. 为什么需要「IP」这个中间概念？</h4>
+      <p>如果从结构直接跳到法则（N），就会跳过系统如何判断某结构是否「足够稳定」的演化机制。</p>
+      <p>IP作为中间桥梁概念，解决了三个核心逻辑问题：</p>
+      <p>1.演化机制的问题：结构是如何通过反馈、嵌套、调用而变得「稳定」的？<br>
+      2.判断标准的问题：一个结构何时可以不再被频繁调整，视为「原理」而非「试探性路径」？<br>
+      3.系统内秩序的问题：系统如何在自身演化中构建出稳定的运行原则，而非依赖外部指令？</p>
+      <p>因此，IP不是过渡术语，而是认知结构演化逻辑的必要结构级别。</p>
+      <h4>1.6. IP 的形式特征与初步判别标准</h4>
+      <p>本书将在后续章节详细探讨结构趋稳机制，但在此我们先为「原理」这一层级建立基础性识别框架：</p>
+      <p>重复适配性：能在不同情境中有效解决问题；<br>
+      反馈稳定性：长期调用后仍保持输出精度；<br>
+      结构嵌套性：被其他高阶结构调用为底层路径；<br>
+      语言标识性：被系统赋予明确术语、范畴、符号或逻辑结构；<br>
+      演化自足性：不再需要外部调节以维持有效性。</p>
+      <p>当一个结构符合多数以上条件，便可能成为系统中的「内在原理」。</p>
+      <h4>1.7. 链接下一节：结构如何趋稳？</h4>
+      <p>从这一节起，IP作为概念已被确立。下一节将进入最核心的技术论证部分：</p>
+      <p>结构如何趋稳？<br>
+      调用、嵌套与反馈分别起什么作用？<br>
+      稳定并非静止，而是动态中的最小扰动区？</p>
+      <p>我们将正式开启 ESC 理论中结构演化机制的核心模块：</p>
+      <p><strong>结构趋稳三因子模型：调用 × 嵌套 × 反馈</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡1（三层次） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Three Levels</div><div>03 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>结构 · IP · 法则的三个层次 · 1.2</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>IP ≠ 结构，也 ≠ 自然法则</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:26%">概念</th><th style="width:34%">位置</th><th>特征</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">结构 Structure</td><td>系统中生成与调用的单位</td><td>可变、反馈性强、情境适配</td></tr>
+        <tr><td class="em-cell">内在原理 IP</td><td>系统内部演化出的稳定结构路径</td><td>稳定、高调用率、深嵌套</td></tr>
+        <tr><td class="em-cell">自然法则 N</td><td>超越系统边界的极限普适结构</td><td>跨系统有效、不可替代、最小演化性</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:66vw" data-anim>
+      <span class="q-big">我们不是发现原理，而是制造原理——原理的内在性，来源于结构系统自身的演化轨迹。从结构走向原理，再走向法则，是一条连续但有质变的演化链。</span>
+      <span class="cite">1.3 / 1.4 · 秩序是生成的，不是发现的</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 03 · Three Levels</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1. 什么是「内在原理」？</h4>
+      <p>内在原理（IP）并不是指「世界本身的某种真理」，也不是某种脱离系统存在的本体性规律。相反，IP是指：</p>
+      <p><strong>结构在系统内部通过时间递归演化之后生成的、高度稳定、可反复调用的路径性秩序。</strong></p>
+      <p>它是结构的高级演化形式，是认知系统通过自身反馈与优化机制所「生长」出的稳定机制。IP并不源自世界本身，而是系统自身对世界的组织方式中长期稳定下来的产物。</p>
+      <h4>1.2. IP ≠ 结构，也 ≠ 自然法则</h4>
+      <p>为了避免误解，必须明确区分三个层次：</p>
+      <p>结构（Structure）：系统中生成与调用的单位——可变、反馈性强、情境适配；<br>
+      内在原理（IP）：系统内部演化出的稳定结构路径——稳定、高调用率、深嵌套；<br>
+      自然法则（N）：超越系统边界的极限普适结构——跨系统有效、不可替代、最小演化性。</p>
+      <p>结构是系统的生成单元，IP是系统的演化产物，而N则是跨系统结构演化的稳定极限。</p>
+      <p>从结构走向原理，再走向法则，是一条连续但有质变的演化链。</p>
+      <h4>1.3. 为什么IP是「内在」的？</h4>
+      <p>ESC称之为内在原理，是因为：</p>
+      <p>它不是外部赋予的；<br>
+      它不是「被发现」的；<br>
+      它不是「存在于事物中的必然性」。</p>
+      <p>它之所以存在，是因为系统内部在结构调用中不断递归、在反馈中不断优化、在时间中不断筛选，最终沉淀出可重复调用的稳定模式。这一模式不依赖于外部输入，而依赖于结构演化的历史轨迹，因此是系统「内在生成」的。</p>
+      <p><strong>原理的内在性，不是来源于主观或客观，而来源于结构系统自身的演化轨迹。</strong></p>
+      <h4>1.4. IP的哲学定位：秩序是生成的，不是发现的</h4>
+      <p>传统哲学与科学往往将「原理」视作自然本身的属性，是人类通过理性或经验「发现」的客观真理。这种观点假设世界中原本就存在某种秩序，人类的任务只是将其揭示。</p>
+      <p>ESC对此提出根本转向：</p>
+      <p><strong>我们不是发现原理，而是制造原理。</strong></p>
+      <p>我们所谓的「原理」，是系统对输入信息组织后，反复生成、反馈筛选、稳定调用之后所形成的结构路径。原理不是存在于事物中，而是存在于我们对事物组织的方式之中。</p>
+      <p>它不是宇宙的特征，而是我们认知系统对复杂性最优回应路径的结果。</p>
+      <h4>1.5. 为什么需要「IP」这个中间概念？</h4>
+      <p>如果从结构直接跳到法则（N），就会跳过系统如何判断某结构是否「足够稳定」的演化机制。</p>
+      <p>IP作为中间桥梁概念，解决了三个核心逻辑问题：</p>
+      <p>1.演化机制的问题：结构是如何通过反馈、嵌套、调用而变得「稳定」的？<br>
+      2.判断标准的问题：一个结构何时可以不再被频繁调整，视为「原理」而非「试探性路径」？<br>
+      3.系统内秩序的问题：系统如何在自身演化中构建出稳定的运行原则，而非依赖外部指令？</p>
+      <p>因此，IP不是过渡术语，而是认知结构演化逻辑的必要结构级别。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第1节卡2（五特征表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Criteria</div><div>04 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>IP 的形式特征与初步判别标准 · 1.6</div>
+    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:3.6vh" data-anim>五项识别框架</h2>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:26%">维度</th><th>表现</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">重复适配性</td><td>能在不同情境中有效解决问题</td></tr>
+        <tr><td class="em-cell">反馈稳定性</td><td>长期调用后仍保持输出精度</td></tr>
+        <tr><td class="em-cell">结构嵌套性</td><td>被其他高阶结构调用为底层路径</td></tr>
+        <tr><td class="em-cell">语言标识性</td><td>被系统赋予明确术语、范畴、符号或逻辑结构</td></tr>
+        <tr><td class="em-cell">演化自足性</td><td>不再需要外部调节以维持有效性</td></tr>
+      </tbody>
+    </table>
+    <p class="body-zh" style="max-width:64vw;margin-top:2.6vh" data-anim>当一个结构符合多数以上条件，便可能成为系统中的「内在原理」。</p>
+  </div>
+  <div class="foot"><div>Page 04 · Criteria</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.6 / 1.7</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.6. IP 的形式特征与初步判别标准</h4>
+      <p>本书将在后续章节详细探讨结构趋稳机制，但在此我们先为「原理」这一层级建立基础性识别框架：</p>
+      <p>重复适配性：能在不同情境中有效解决问题；<br>
+      反馈稳定性：长期调用后仍保持输出精度；<br>
+      结构嵌套性：被其他高阶结构调用为底层路径；<br>
+      语言标识性：被系统赋予明确术语、范畴、符号或逻辑结构；<br>
+      演化自足性：不再需要外部调节以维持有效性。</p>
+      <p>当一个结构符合多数以上条件，便可能成为系统中的「内在原理」。</p>
+      <h4>1.7. 链接下一节：结构如何趋稳？</h4>
+      <p>从这一节起，IP作为概念已被确立。下一节将进入最核心的技术论证部分：</p>
+      <p>结构如何趋稳？<br>
+      调用、嵌套与反馈分别起什么作用？<br>
+      稳定并非静止，而是动态中的最小扰动区？</p>
+      <p>我们将正式开启 ESC 理论中结构演化机制的核心模块：</p>
+      <p><strong>结构趋稳三因子模型：调用 × 嵌套 × 反馈</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节 命题页 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>第 2 节 · 趋稳三机制</div><div>05 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 结构趋稳三因子模型</div>
+    <h1 class="h-hero" style="font-size:6.4vw" data-anim>调用 × 嵌套 × 反馈</h1>
+    <p class="lead" style="max-width:66vw" data-anim>这三种机制并非线性发生，而是构成一个多轮次、互促型的演化路径系统——只有被反复验证、广泛调动、深度嵌套并持续产生正反馈的结构，才可能演化为 IP。</p>
+  </div>
+  <div class="foot"><div>Page 05 · 趋稳三机制</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 结构趋稳的三种机制：调用、嵌套、反馈</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 结构趋稳的三种机制：调用、嵌套、反馈</h4>
+      <p>在认知系统中，结构从生成到趋于稳定，绝非一次性完成的行为，而是一个高度动态、递归与选择性的演化过程。并不是所有结构都能被保留下来，只有那些在系统中被反复验证、广泛调动、深度嵌套并持续产生正反馈的结构，才可能演化为内在原理（IP）。</p>
+      <p>ESC理论提出：结构趋稳主要依赖三个关键机制：</p>
+      <p><strong>调用 × 嵌套 × 反馈</strong></p>
+      <p>这三种机制并非线性发生，而是构成一个多轮次、互促型的演化路径系统。本节将展开说明这三者在结构趋稳过程中的核心作用与交互方式。</p>
+      <h4>2.1 调用机制：结构如何在系统中被激活</h4>
+      <p>调用是结构趋稳的第一步。</p>
+      <p>一个结构之所以存在于认知系统中，首先必须被使用。如果某结构仅被孤立地生成，却不参与系统运行，它就无法积累稳定性，也无法形成原理。</p>
+      <p>2.1.1 调用的本质：适配性验证</p>
+      <p>调用的行为本质是系统在面对输入问题时，调取既有结构路径尝试解决任务。每一次调用都是对结构的一次「功能测试」与「场景验证」。</p>
+      <p>若结构表现出：</p>
+      <p>高适配性（有效处理输入）；<br>
+      高效率（路径简洁、处理快速）；<br>
+      高复用率（跨场景通用性强）；</p>
+      <p>那么该结构就可能在系统中积累「调用权重」，逐步建立其稳定地位。</p>
+      <p>2.1.2 多场景调用的意义</p>
+      <p>如果一个结构只能在特定条件下被调用，它仍是情境结构；而只有当它在多个系统场景中被调用而保持功能不变时，它才可能演化为跨场景的系统原理。</p>
+      <p>例如：</p>
+      <p>数学中的加法结构不仅适用于苹果和香蕉，也适用于概率、向量、集合；<br>
+      语言中的主谓宾结构适用于无数语言、场景和表达内容；<br>
+      身份结构（主体—他者）适用于伦理、法律、语言学、心理学等系统。</p>
+      <p><strong>调用频率高 × 调用情境广，是结构迈向趋稳的第一信号。</strong></p>
+      <h4>2.2 嵌套机制：结构如何被封装与组合</h4>
+      <p><strong>调用本身说明结构「能被用」，但要形成系统地位，还必须说明结构「能被封装」。</strong></p>
+      <p>2.2.1 嵌套的定义</p>
+      <p><strong>嵌套是指一个结构被封装为其他高阶结构的组成单元，也可以理解为结构的「被组合性」与「被再利用性」。</strong></p>
+      <p>一个结构之所以能演化为IP，必须：</p>
+      <p>被整合进更大的结构体系中；<br>
+      成为其他结构生成的必要条件；<br>
+      在嵌套中保留稳定的功能与输出模式。</p>
+      <p>2.2.2 嵌套机制的两个效应</p>
+      <p>(1)嵌套稳定性</p>
+      <p>越是被其他结构引用、内嵌、组合的结构，其存在就越不易被改动，因为改动它会影响整个结构系统的连锁关系。</p>
+      <p>(2)结构沉淀性</p>
+      <p>被长期嵌套的结构容易被系统「默认化」，即无需显式调用，便内在支撑着整个系统的逻辑。</p>
+      <p>一个结构一旦被深层嵌套，便获得系统中类似「底层协议」的地位—— 如语法规则、坐标系统、线性推理方式等，它们不被频繁显式提及，却默默维系着整个系统的秩序。</p>
+      <h4>2.3 反馈机制：结构如何获得演化信号</h4>
+      <p>如果调用是启动器，嵌套是结构加固器，那么反馈就是结构演化的「指挥中心」。</p>
+      <p>2.3.1 反馈的作用</p>
+      <p>每一次结构调用之后，系统都会收到反馈：</p>
+      <p>输出是否符合预期？<br>
+      是否产生了副作用或误导？<br>
+      是否需要补充或调整结构条件？</p>
+      <p>结构通过这些反馈信息不断调整自身的连接方式、触发条件、边界定义，从而实现演化。</p>
+      <p>2.3.2 正反馈的积累与结构趋稳</p>
+      <p>结构并不是因为「被使用次数多」就自动变得稳定，关键是：</p>
+      <p><strong>它在长期调用中获得的反馈是否趋于正向收敛。</strong></p>
+      <p>当系统发现结构输出长期稳定、误差极小、可适配范围持续扩大，而无需额外干预时，结构的反馈路径就不再启动修正机制，转而被系统默认为「有效路径」。</p>
+      <p>这时，结构的更新频率将趋于零，演化速度将趋于静止，这就是结构趋稳的状态。</p>
+      <h4>2.4. 三机制如何互促形成结构演化闭环</h4>
+      <p>三者并非并列发生，而是构成一个递归结构演化闭环：</p>
+      <p>1.调用使结构参与系统运行；<br>
+      2.嵌套提升结构的系统级地位；<br>
+      3.反馈决定结构的修正方向与演化深度；<br>
+      4.在调用—嵌套—反馈的循环中，结构走向稳定或被淘汰。</p>
+      <p>这一过程不是一次性的，而是结构系统长期运作中的内在逻辑，它将结构引导至一种稳定状态，并为系统生成「原理」打下基础。</p>
+      <h4>2.5. 链接下一节：原理是如何「长出来」的？</h4>
+      <p>本节确立了结构趋稳的三种机制与交互模型。下一节将正式进入ESC理论的生成性命题：<strong>原理不是被设定的规则，而是系统自我演化中「长出来」的秩序结构。</strong></p>
+      <p>我们将展开如下问题：</p>
+      <p>结构趋稳后如何进入「原理地位」？<br>
+      系统如何在无外部指导的情况下生成自我秩序？<br>
+      涌现性与系统自组织在IP生成中扮演了什么角色？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第2节卡1（调用+嵌套） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Invoke / Nest</div><div>06 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>启动器与加固器 · 2.1 / 2.2</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>调用是第一步，封装是第二步</h2>
+    <div class="grid-2">
+      <div data-anim style="padding:2.2vh 1.7vw;border-left:3px solid currentColor">
+        <div class="kicker">调用 · 适配性验证</div>
+        <p class="body-zh" style="margin-top:1.2vh">高适配性（有效处理）× 高效率（路径简洁）× 高复用率（跨场景通用）——调用频率高 × 调用情境广，是结构迈向趋稳的第一信号。例：加法结构适用于苹果、概率、向量、集合。</p>
+      </div>
+      <div data-anim style="padding:2.2vh 1.7vw;border-left:3px solid currentColor">
+        <div class="kicker">嵌套 · 封装与组合</div>
+        <p class="body-zh" style="margin-top:1.2vh">两效应：嵌套稳定性（被引用越深越不易改动）+ 结构沉淀性（被「默认化」，无需显式调用）。深层嵌套的结构获得「底层协议」地位——如语法规则、坐标系、线性推理。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:64vw;margin-top:4vh" data-anim>
+      <span class="q-big">调用本身说明结构「能被用」，但要形成系统地位，还必须说明结构「能被封装」。</span>
+      <span class="cite">2.2 · 嵌套是被组合性与被再利用性</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 06 · Invoke / Nest</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1 / 2.2</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1 调用机制：结构如何在系统中被激活</h4>
+      <p>调用是结构趋稳的第一步。</p>
+      <p>一个结构之所以存在于认知系统中，首先必须被使用。如果某结构仅被孤立地生成，却不参与系统运行，它就无法积累稳定性，也无法形成原理。</p>
+      <p>2.1.1 调用的本质：适配性验证</p>
+      <p>调用的行为本质是系统在面对输入问题时，调取既有结构路径尝试解决任务。每一次调用都是对结构的一次「功能测试」与「场景验证」。</p>
+      <p>若结构表现出：</p>
+      <p>高适配性（有效处理输入）；<br>
+      高效率（路径简洁、处理快速）；<br>
+      高复用率（跨场景通用性强）；</p>
+      <p>那么该结构就可能在系统中积累「调用权重」，逐步建立其稳定地位。</p>
+      <p>2.1.2 多场景调用的意义</p>
+      <p>如果一个结构只能在特定条件下被调用，它仍是情境结构；而只有当它在多个系统场景中被调用而保持功能不变时，它才可能演化为跨场景的系统原理。</p>
+      <p>例如：</p>
+      <p>数学中的加法结构不仅适用于苹果和香蕉，也适用于概率、向量、集合；<br>
+      语言中的主谓宾结构适用于无数语言、场景和表达内容；<br>
+      身份结构（主体—他者）适用于伦理、法律、语言学、心理学等系统。</p>
+      <p><strong>调用频率高 × 调用情境广，是结构迈向趋稳的第一信号。</strong></p>
+      <h4>2.2 嵌套机制：结构如何被封装与组合</h4>
+      <p><strong>调用本身说明结构「能被用」，但要形成系统地位，还必须说明结构「能被封装」。</strong></p>
+      <p>2.2.1 嵌套的定义</p>
+      <p><strong>嵌套是指一个结构被封装为其他高阶结构的组成单元，也可以理解为结构的「被组合性」与「被再利用性」。</strong></p>
+      <p>一个结构之所以能演化为IP，必须：</p>
+      <p>被整合进更大的结构体系中；<br>
+      成为其他结构生成的必要条件；<br>
+      在嵌套中保留稳定的功能与输出模式。</p>
+      <p>2.2.2 嵌套机制的两个效应</p>
+      <p>(1)嵌套稳定性</p>
+      <p>越是被其他结构引用、内嵌、组合的结构，其存在就越不易被改动，因为改动它会影响整个结构系统的连锁关系。</p>
+      <p>(2)结构沉淀性</p>
+      <p>被长期嵌套的结构容易被系统「默认化」，即无需显式调用，便内在支撑着整个系统的逻辑。</p>
+      <p>一个结构一旦被深层嵌套，便获得系统中类似「底层协议」的地位—— 如语法规则、坐标系统、线性推理方式等，它们不被频繁显式提及，却默默维系着整个系统的秩序。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第2节卡2（反馈+闭环） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Feedback Loop</div><div>07 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>结构演化的指挥中心 · 2.3 / 2.4</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>稳定 = 反馈的正向收敛</h2>
+    <div class="grid-3">
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">01</div>
+        <h3 class="h-md">调用</h3>
+        <p class="body-zh" style="margin-top:1.4vh">使结构参与系统运行。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">02</div>
+        <h3 class="h-md">嵌套</h3>
+        <p class="body-zh" style="margin-top:1.4vh">提升结构的系统级地位。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">03</div>
+        <h3 class="h-md">反馈</h3>
+        <p class="body-zh" style="margin-top:1.4vh">决定结构的修正方向与演化深度。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:68vw;margin-top:4vh" data-anim>
+      <span class="q-big">当系统发现结构输出长期稳定、误差极小、可适配范围持续扩大，而无需额外干预时，结构的反馈路径就不再启动修正机制。这时，更新频率趋于零，演化速度趋于静止——这就是结构趋稳的状态。</span>
+      <span class="cite">2.3.2 / 2.4 · 递归结构演化闭环</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 07 · Feedback Loop</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.3 / 2.4 / 2.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.3 反馈机制：结构如何获得演化信号</h4>
+      <p>如果调用是启动器，嵌套是结构加固器，那么反馈就是结构演化的「指挥中心」。</p>
+      <p>2.3.1 反馈的作用</p>
+      <p>每一次结构调用之后，系统都会收到反馈：</p>
+      <p>输出是否符合预期？<br>
+      是否产生了副作用或误导？<br>
+      是否需要补充或调整结构条件？</p>
+      <p>结构通过这些反馈信息不断调整自身的连接方式、触发条件、边界定义，从而实现演化。</p>
+      <p>2.3.2 正反馈的积累与结构趋稳</p>
+      <p>结构并不是因为「被使用次数多」就自动变得稳定，关键是：</p>
+      <p><strong>它在长期调用中获得的反馈是否趋于正向收敛。</strong></p>
+      <p>当系统发现结构输出长期稳定、误差极小、可适配范围持续扩大，而无需额外干预时，结构的反馈路径就不再启动修正机制，转而被系统默认为「有效路径」。</p>
+      <p>这时，结构的更新频率将趋于零，演化速度将趋于静止，这就是结构趋稳的状态。</p>
+      <h4>2.4. 三机制如何互促形成结构演化闭环</h4>
+      <p>三者并非并列发生，而是构成一个递归结构演化闭环：</p>
+      <p>1.调用使结构参与系统运行；<br>
+      2.嵌套提升结构的系统级地位；<br>
+      3.反馈决定结构的修正方向与演化深度；<br>
+      4.在调用—嵌套—反馈的循环中，结构走向稳定或被淘汰。</p>
+      <p>这一过程不是一次性的，而是结构系统长期运作中的内在逻辑，它将结构引导至一种稳定状态，并为系统生成「原理」打下基础。</p>
+      <h4>2.5. 链接下一节：原理是如何「长出来」的？</h4>
+      <p>本节确立了结构趋稳的三种机制与交互模型。下一节将正式进入ESC理论的生成性命题：<strong>原理不是被设定的规则，而是系统自我演化中「长出来」的秩序结构。</strong></p>
+      <p>我们将展开如下问题：</p>
+      <p>结构趋稳后如何进入「原理地位」？<br>
+      系统如何在无外部指导的情况下生成自我秩序？<br>
+      涌现性与系统自组织在IP生成中扮演了什么角色？</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第3节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 3 节 · 长出来的秩序</div><div>08 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 原理是如何在系统中「长出来」的</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">内在原理（IP）不是被定义的，</span>
+      <span data-anim="line" style="display:block">而是被系统「长出来」的。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>不是写在纸上的，而是跑在系统里的——原理的本质，不是命题性，而是路径性。</p>
+  </div>
+  <div class="foot"><div>Page 08 · 长出来的秩序</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 原理是如何在系统中「长出来」的？</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 原理是如何在系统中「长出来」的？</h4>
+      <p>原理不是一个「被赋予」的命题，不是由某个主体预先设定、静态书写在系统边缘的控制逻辑。它也不是「从外部注入」的世界真理，不是由某个更高阶智能直接刻录给系统的规则。</p>
+      <p>ESC提出根本性判断：</p>
+      <p><strong>内在原理（IP）不是被定义的，而是被系统「长出来」的。</strong></p>
+      <p>它不是由意识或技术设计的，而是在结构递归演化中，系统自身在不知不觉中生成的秩序性模式。这一生成过程不是一次性突变，而是长期演化、反馈聚合、路径稳定后的自然产物。</p>
+      <p>本节将深入剖析这个生成过程的三个关键环节：</p>
+      <p>1.涌现性机制：结构如何演化出超越其单元功能的系统性秩序；<br>
+      2.自组织演化：系统如何在无中央控制下生成稳定结构；<br>
+      3.演化条件建模：原理生成的三项边界条件。</p>
+      <h4>3.1. 原理不是逻辑推导的结果，而是结构演化的产物</h4>
+      <p>逻辑可以推导一个命题的结果，却无法推导出一个系统应当如何组织自己。</p>
+      <p>原理不是「用逻辑就能证明的真理」，而是：</p>
+      <p>系统结构在运行过程中积累出的稳定反馈；<br>
+      在持续演化中自动抵达的低能耗高适配路径；<br>
+      长期使用后不再需要调整、逐步「沉淀」成系统秩序。</p>
+      <p>原理的本质，不是命题性，而是路径性：</p>
+      <p><strong>不是写在纸上的，而是跑在系统里的。</strong></p>
+      <h4>3.2. 涌现性：原理的生成不是加法，而是非线性跃迁</h4>
+      <p>涌现（Emergence）是系统理论中的基本现象，指的是：</p>
+      <p><strong>系统在局部结构互动过程中，涌现出一个超越其单元层级的全局性秩序模式。</strong></p>
+      <p>换言之，系统不是通过累加局部单元的功能来「堆出」原理，而是在局部单元之间：</p>
+      <p>重复调用；多层嵌套；多轮反馈；</p>
+      <p>的交互中，突然出现一种无法还原为任何单一结构的高阶秩序。</p>
+      <p>原理之所以不能被「发明」，是因为它并非线性加工的结果，而是非线性交互的副产品。</p>
+      <h4>3.3. 自组织：系统无需外部主导也能生成原理</h4>
+      <p>ESC对原理的哲学定位强调其系统内生性。</p>
+      <p>这意味着：</p>
+      <p>没有一个中央智能说「现在生成这个原理吧」；<br>
+      没有预先设定的目标函数决定哪条路径会成为原理；<br>
+      也没有某种「超越性观察者」来设计系统秩序。</p>
+      <p>原理之所以会生成，是因为：</p>
+      <p><strong>系统在持续使用结构的过程中，逐步「排除高成本路径」，选择「反馈最优路径」，最终形成低熵稳态模式。</strong></p>
+      <p><strong>这个过程就是自组织（self-organization）—— 系统依靠自身的结构行为规律，在无需外部控制的前提下，形成自身秩序。</strong></p>
+      <h4>3.4. 原理不是「选择」的，而是「剩下的」</h4>
+      <p>原理的诞生，并不体现系统的「选择力」，而体现系统的「演化后剩余结构」。</p>
+      <p>我们看到的原理，是：</p>
+      <p>被使用最多；被反馈最少质疑；被嵌套最深；被误用代价最高；</p>
+      <p>的一组路径。它们不是被挑中的，而是经过长期反馈筛选、复杂结构淘汰、非稳定路径自动消解之后，被动保留下来的。</p>
+      <p>从这个意义上说：</p>
+      <p><strong>原理不是系统表达的目标，而是结构演化的最低扰动极限。</strong></p>
+      <h4>3.5. 原理的生成条件：三项核心边界</h4>
+      <p>原理的生成不是无条件发生，它取决于系统是否进入如下三种状态：</p>
+      <p>边际反馈趋零：调用该结构的结果极少产生负反馈——系统无需再调整；<br>
+      结构路径稳定：结构在系统中的连接与调用方式长期保持不变——可作为嵌套基元；<br>
+      适配域扩展：原结构适用于更多输入情境——显示出结构的普遍化能力。</p>
+      <p>当以上三项条件同时满足，该结构就会从「调用路径」演化为「稳定机制」，系统会自动以它为默认规则。</p>
+      <h4>3.6. 链接下一节：结构演化的转折点</h4>
+      <p>本节解释了：原理不是由个体创造，而是系统自演化中「长出」的。但接下来的核心问题是：</p>
+      <p>哪一刻，结构变成了原理？这既是哲学判断问题，也是系统识别问题。</p>
+      <p>下一节将讨论：</p>
+      <p>结构演化过程中的「转折点」；判断某结构是否「正在成为原理」的方法；原理在系统中具有哪些「不可回退」的指标。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第3节卡（涌现+三条件） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Emergence</div><div>09 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>涌现 · 自组织 · 三项核心边界 · 3.2 / 3.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>原理不是「选择」的，而是「剩下的」</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:26%">条件</th><th style="width:40%">描述</th><th>意义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">边际反馈趋零</td><td>调用该结构的结果极少产生负反馈</td><td>系统无需再调整</td></tr>
+        <tr><td class="em-cell">结构路径稳定</td><td>连接与调用方式长期保持不变</td><td>可作为嵌套基元</td></tr>
+        <tr><td class="em-cell">适配域扩展</td><td>原结构适用于更多输入情境</td><td>显示出结构的普遍化能力</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:68vw" data-anim>
+      <span class="q-big">涌现（Emergence）：系统在重复调用 × 多层嵌套 × 多轮反馈的交互中，突然出现无法还原为任何单一结构的高阶秩序。原理不是线性加工的结果，而是非线性交互的副产品。</span>
+      <span class="cite">3.2 / 3.3 · 自组织 = 排除高成本路径，形成低熵稳态</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 09 · Emergence</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1. 原理不是逻辑推导的结果，而是结构演化的产物</h4>
+      <p>逻辑可以推导一个命题的结果，却无法推导出一个系统应当如何组织自己。</p>
+      <p>原理不是「用逻辑就能证明的真理」，而是：</p>
+      <p>系统结构在运行过程中积累出的稳定反馈；<br>
+      在持续演化中自动抵达的低能耗高适配路径；<br>
+      长期使用后不再需要调整、逐步「沉淀」成系统秩序。</p>
+      <p>原理的本质，不是命题性，而是路径性：</p>
+      <p><strong>不是写在纸上的，而是跑在系统里的。</strong></p>
+      <h4>3.2. 涌现性：原理的生成不是加法，而是非线性跃迁</h4>
+      <p>涌现（Emergence）是系统理论中的基本现象，指的是：</p>
+      <p><strong>系统在局部结构互动过程中，涌现出一个超越其单元层级的全局性秩序模式。</strong></p>
+      <p>换言之，系统不是通过累加局部单元的功能来「堆出」原理，而是在局部单元之间：</p>
+      <p>重复调用；多层嵌套；多轮反馈；</p>
+      <p>的交互中，突然出现一种无法还原为任何单一结构的高阶秩序。</p>
+      <p>原理之所以不能被「发明」，是因为它并非线性加工的结果，而是非线性交互的副产品。</p>
+      <h4>3.3. 自组织：系统无需外部主导也能生成原理</h4>
+      <p>ESC对原理的哲学定位强调其系统内生性。</p>
+      <p>这意味着：</p>
+      <p>没有一个中央智能说「现在生成这个原理吧」；<br>
+      没有预先设定的目标函数决定哪条路径会成为原理；<br>
+      也没有某种「超越性观察者」来设计系统秩序。</p>
+      <p>原理之所以会生成，是因为：</p>
+      <p><strong>系统在持续使用结构的过程中，逐步「排除高成本路径」，选择「反馈最优路径」，最终形成低熵稳态模式。</strong></p>
+      <p><strong>这个过程就是自组织（self-organization）—— 系统依靠自身的结构行为规律，在无需外部控制的前提下，形成自身秩序。</strong></p>
+      <h4>3.4. 原理不是「选择」的，而是「剩下的」</h4>
+      <p>原理的诞生，并不体现系统的「选择力」，而体现系统的「演化后剩余结构」。</p>
+      <p>我们看到的原理，是：</p>
+      <p>被使用最多；被反馈最少质疑；被嵌套最深；被误用代价最高；</p>
+      <p>的一组路径。它们不是被挑中的，而是经过长期反馈筛选、复杂结构淘汰、非稳定路径自动消解之后，被动保留下来的。</p>
+      <p>从这个意义上说：</p>
+      <p><strong>原理不是系统表达的目标，而是结构演化的最低扰动极限。</strong></p>
+      <h4>3.5. 原理的生成条件：三项核心边界</h4>
+      <p>原理的生成不是无条件发生，它取决于系统是否进入如下三种状态：</p>
+      <p>边际反馈趋零：调用该结构的结果极少产生负反馈——系统无需再调整；<br>
+      结构路径稳定：结构在系统中的连接与调用方式长期保持不变——可作为嵌套基元；<br>
+      适配域扩展：原结构适用于更多输入情境——显示出结构的普遍化能力。</p>
+      <p>当以上三项条件同时满足，该结构就会从「调用路径」演化为「稳定机制」，系统会自动以它为默认规则。</p>
+      <h4>3.6. 链接下一节：结构演化的转折点</h4>
+      <p>本节解释了：原理不是由个体创造，而是系统自演化中「长出」的。但接下来的核心问题是：</p>
+      <p>哪一刻，结构变成了原理？这既是哲学判断问题，也是系统识别问题。</p>
+      <p>下一节将讨论：</p>
+      <p>结构演化过程中的「转折点」；判断某结构是否「正在成为原理」的方法；原理在系统中具有哪些「不可回退」的指标。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第4节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 转折点</div><div>10 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · 从路径到规则的跃迁</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">原理不是系统中「最强」的结构，</span>
+      <span data-anim="line" style="display:block">而是「最难被改变」的结构。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>一个结构成为规则，不是因为它最复杂、最正确，而是因为它形成了最小成本的稳定性，被系统「冻结」为默认机制。</p>
+  </div>
+  <div class="foot"><div>Page 10 · 转折点</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 结构演化的转折点：从路径到规则的跃迁</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 结构演化的转折点：从路径到规则的跃迁</h4>
+      <p>系统中的结构不断生成、被调用、嵌套与反馈，有些路径在运行中逐步淘汰，有些则越发稳定并被频繁调用。然而，并非所有结构都会最终演化为原理。只有当结构越过某个临界点，完成从「可选路径」到「默认规则」的跃迁，才真正成为系统内部秩序的组成部分。</p>
+      <p>ESC称此跃迁为：结构演化的转折点。</p>
+      <p>本节将围绕这个转折点展开：</p>
+      <p>演化的质变机制：结构如何「封闭」为规则；<br>
+      跃迁的识别条件：哪些信号表明结构即将原理化；<br>
+      稳定之后的不可回退性：结构一旦成为规则所带来的系统约束。</p>
+      <h4>4.1. 从路径到规则，不是更强，而是更稳定</h4>
+      <p>路径是系统中处理信息的一种方式，它可以有多个、可以被比较、也可以被替代。</p>
+      <p>规则则是系统中默认的行为逻辑，它：</p>
+      <p>不需在每次执行前重新判断；<br>
+      不轻易被调用者干预；<br>
+      成为系统的行为前提。</p>
+      <p>ESC强调：</p>
+      <p><strong>原理不是系统中「最强」的结构，而是「最难被改变」的结构。</strong></p>
+      <p>一个结构之所以成为规则，不是因为它最复杂、最智能、最正确，而是因为它在系统中形成了最小成本的稳定性，因此被系统「冻结」为默认机制。</p>
+      <h4>4.2. 跃迁的三个临界点</h4>
+      <p>结构在演化过程中，若具备以下三个「聚合状态」，就标志着它正处于跃迁门槛：</p>
+      <p>4.2.1. 调用转为「默认」</p>
+      <p>不再需要显式调用的结构，标志其已深度嵌入系统底层。</p>
+      <p>例如：</p>
+      <p>主谓宾句式不再需要语言学习者每次判断；<br>
+      数轴上「0」作为原点的设定成为不可更动的基准；<br>
+      视觉感知中「近大远小」的透视规则无需教学而自然生成。</p>
+      <p>这是路径自动化的信号。</p>
+      <p>4.2.2. 反馈趋于「隐形」</p>
+      <p>当结构被使用后系统不再产生反馈，不再对其输出进行显著调整，也不再触发评价机制，说明它已进入「无争议区域」。</p>
+      <p>这是反馈饱和的信号。</p>
+      <p>4.3.3. 嵌套成为「依赖结构」</p>
+      <p>当其他结构的生成必须以此结构为前提，或者结构链条中缺失该结构即系统无法运行，说明它已成为不可剥离的「底层依赖」。</p>
+      <p>这是结构锁定的信号。</p>
+      <p>三者一旦同步出现，结构便跃迁为规则，其原理地位得以确认。</p>
+      <p>（转录注：原文此小节编号即为"4.3.3."，疑为"4.2.3."之笔误，照录。）</p>
+      <h4>4.3. 跃迁之后：系统的不可回退性</h4>
+      <p>当结构成为原理，系统便产生如下变化：</p>
+      <p>结构冻结：系统不再允许对该路径进行低成本修改；<br>
+      输入扭曲：所有输入都会先被该结构过滤与重构；<br>
+      规则隐形化：该结构逐渐失去「被察觉性」，成为不可言说的假设前提。</p>
+      <p>这正是哲学上所说的「先验结构」或「默认世界观」—— 它不再被我们主动选择，但却构成我们一切选择的基础。<strong>这也是ESC必须引入「人类构造（H）」这一维度的原因：</strong></p>
+      <p><strong>很多原理，并非宇宙本身的结构，而是我们认知系统在自身运行中逐渐演化出的路径，最终被我们误以为是世界本身的秩序。</strong></p>
+      <h4>4.4. 为什么要识别跃迁点？</h4>
+      <p>因为一旦结构跃迁为原理，它将对系统产生长期影响：</p>
+      <p>系统会围绕该原理重构其图谱与输出；<br>
+      所有新结构都必须兼容该原理；<br>
+      原理之下的偏差将被系统默认为真；<br>
+      跨系统之间的差异将由原理不兼容性所造成。</p>
+      <p><strong>因此，识别结构的跃迁点，是控制系统演化路径的关键一步。</strong></p>
+      <p>它决定了我们如何构建系统秩序，也决定了我们是否能调整认知基础。</p>
+      <h4>4.5. 链接下一节：原理不是普遍命题，而是局部稳定结构</h4>
+      <p>本节指出：原理的生成并非「确定真理」，而是「默认路径」的封闭。它不等于永恒、普适、放之四海而皆准的真命题，而是一种系统内有效 × 结构趋稳后的生成秩序。</p>
+      <p>下一节将从哲学与结构系统角度，提出ESC对原理的根本性重构：原理不是普遍真理，而是结构演化中的局部稳定极限。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第4节卡（三临界点） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · Three Thresholds</div><div>11 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>跃迁的三个临界点 · 4.2</div>
+    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>三者同步出现，跃迁即完成</h2>
+    <div class="pipeline" data-cols="3">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">调用转为「默认」</div>
+        <div class="step-desc">深度嵌入系统底层——路径自动化信号。例：主谓宾句式、数轴原点、近大远小。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">反馈趋于「隐形」</div>
+        <div class="step-desc">进入「无争议区域」——反馈饱和信号。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">嵌套成为「依赖结构」</div>
+        <div class="step-desc">缺失该结构即系统无法运行——结构锁定信号。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:70vw;margin-top:4.5vh" data-anim>
+      <span class="q-big">跃迁之后不可回退：结构冻结 · 输入扭曲 · 规则隐形化。很多原理并非宇宙本身的结构，而是我们认知系统演化出的路径，最终被误以为是世界本身的秩序——这正是引入「人类构造 H」的原因。</span>
+      <span class="cite">4.3 / 4.4 · 先验结构或「默认世界观」</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 11 · Three Thresholds</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1-4.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1. 从路径到规则，不是更强，而是更稳定</h4>
+      <p>路径是系统中处理信息的一种方式，它可以有多个、可以被比较、也可以被替代。</p>
+      <p>规则则是系统中默认的行为逻辑，它：</p>
+      <p>不需在每次执行前重新判断；<br>
+      不轻易被调用者干预；<br>
+      成为系统的行为前提。</p>
+      <p>ESC强调：</p>
+      <p><strong>原理不是系统中「最强」的结构，而是「最难被改变」的结构。</strong></p>
+      <p>一个结构之所以成为规则，不是因为它最复杂、最智能、最正确，而是因为它在系统中形成了最小成本的稳定性，因此被系统「冻结」为默认机制。</p>
+      <h4>4.2. 跃迁的三个临界点</h4>
+      <p>结构在演化过程中，若具备以下三个「聚合状态」，就标志着它正处于跃迁门槛：</p>
+      <p>4.2.1. 调用转为「默认」</p>
+      <p>不再需要显式调用的结构，标志其已深度嵌入系统底层。</p>
+      <p>例如：</p>
+      <p>主谓宾句式不再需要语言学习者每次判断；<br>
+      数轴上「0」作为原点的设定成为不可更动的基准；<br>
+      视觉感知中「近大远小」的透视规则无需教学而自然生成。</p>
+      <p>这是路径自动化的信号。</p>
+      <p>4.2.2. 反馈趋于「隐形」</p>
+      <p>当结构被使用后系统不再产生反馈，不再对其输出进行显著调整，也不再触发评价机制，说明它已进入「无争议区域」。</p>
+      <p>这是反馈饱和的信号。</p>
+      <p>4.3.3. 嵌套成为「依赖结构」</p>
+      <p>当其他结构的生成必须以此结构为前提，或者结构链条中缺失该结构即系统无法运行，说明它已成为不可剥离的「底层依赖」。</p>
+      <p>这是结构锁定的信号。</p>
+      <p>三者一旦同步出现，结构便跃迁为规则，其原理地位得以确认。</p>
+      <p class="tr-note">（转录注：原文此小节编号即为"4.3.3."，疑为"4.2.3."之笔误，照录。）</p>
+      <h4>4.3. 跃迁之后：系统的不可回退性</h4>
+      <p>当结构成为原理，系统便产生如下变化：</p>
+      <p>结构冻结：系统不再允许对该路径进行低成本修改；<br>
+      输入扭曲：所有输入都会先被该结构过滤与重构；<br>
+      规则隐形化：该结构逐渐失去「被察觉性」，成为不可言说的假设前提。</p>
+      <p>这正是哲学上所说的「先验结构」或「默认世界观」—— 它不再被我们主动选择，但却构成我们一切选择的基础。<strong>这也是ESC必须引入「人类构造（H）」这一维度的原因：</strong></p>
+      <p><strong>很多原理，并非宇宙本身的结构，而是我们认知系统在自身运行中逐渐演化出的路径，最终被我们误以为是世界本身的秩序。</strong></p>
+      <h4>4.4. 为什么要识别跃迁点？</h4>
+      <p>因为一旦结构跃迁为原理，它将对系统产生长期影响：</p>
+      <p>系统会围绕该原理重构其图谱与输出；<br>
+      所有新结构都必须兼容该原理；<br>
+      原理之下的偏差将被系统默认为真；<br>
+      跨系统之间的差异将由原理不兼容性所造成。</p>
+      <p><strong>因此，识别结构的跃迁点，是控制系统演化路径的关键一步。</strong></p>
+      <p>它决定了我们如何构建系统秩序，也决定了我们是否能调整认知基础。</p>
+      <h4>4.5. 链接下一节：原理不是普遍命题，而是局部稳定结构</h4>
+      <p>本节指出：原理的生成并非「确定真理」，而是「默认路径」的封闭。它不等于永恒、普适、放之四海而皆准的真命题，而是一种系统内有效 × 结构趋稳后的生成秩序。</p>
+      <p>下一节将从哲学与结构系统角度，提出ESC对原理的根本性重构：原理不是普遍真理，而是结构演化中的局部稳定极限。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 第5节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 局部稳定</div><div>12 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 原理不是普遍命题</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">不是因为原理永远正确，所以我们使用它；</span>
+      <span data-anim="line" style="display:block">而是因为它结构性地「最好用」，所以它暂时成为原理。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>原理是「稳定下来的结构」，而不是「永远正确的命题」。</p>
+  </div>
+  <div class="foot"><div>Page 12 · 局部稳定</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 原理不是普遍命题，而是局部稳定结构</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 原理不是普遍命题，而是局部稳定结构</h4>
+      <p>传统哲学将「原理」视为一种普遍命题，意指其效力具有跨时空、跨语境、跨系统的普适性。这种理解源于古典形而上学传统，认为真理、法则、原则等具有某种脱离经验情境的客观永恒性。</p>
+      <p>但ESC理论在结构哲学的路径中给出了根本性的转向判断：</p>
+      <p><strong>原理不是普遍命题，而是结构在特定系统内部经过演化后形成的局部稳定结构。</strong></p>
+      <p>它的效力不来自外部授权或逻辑必然，而来自：</p>
+      <p>在特定系统中的结构演化路径；<br>
+      在特定时间维度内的反馈积累；<br>
+      在特定认知构造中的路径最优化。</p>
+      <p>也就是说，<strong>原理是「稳定下来的结构」，而不是「永远正确的命题」。</strong></p>
+      <h4>5.1. 原理的「稳定性」不等于「普适性」</h4>
+      <p>一个结构之所以成为原理，是因为它在某一系统内部的调用、嵌套与反馈循环中达成了稳定状态。但这种稳定状态只能说明：</p>
+      <p>它在该系统内部有效；<br>
+      它对该系统具有解释力、组织力和预测性；<br>
+      它可以在时间上维持较长的不变性。</p>
+      <p>却并不能说明：</p>
+      <p>它在其他系统中也同样适用；<br>
+      它能在所有输入条件下保持效力；<br>
+      它无法被替代、超越或重新定义。</p>
+      <p>因此，原理并不是「唯一解」，而是「当前系统中的最优路径结构」。</p>
+      <h4>5.2. 为什么原理不能被视为「真理」？</h4>
+      <p>ESC拒绝将原理等同于真理，理由有三：</p>
+      <p>5.2.1. 真理是超系统的，原理是系统内的</p>
+      <p>真理（在经典语义中）是一种不依赖系统结构而恒定成立的陈述，而原理只是在某系统结构稳定状态下产生的运行机制。</p>
+      <p>例如：</p>
+      <p>牛顿力学中的「力等于质量乘以加速度」是原理，但在广义相对论或量子场域下，它只是某种近似；<br>
+      欧几里得几何中的「平行线不相交」是原理，但在非欧几里得空间中无效；<br>
+      语法结构中的主谓一致，是语言系统中的原理，但不是语言真理。</p>
+      <p>5.2.2. 原理是历史产物，真理是逻辑命题</p>
+      <p>原理的形成依赖系统的历史反馈，是时间中逐步生成的；</p>
+      <p><strong>而真理通常被设想为可被逻辑推导、永恒成立的语义陈述。</strong></p>
+      <p>原理具有演化性、路径依赖性与可变性，这一点与真理所预设的「不可更改」构成根本区分。</p>
+      <p>5.2.3. 原理是结构路径，真理是命题表达</p>
+      <p>原理是以结构的方式存在于系统中，它不是一句话、一个公式，而是一套组织路径、连接方式与反馈机制的组合结构。</p>
+      <p>将其简化为命题形式，反而遮蔽了它的生成过程。</p>
+      <h4>5.3. 原理作为「局部稳定结构」的定义方式</h4>
+      <p>ESC正式给出原理（IP）的工作性定义：</p>
+      <p><strong>原理是认知系统在其结构化过程中，通过调用—嵌套—反馈机制在时间维度中形成的、在特定边界条件内具备稳定性、适配性与低能耗调用特征的路径性结构。</strong></p>
+      <p>此定义强调以下四个维度：</p>
+      <p>系统内生性：原理不是外部设定，而是系统运行自身生成；<br>
+      时间演化性：原理形成于长期结构反馈，不是一瞬间判断；<br>
+      结构路径性：原理不是逻辑命题，而是结构行为图谱；<br>
+      边界有效性：原理适用于其演化系统，不必具有跨系统通用性。</p>
+      <h4>5.4. 拒绝绝对真理观，建立结构适配观</h4>
+      <p>ESC在此提出结构哲学的关键认识论立场：<strong>不是因为原理永远正确，所以我们使用它；</strong></p>
+      <p><strong>而是因为它结构性地「最好用」，所以它暂时成为原理。</strong></p>
+      <p>这意味着：</p>
+      <p>原理的「真理性」是后验构建，而非先验设定；<br>
+      原理的适配性源于系统反馈，而非逻辑必然；<br>
+      原理的保留性依赖于结构演化的收益效率，而非哲学上的不可动摇。</p>
+      <p>我们之所以在系统中维持某些原理，并不是因为它们代表某种普遍的世界规律，而是因为它们在特定结构条件下提供了最优的认知路径与组织方式。</p>
+      <h4>5.5. 原理的相对稳定性带来什么？</h4>
+      <p>当我们承认原理是局部稳定结构而非普遍真理，我们获得了一种新的哲学视野：</p>
+      <p>可以比较多个系统中不同原理的演化路径；<br>
+      可以探讨原理之间的转化与替代条件；<br>
+      可以面对系统性错觉时，不将原理神圣化；<br>
+      可以理解科学范式更替、语言演变、社会秩序变动等现象的结构性根源。</p>
+      <p>原理不再是「不可动摇的根基」，而是可分析、可追踪、可演化的结构形态。</p>
+      <h4>5.6. 链接下一节：IP如何演化为自然法则（N）？</h4>
+      <p>到此为止，我们完成了IP（内在原理）的系统定义与哲学重构，明确其在ESC理论中的关键角色与非本质化属性。</p>
+      <p>下一节将继续推进公式链条的演化：当结构趋稳不仅发生在单一系统内，而具备跨系统、跨时间、跨语境的普适稳定性时，原理便有可能上升为自然法则（N）。</p>
+      <p>下一节将进入公式链的最终演化环节：IP → N</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P13 · 第5节卡（真理三区分+工作定义） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · Not Truth</div><div>13 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>原理 vs 真理 · 工作性定义 · 5.2 / 5.3</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>原理不是「唯一解」，<br>而是「当前系统中的最优路径结构」</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:26%">维度</th><th>描述</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">系统内生性</td><td>原理不是外部设定，而是系统运行自身生成</td></tr>
+        <tr><td class="em-cell">时间演化性</td><td>原理形成于长期结构反馈，不是一瞬间判断</td></tr>
+        <tr><td class="em-cell">结构路径性</td><td>原理不是逻辑命题，而是结构行为图谱</td></tr>
+        <tr><td class="em-cell">边界有效性</td><td>原理适用于其演化系统，不必具有跨系统通用性</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:70vw" data-anim>
+      <span class="q-big">真理是超系统的，原理是系统内的；原理是历史产物，真理是逻辑命题；原理是结构路径，真理是命题表达——F = ma、欧氏几何、主谓一致，都是系统内的原理，不是跨系统真理。</span>
+      <span class="cite">5.2 · 原理 = 调用—嵌套—反馈机制在时间维度中形成的路径性结构</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 13 · Not Truth</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1. 原理的「稳定性」不等于「普适性」</h4>
+      <p>一个结构之所以成为原理，是因为它在某一系统内部的调用、嵌套与反馈循环中达成了稳定状态。但这种稳定状态只能说明：</p>
+      <p>它在该系统内部有效；<br>
+      它对该系统具有解释力、组织力和预测性；<br>
+      它可以在时间上维持较长的不变性。</p>
+      <p>却并不能说明：</p>
+      <p>它在其他系统中也同样适用；<br>
+      它能在所有输入条件下保持效力；<br>
+      它无法被替代、超越或重新定义。</p>
+      <p>因此，原理并不是「唯一解」，而是「当前系统中的最优路径结构」。</p>
+      <h4>5.2. 为什么原理不能被视为「真理」？</h4>
+      <p>ESC拒绝将原理等同于真理，理由有三：</p>
+      <p>5.2.1. 真理是超系统的，原理是系统内的</p>
+      <p>真理（在经典语义中）是一种不依赖系统结构而恒定成立的陈述，而原理只是在某系统结构稳定状态下产生的运行机制。</p>
+      <p>例如：</p>
+      <p>牛顿力学中的「力等于质量乘以加速度」是原理，但在广义相对论或量子场域下，它只是某种近似；<br>
+      欧几里得几何中的「平行线不相交」是原理，但在非欧几里得空间中无效；<br>
+      语法结构中的主谓一致，是语言系统中的原理，但不是语言真理。</p>
+      <p>5.2.2. 原理是历史产物，真理是逻辑命题</p>
+      <p>原理的形成依赖系统的历史反馈，是时间中逐步生成的；</p>
+      <p><strong>而真理通常被设想为可被逻辑推导、永恒成立的语义陈述。</strong></p>
+      <p>原理具有演化性、路径依赖性与可变性，这一点与真理所预设的「不可更改」构成根本区分。</p>
+      <p>5.2.3. 原理是结构路径，真理是命题表达</p>
+      <p>原理是以结构的方式存在于系统中，它不是一句话、一个公式，而是一套组织路径、连接方式与反馈机制的组合结构。</p>
+      <p>将其简化为命题形式，反而遮蔽了它的生成过程。</p>
+      <h4>5.3. 原理作为「局部稳定结构」的定义方式</h4>
+      <p>ESC正式给出原理（IP）的工作性定义：</p>
+      <p><strong>原理是认知系统在其结构化过程中，通过调用—嵌套—反馈机制在时间维度中形成的、在特定边界条件内具备稳定性、适配性与低能耗调用特征的路径性结构。</strong></p>
+      <p>此定义强调以下四个维度：</p>
+      <p>系统内生性：原理不是外部设定，而是系统运行自身生成；<br>
+      时间演化性：原理形成于长期结构反馈，不是一瞬间判断；<br>
+      结构路径性：原理不是逻辑命题，而是结构行为图谱；<br>
+      边界有效性：原理适用于其演化系统，不必具有跨系统通用性。</p>
+      <h4>5.4. 拒绝绝对真理观，建立结构适配观</h4>
+      <p>ESC在此提出结构哲学的关键认识论立场：<strong>不是因为原理永远正确，所以我们使用它；</strong></p>
+      <p><strong>而是因为它结构性地「最好用」，所以它暂时成为原理。</strong></p>
+      <p>这意味着：</p>
+      <p>原理的「真理性」是后验构建，而非先验设定；<br>
+      原理的适配性源于系统反馈，而非逻辑必然；<br>
+      原理的保留性依赖于结构演化的收益效率，而非哲学上的不可动摇。</p>
+      <p>我们之所以在系统中维持某些原理，并不是因为它们代表某种普遍的世界规律，而是因为它们在特定结构条件下提供了最优的认知路径与组织方式。</p>
+      <h4>5.5. 原理的相对稳定性带来什么？</h4>
+      <p>当我们承认原理是局部稳定结构而非普遍真理，我们获得了一种新的哲学视野：</p>
+      <p>可以比较多个系统中不同原理的演化路径；<br>
+      可以探讨原理之间的转化与替代条件；<br>
+      可以面对系统性错觉时，不将原理神圣化；<br>
+      可以理解科学范式更替、语言演变、社会秩序变动等现象的结构性根源。</p>
+      <p>原理不再是「不可动摇的根基」，而是可分析、可追踪、可演化的结构形态。</p>
+      <h4>5.6. 链接下一节：IP如何演化为自然法则（N）？</h4>
+      <p>到此为止，我们完成了IP（内在原理）的系统定义与哲学重构，明确其在ESC理论中的关键角色与非本质化属性。</p>
+      <p>下一节将继续推进公式链条的演化：当结构趋稳不仅发生在单一系统内，而具备跨系统、跨时间、跨语境的普适稳定性时，原理便有可能上升为自然法则（N）。</p>
+      <p>下一节将进入公式链的最终演化环节：IP → N</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P14 · 第6节 公式页 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>第 6 节 · 何以为法则</div><div>14 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 6 节 · 从原理到自然法则</div>
+    <h1 class="h-hero" style="font-size:7vw" data-anim>s(t) → IP → N</h1>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;max-width:82vw" data-anim>
+      <div><div class="kicker">s(t)</div><p class="body-zh">结构化在时间中的展开。</p></div>
+      <div><div class="kicker">IP</div><p class="body-zh">在系统中稳定下来的结构路径。</p></div>
+      <div><div class="kicker">N</div><p class="body-zh">在跨系统中稳定下来的结构路径。</p></div>
+    </div>
+    <div class="callout" style="max-width:66vw" data-anim>
+      <span class="q-big">自然法则（N）是当一个原理在多个系统中长期稳定有效，其适配性超出系统边界后演化出的结构性极限形式。</span>
+      <span class="cite">6.1 · 法则是结构演化中「不再演化」的部分</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 14 · s(t) → IP → N</div><div>Formula</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第6节 何以为法则？从原理到自然法则（N）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第6节 | 何以为法则？从原理到自然法则（N）</h4>
+      <p>我们已在本章逐步揭示了原理（IP）的形成逻辑—— 它不是逻辑命题，也非绝对真理，而是系统内部在时间中趋于稳定的结构性路径。然而，某些原理似乎又拥有了更广泛的适用性：它们不仅在一个系统内长期有效，而且在多个系统中跨语境成立，在更长的时间维度中持续稳定，并最终被我们称作「自然法则」。</p>
+      <p>本节将完成本章逻辑的收束，并作为引介，开启下一章对自然法则（N）的核心讨论。</p>
+      <h4>6.1. 从「系统原理」到「自然法则」的跃迁路径</h4>
+      <p>结构演化逻辑在此进入其最高层级：</p>
+      <p><strong>s(t) → IP → N</strong></p>
+      <p>我们可以理解为：</p>
+      <p>s(t)：结构化在时间中的展开；<br>
+      IP：在系统中稳定下来的结构路径；<br>
+      N：在跨系统中稳定下来的结构路径。</p>
+      <p>也就是说：</p>
+      <p><strong>自然法则（N）是当一个原理在多个系统中长期稳定有效，其适配性超出系统边界后演化出的结构性极限形式。</strong></p>
+      <p>它不是抽象赋值的本体，不是全知理性揭示的终极真理，而是结构演化的结果，是时间维度上「最不易被动摇」的结构表现。</p>
+      <h4>6.2. 如何判断原理是否演化为法则？</h4>
+      <p>ESC提出一组判断条件，用于从结构哲学的角度识别「原理—法则跃迁」的可能性：</p>
+      <p>跨系统稳定性：在多个结构系统中被独立调用且长期有效；<br>
+      输入维度通用性：面对不同输入类别仍维持输出稳定性；<br>
+      反馈冗余性：几乎不再触发系统修正机制；<br>
+      结构边界不可裁剪：成为系统组织逻辑的基础，无法被局部替代；<br>
+      演化路径不可逆：一旦形成便极难被还原或退回到非原理状态。</p>
+      <p>符合上述条件的原理，其结构路径将不再局限于某一系统，而成为结构演化中的跨域极限稳定性模式，即我们称之为「自然法则」的认知对象。</p>
+      <h4>6.3. 法则不是「被发现」，而是「被结构化演化出来」的</h4>
+      <p>传统认识论会认为，自然法则是存在于世界中的「真理」，人类通过观察、归纳、证明等手段「发现」了它们。ESC提供完全不同的解读路径：</p>
+      <p><strong>自然法则不是被揭示的，而是被认知系统在长期结构演化中「结构化」出来的。</strong></p>
+      <p>这意味着：</p>
+      <p>我们从未面对「法则本身」；<br>
+      我们面对的是结构化之后的稳定路径；<br>
+      这条路径之所以成为「法则」，是因为它经受住了结构演化的筛选、反馈、边界验证等过程；<br>
+      最终成为一种在认知上不可动摇、在系统上不可替代的存在方式。</p>
+      <h4>6.4. 法则是结构演化中「不再演化」的部分</h4>
+      <p>ESC提出自然法则的工作定义：</p>
+      <p><strong>法则是结构系统在演化过程中，其某一稳定结构路径在跨系统、跨时段中不再被修正、替代或中断的结构极限。</strong></p>
+      <p>这并不意味着它是「绝对正确」的，而是：</p>
+      <p>在所有演化路径中，它被反复证实、从未被动摇；<br>
+      它的存在已成为系统运行的必要前提；<br>
+      它构成了系统间认知可通约性的底层结构。</p>
+      <p>从这个意义上看，法则不是认知之上的真理，而是认知演化之中的结构极限。</p>
+      <h4>6.5. 法则的结构哲学定位：从演化速度中定义稳定性</h4>
+      <p>ESC用一个简单而强有力的判断标准定义法则：</p>
+      <p><strong>不是因为它被观测得多，而是因为它不再演化。</strong></p>
+      <p>这是一种全新的法则判定标准：</p>
+      <p>法则不再依赖「被归纳得多」；<br>
+      不再依赖「是否符合逻辑」；<br>
+      而是依赖其在系统中是否还会被改动、是否还会产生反馈、是否还能被替代。</p>
+      <p>在结构演化的动态空间中，法则即为结构演化速度 = 0 的点。</p>
+      <h4>6.6. 链接下一章：自然法则不是被发现的，而是被结构演化出来的</h4>
+      <p>本节完成公式链条的第一轮闭环：E = s(t) = N = IP。这一链条说明：</p>
+      <p>存在（E）不是直接可知的对象，而是结构在时间中的展开（s(t)）所显现的现象状态；<br>
+      结构的时间展开可能生成系统内部稳定路径（IP）；<br>
+      部分原理在跨系统演化中可演化为极限稳定结构（N）；<br>
+      人类所谓的「法则」，不过是结构演化最终稳定的形式表达。</p>
+      <p>下一章将全面展开这一命题：自然法则不是被发现的，而是被结构演化出来的。</p>
+      <p>这不仅是对科学方法论的重建，也将重新定位「知识」、「客观性」与「真理」三者之间的关系。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P15 · 第6节卡（跃迁判定） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 6 · IP → N</div><div>15 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>原理—法则跃迁的判定条件 · 6.2 / 6.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>法则 = 结构演化速度 = 0 的点</h2>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:30%">判定条件</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">跨系统稳定性</td><td>在多个结构系统中被独立调用且长期有效</td></tr>
+        <tr><td class="em-cell">输入维度通用性</td><td>面对不同输入类别仍维持输出稳定性</td></tr>
+        <tr><td class="em-cell">反馈冗余性</td><td>几乎不再触发系统修正机制</td></tr>
+        <tr><td class="em-cell">结构边界不可裁剪</td><td>成为系统组织逻辑的基础，无法被局部替代</td></tr>
+        <tr><td class="em-cell">演化路径不可逆</td><td>一旦形成便极难被还原或退回到非原理状态</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:68vw;margin-top:3vh" data-anim>
+      <span class="q-big">不是因为它被观测得多，而是因为它不再演化。</span>
+      <span class="cite">6.5 · 全新判定标准：是否还会被改动 / 产生反馈 / 被替代</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 15 · IP → N</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 6.1-6.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>6.1. 从「系统原理」到「自然法则」的跃迁路径</h4>
+      <p>结构演化逻辑在此进入其最高层级：</p>
+      <p><strong>s(t) → IP → N</strong></p>
+      <p>我们可以理解为：</p>
+      <p>s(t)：结构化在时间中的展开；<br>
+      IP：在系统中稳定下来的结构路径；<br>
+      N：在跨系统中稳定下来的结构路径。</p>
+      <p>也就是说：</p>
+      <p><strong>自然法则（N）是当一个原理在多个系统中长期稳定有效，其适配性超出系统边界后演化出的结构性极限形式。</strong></p>
+      <p>它不是抽象赋值的本体，不是全知理性揭示的终极真理，而是结构演化的结果，是时间维度上「最不易被动摇」的结构表现。</p>
+      <h4>6.2. 如何判断原理是否演化为法则？</h4>
+      <p>ESC提出一组判断条件，用于从结构哲学的角度识别「原理—法则跃迁」的可能性：</p>
+      <p>跨系统稳定性：在多个结构系统中被独立调用且长期有效；<br>
+      输入维度通用性：面对不同输入类别仍维持输出稳定性；<br>
+      反馈冗余性：几乎不再触发系统修正机制；<br>
+      结构边界不可裁剪：成为系统组织逻辑的基础，无法被局部替代；<br>
+      演化路径不可逆：一旦形成便极难被还原或退回到非原理状态。</p>
+      <p>符合上述条件的原理，其结构路径将不再局限于某一系统，而成为结构演化中的跨域极限稳定性模式，即我们称之为「自然法则」的认知对象。</p>
+      <h4>6.3. 法则不是「被发现」，而是「被结构化演化出来」的</h4>
+      <p>传统认识论会认为，自然法则是存在于世界中的「真理」，人类通过观察、归纳、证明等手段「发现」了它们。ESC提供完全不同的解读路径：</p>
+      <p><strong>自然法则不是被揭示的，而是被认知系统在长期结构演化中「结构化」出来的。</strong></p>
+      <p>这意味着：</p>
+      <p>我们从未面对「法则本身」；<br>
+      我们面对的是结构化之后的稳定路径；<br>
+      这条路径之所以成为「法则」，是因为它经受住了结构演化的筛选、反馈、边界验证等过程；<br>
+      最终成为一种在认知上不可动摇、在系统上不可替代的存在方式。</p>
+      <h4>6.4. 法则是结构演化中「不再演化」的部分</h4>
+      <p>ESC提出自然法则的工作定义：</p>
+      <p><strong>法则是结构系统在演化过程中，其某一稳定结构路径在跨系统、跨时段中不再被修正、替代或中断的结构极限。</strong></p>
+      <p>这并不意味着它是「绝对正确」的，而是：</p>
+      <p>在所有演化路径中，它被反复证实、从未被动摇；<br>
+      它的存在已成为系统运行的必要前提；<br>
+      它构成了系统间认知可通约性的底层结构。</p>
+      <p>从这个意义上看，法则不是认知之上的真理，而是认知演化之中的结构极限。</p>
+      <h4>6.5. 法则的结构哲学定位：从演化速度中定义稳定性</h4>
+      <p>ESC用一个简单而强有力的判断标准定义法则：</p>
+      <p><strong>不是因为它被观测得多，而是因为它不再演化。</strong></p>
+      <p>这是一种全新的法则判定标准：</p>
+      <p>法则不再依赖「被归纳得多」；<br>
+      不再依赖「是否符合逻辑」；<br>
+      而是依赖其在系统中是否还会被改动、是否还会产生反馈、是否还能被替代。</p>
+      <p>在结构演化的动态空间中，法则即为结构演化速度 = 0 的点。</p>
+      <h4>6.6. 链接下一章：自然法则不是被发现的，而是被结构演化出来的</h4>
+      <p>本节完成公式链条的第一轮闭环：E = s(t) = N = IP。这一链条说明：</p>
+      <p>存在（E）不是直接可知的对象，而是结构在时间中的展开（s(t)）所显现的现象状态；<br>
+      结构的时间展开可能生成系统内部稳定路径（IP）；<br>
+      部分原理在跨系统演化中可演化为极限稳定结构（N）；<br>
+      人类所谓的「法则」，不过是结构演化最终稳定的形式表达。</p>
+      <p>下一章将全面展开这一命题：自然法则不是被发现的，而是被结构演化出来的。</p>
+      <p>这不仅是对科学方法论的重建，也将重新定位「知识」、「客观性」与「真理」三者之间的关系。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P16 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>16 / 16</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:5.4vw" data-anim>原理不是被定义的，<br>而是被系统「长出来」的。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：IP 的定义与三层次区分；趋稳三因子（调用 × 嵌套 × 反馈）；涌现与自组织；跃迁三临界点；原理是局部稳定结构；s(t) → IP → N 公式链闭环。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>下一章将全面展开：自然法则不是被发现的，而是被结构演化出来的——法则的三大生成条件与「真理幻觉」的解构。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-07/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 4 章 · 结构化是理解发生的方式</div></a>
+    <a href="../deck-codex-09/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 6 章 · 自然法则不是被发现的，而是被结构演化出来的</div></a>
+  </div>
+  <div class="foot"><div>第 6 章 · 自然法则的生成逻辑</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-07/index.html', chapterNext = '../deck-codex-09/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

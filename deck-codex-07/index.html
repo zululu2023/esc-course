@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第4章 结构化是理解发生的方式</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:9vw;line-height:1.06;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5.6vw;line-height:1.12;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.16vw);line-height:1.72;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.8vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.18vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.5vw);line-height:1.42}
+
+  .pipeline{display:grid;gap:1.4vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="5"]{grid-template-columns:repeat(5,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.42vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.92vw);line-height:1.5;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1vw);line-height:1.6}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.84vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.4vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.4vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.05vw,19px);line-height:1.92;margin:0 0 1.35em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+  .src-panel .src-body .tr-note{font-family:var(--mono);font-size:clamp(11px,.85vw,14px);letter-spacing:.06em;opacity:.6;line-height:1.6}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 4 章</div><div>Chapter IV</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>Structuring as Understanding</div>
+    <h1 class="h-hero" data-anim>结构化</h1>
+    <h2 class="h-sub" data-anim>是理解发生的方式</h2>
+    <p class="lead" style="max-width:62vw" data-anim>连接 × 模式 × 时间——结构不是对已知内容的整理，而是理解本身的发生机制。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.11</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 4 章</div><div>01 / 17</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第4章（来源：结构认知实验室 · 2026年3月11日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章六节：第1节 结构化不是技术手段，而是理解机制；第2节 理解的发生——从输入到结构的跃迁；第3节 结构如何发生——连接 × 模式 × 时间；第4节 结构化的递归性与系统性；第5节 理解即结构——结构如何成为知识与现实；第6节 结构趋稳如何生成内在原理（IP）。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 理解机制</div><div>02 / 17</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 结构化不是技术手段，而是理解机制</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">结构化不是一种后天添加的技术手段，</span>
+      <span data-anim="line" style="display:block">而是理解本身发生的方式。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>没有结构化，就没有信息本身。结构不属于解释层面，而属于发生层面——不是认知之后的整理动作，而是认知发生本身。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 理解机制</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 结构化不是技术手段，而是理解机制</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 结构化不是技术手段，而是理解机制</h4>
+      <p>「结构化」一词，在今日的语言环境中似乎已变得过于日常化与工具化。我们谈到数据结构化、思维结构化、写作结构化、信息结构化，仿佛结构化只是某种更清晰、更有条理的排列方式，是某种提升效率与逻辑性的操作技巧。</p>
+      <p>但ESC指出：</p>
+      <p><strong>结构化不是一种后天添加的技术手段，而是理解本身发生的方式。</strong></p>
+      <p>理解，并不是在现成的世界上「套入框架」，而是在信息混沌中通过结构化过程生成现实单元的行为。结构化不属于解释层面，而属于发生层面；不是认知之后的整理动作，而是认知发生本身。</p>
+      <h4>1.1. 结构化并非一种技术行为</h4>
+      <p>在传统的信息管理、计算建模或思维训练领域，「结构化」常被视为一种提高效率的步骤，通常表现为：</p>
+      <p>对散乱信息进行归类整理；<br>
+      将复杂关系简化为层级模型；<br>
+      为表达与传播提供清晰载体。</p>
+      <p>这些操作无疑有其效用，但它们基于一个默认前提：信息已经存在，意义已被捕捉，结构只是表达或分类的手段。</p>
+      <p>ESC拒绝这一预设，指出：</p>
+      <p><strong>没有结构化，就没有信息本身。</strong></p>
+      <p>结构化不是对已知的加工，而是对「原本无结构之物」的生成路径。也就是说，结构不是对内容的重组，而是对理解的原始生成。</p>
+      <h4>1.2. 理解不是输入的激活，而是结构的生成</h4>
+      <p>我们通常以为理解是「听懂了」、「看懂了」、「想明白了」，是一种对外部输入的内部反应。但这一思维逻辑隐藏了结构化的真实作用。</p>
+      <p>理解的发生并非因为输入本身具备意义，而是因为：</p>
+      <p>结构系统成功组织了这些输入之间的连接；<br>
+      连接形成稳定模式，生成了可调用的结构单元；<br>
+      该结构在系统中获得了位置、标签与调用路径。</p>
+      <p>换句话说：</p>
+      <p><strong>理解不是「认识一个事实」，而是「形成一个结构」。</strong></p>
+      <p>只有当结构化成功地把输入转化为系统内的稳定结构，理解才发生。而理解失败的根本原因，就是结构化过程的失败：<strong>连接断裂、模式不明、时间不足、反馈缺失。</strong></p>
+      <h4>1.3. 理解发生之前：结构性显现的必要条件</h4>
+      <p>为了理解「结构化是理解本身」，我们必须重新定义「理解发生」的条件。ESC认为，理解的显现需要满足以下三项：</p>
+      <p>连接形成：输入单元之间建立起具逻辑、模式或象征意义的连接；<br>
+      结构闭合：连接形成可封闭的路径网络，成为系统中可调用单元；<br>
+      反馈可行：系统能验证该结构路径是否生效，从而增强或淘汰之。</p>
+      <p>这三个条件共同构成理解的最小单位结构。缺一不可，否之不成。因此，结构化是理解的物理机制，而非心理现象；是生成过程，而非意识状态。</p>
+      <h4>1.4. 为什么误以为结构化只是技术？</h4>
+      <p>结构化之所以被误认为是一种「技术行为」，源于以下四种遮蔽机制：</p>
+      <p>语言遮蔽：日常语言将结构化等同于整理、条理、秩序；<br>
+      操作遮蔽：教育系统将结构化训练作为表达技巧传授；<br>
+      工具遮蔽：数字系统将结构化限制于数据库、模型与格式；<br>
+      阶段遮蔽：结构一旦形成，其生成过程便被掩盖，只剩结果被「调用」。</p>
+      <p>ESC对这一误区提出纠偏：</p>
+      <p><strong>我们必须将结构化还原为认知生成世界的第一性过程。在没有结构化之前，不存在可被理解的输入、不存在被命名的存在、不存在可描述的现实。</strong></p>
+      <h4>1.5. 引向下一节：理解的发生机制</h4>
+      <p>理解并不是我们面对世界之后的「开窍」，而是我们在结构系统中成功构造出「世界」的过程。这也意味着：</p>
+      <p>我们理解得越深，不是因为我们「看到更多事实」，而是因为我们「构造出更深结构」；理解的层次差异，本质是结构化路径的差异；结构的生成过程，就是理解的生成机制。</p>
+      <p>下一节将深入展开这一过程，从「输入如何跃迁为结构」出发，揭示理解发生的底层组织方式与展开路径。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡1（1.1-1.3） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Conditions</div><div>03 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>理解显现的三个必要条件 · 1.2-1.3</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>理解不是认识一个事实，<br>而是形成一个结构</h2>
+    <div class="grid-3">
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">01 · 连接形成</div>
+        <p class="body-zh" style="margin-top:1.4vh">输入单元之间建立起具逻辑、模式或象征意义的连接。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">02 · 结构闭合</div>
+        <p class="body-zh" style="margin-top:1.4vh">连接形成可封闭的路径网络，成为系统中可调用单元。</p>
+      </div>
+      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
+        <div class="kicker">03 · 反馈可行</div>
+        <p class="body-zh" style="margin-top:1.4vh">系统能验证该结构路径是否生效，从而增强或淘汰之。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:66vw;margin-top:4vh" data-anim>
+      <span class="q-big">三个条件缺一不可，否之不成——结构化是理解的物理机制，而非心理现象；是生成过程，而非意识状态。理解失败 = 连接断裂、模式不明、时间不足、反馈缺失。</span>
+      <span class="cite">1.3 · 理解发生之前：结构性显现的必要条件</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 03 · Conditions</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1 / 1.2 / 1.3</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1. 结构化并非一种技术行为</h4>
+      <p>在传统的信息管理、计算建模或思维训练领域，「结构化」常被视为一种提高效率的步骤，通常表现为：</p>
+      <p>对散乱信息进行归类整理；<br>
+      将复杂关系简化为层级模型；<br>
+      为表达与传播提供清晰载体。</p>
+      <p>这些操作无疑有其效用，但它们基于一个默认前提：信息已经存在，意义已被捕捉，结构只是表达或分类的手段。</p>
+      <p>ESC拒绝这一预设，指出：</p>
+      <p><strong>没有结构化，就没有信息本身。</strong></p>
+      <p>结构化不是对已知的加工，而是对「原本无结构之物」的生成路径。也就是说，结构不是对内容的重组，而是对理解的原始生成。</p>
+      <h4>1.2. 理解不是输入的激活，而是结构的生成</h4>
+      <p>我们通常以为理解是「听懂了」、「看懂了」、「想明白了」，是一种对外部输入的内部反应。但这一思维逻辑隐藏了结构化的真实作用。</p>
+      <p>理解的发生并非因为输入本身具备意义，而是因为：</p>
+      <p>结构系统成功组织了这些输入之间的连接；<br>
+      连接形成稳定模式，生成了可调用的结构单元；<br>
+      该结构在系统中获得了位置、标签与调用路径。</p>
+      <p>换句话说：</p>
+      <p><strong>理解不是「认识一个事实」，而是「形成一个结构」。</strong></p>
+      <p>只有当结构化成功地把输入转化为系统内的稳定结构，理解才发生。而理解失败的根本原因，就是结构化过程的失败：<strong>连接断裂、模式不明、时间不足、反馈缺失。</strong></p>
+      <h4>1.3. 理解发生之前：结构性显现的必要条件</h4>
+      <p>为了理解「结构化是理解本身」，我们必须重新定义「理解发生」的条件。ESC认为，理解的显现需要满足以下三项：</p>
+      <p>连接形成：输入单元之间建立起具逻辑、模式或象征意义的连接；<br>
+      结构闭合：连接形成可封闭的路径网络，成为系统中可调用单元；<br>
+      反馈可行：系统能验证该结构路径是否生效，从而增强或淘汰之。</p>
+      <p>这三个条件共同构成理解的最小单位结构。缺一不可，否之不成。因此，结构化是理解的物理机制，而非心理现象；是生成过程，而非意识状态。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第1节卡2（1.4 四遮蔽） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Four Veils</div><div>04 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>为什么误以为结构化只是技术 · 1.4</div>
+    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>四种遮蔽机制</h2>
+    <div class="pipeline" data-cols="4">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">语言遮蔽</div>
+        <div class="step-desc">日常语言将结构化等同于整理、条理、秩序。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">操作遮蔽</div>
+        <div class="step-desc">教育系统将结构化训练作为表达技巧传授。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">工具遮蔽</div>
+        <div class="step-desc">数字系统将结构化限制于数据库、模型与格式。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iv</div>
+        <div class="step-title">阶段遮蔽</div>
+        <div class="step-desc">结构一旦形成，生成过程被掩盖，只剩结果被「调用」。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:68vw;margin-top:5vh" data-anim>
+      <span class="q-big">必须将结构化还原为认知生成世界的第一性过程——在没有结构化之前，不存在可被理解的输入、不存在被命名的存在、不存在可描述的现实。</span>
+      <span class="cite">1.4 · ESC 的纠偏</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 04 · Four Veils</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.4 / 1.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.4. 为什么误以为结构化只是技术？</h4>
+      <p>结构化之所以被误认为是一种「技术行为」，源于以下四种遮蔽机制：</p>
+      <p>语言遮蔽：日常语言将结构化等同于整理、条理、秩序；<br>
+      操作遮蔽：教育系统将结构化训练作为表达技巧传授；<br>
+      工具遮蔽：数字系统将结构化限制于数据库、模型与格式；<br>
+      阶段遮蔽：结构一旦形成，其生成过程便被掩盖，只剩结果被「调用」。</p>
+      <p>ESC对这一误区提出纠偏：</p>
+      <p><strong>我们必须将结构化还原为认知生成世界的第一性过程。在没有结构化之前，不存在可被理解的输入、不存在被命名的存在、不存在可描述的现实。</strong></p>
+      <h4>1.5. 引向下一节：理解的发生机制</h4>
+      <p>理解并不是我们面对世界之后的「开窍」，而是我们在结构系统中成功构造出「世界」的过程。这也意味着：</p>
+      <p>我们理解得越深，不是因为我们「看到更多事实」，而是因为我们「构造出更深结构」；理解的层次差异，本质是结构化路径的差异；结构的生成过程，就是理解的生成机制。</p>
+      <p>下一节将深入展开这一过程，从「输入如何跃迁为结构」出发，揭示理解发生的底层组织方式与展开路径。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 2 节 · 理解的发生</div><div>05 / 17</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · 从输入到结构的跃迁</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">理解并非「获得答案」，而是生成结构；</span>
+      <span data-anim="line" style="display:block">不是「识别意义」，而是构建路径；</span>
+      <span data-anim="line" style="display:block">不是「点亮认知」，而是嵌入系统。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>输入在结构系统中，通过连接与反馈跃迁为结构，从而获得「被理解」的状态。</p>
+  </div>
+  <div class="foot"><div>Page 05 · 理解的发生</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 理解的发生：从输入到结构的跃迁</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 理解的发生：从输入到结构的跃迁</h4>
+      <p>理解不是回应信息的能力，而是生成结构的行为。在ESC框架中，我们不再将理解视为一种意识的开悟、知识的积累或经验的自我整理，而是一种<strong>发生机制</strong>：</p>
+      <p><strong>输入在结构系统中，通过连接与反馈跃迁为结构，从而获得「被理解」的状态。</strong></p>
+      <p>因此，<strong>理解并非「获得答案」，而是生成结构；不是「识别意义」，而是构建路径；不是「点亮认知」，而是嵌入系统。</strong></p>
+      <h4>2.1. 输入是潜能，不是内容</h4>
+      <p>我们常说「获取信息」以促进理解，但信息本身并不包含意义。信息只是可被接收、可被加工的输入单位，它的意义取决于系统是否能够将其组织进结构之中。</p>
+      <p>ESC指出：</p>
+      <p>输入没有结构 → 不可被识别；<br>
+      输入无连接 → 无法被组织；<br>
+      输入无路径 → 不可被理解。</p>
+      <p>在这一点上，ESC与传统的信息理论断裂开来。<strong>输入不是「现实内容」，而是认知系统面前的结构潜能。只有当输入被整合为结构单元，它才成为我们所谓的「内容」</strong>。（结构潜能是信息在被认知系统处理前所具有的「可被结构化」的能力。只有当认知系统拥有与之匹配的结构模式（S）与连接方式（C），输入才可能转化为结构单元（即理解的内容））</p>
+      <h4>2.2. 从输入到结构：跃迁的三步发生过程</h4>
+      <p>ESC将理解的发生描述为三步跃迁过程，每一步都不是心理现象，而是结构行为：</p>
+      <p>连接生成（结构潜能激活）：输入单位之间出现模式耦合的可能性；<br>
+      结构闭合（生成最小结构）：多个连接形成封闭路径，构成结构单元；<br>
+      调用验证（系统内验证）：结构被系统识别并纳入可用路径，产生「理解感」。</p>
+      <p>理解的「跃迁感」，往往发生在第三阶段：</p>
+      <p><strong>当结构完成闭合，并被系统整合进整体认知图谱时，系统「承认」了这一结构为稳定的部分，才产生了「我懂了」的体验。</strong></p>
+      <h4>2.3. 时间是理解发生的维度</h4>
+      <p>结构化是一个过程，因此理解也必须被视为时间维度中的发生现象。没有时间，就没有：</p>
+      <p>输入的持续性；连接的延展性；结构的沉淀性；验证的反馈性。</p>
+      <p>ESC在公式中写作 s(t)，意在强调：</p>
+      <p><strong>结构化只有在时间中才能展开，理解也只能在时间中发生。</strong></p>
+      <p>理解不是瞬间事件，而是系统在时间中完成的结构整合：它有前提、有路径、有演化、有反馈。</p>
+      <h4>2.4. 「理解失败」是结构生成失败的表现</h4>
+      <p>理解失败并不意味着个体「能力不够」，而是系统在结构化路径上未能成功：</p>
+      <p>输入过于稀疏或过载，难以形成连接；<br>
+      缺乏已有结构参照，无法闭合路径；<br>
+      缺乏时间维度与反馈机制，导致结构不稳定；<br>
+      缺少可调用的语言或范畴，使得结构难以外化。</p>
+      <p>因此，教育、学习、认知优化的核心，不是填塞更多信息，而是优化结构路径生成的能力。<strong>这正是ESC所主张的认知演化方向：</strong></p>
+      <p><strong>不增加「知识量」，而增强「结构能力」。</strong></p>
+      <h4>2.5. 引向下一节：结构如何发生？</h4>
+      <p>本节界定了理解的发生并非意识顿悟，而是结构的成功生成。但接下来的问题是：结构本身是如何发生的？</p>
+      <p>我们将进入结构生成的三大核心机制—— 连接、模式与时间—— 以揭示结构如何从混沌输入中浮现，如何在系统中占据位置，如何在认知演化中成为「现实单位」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第2节卡（2.2 三步跃迁 表格） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · Three Leaps</div><div>06 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>从输入到结构：三步跃迁 · 2.2</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>「我懂了」发生在第三步</h2>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:20%">阶段</th><th style="width:28%">名称</th><th>描述</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">连接生成</td><td>结构潜能激活</td><td>输入单位之间出现模式耦合的可能性</td></tr>
+        <tr><td class="em-cell">结构闭合</td><td>生成最小结构</td><td>多个连接形成封闭路径，构成结构单元</td></tr>
+        <tr><td class="em-cell">调用验证</td><td>系统内验证</td><td>结构被系统识别并纳入可用路径，产生「理解感」</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:70vw;margin-top:4vh" data-anim>
+      <span class="q-big">当结构完成闭合，并被系统整合进整体认知图谱时，系统「承认」了这一结构为稳定的部分，才产生了「我懂了」的体验。输入不是「现实内容」，而是认知系统面前的结构潜能。</span>
+      <span class="cite">2.1 / 2.2 · 每一步都不是心理现象，而是结构行为</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 06 · Three Leaps</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1 / 2.2</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1. 输入是潜能，不是内容</h4>
+      <p>我们常说「获取信息」以促进理解，但信息本身并不包含意义。信息只是可被接收、可被加工的输入单位，它的意义取决于系统是否能够将其组织进结构之中。</p>
+      <p>ESC指出：</p>
+      <p>输入没有结构 → 不可被识别；<br>
+      输入无连接 → 无法被组织；<br>
+      输入无路径 → 不可被理解。</p>
+      <p>在这一点上，ESC与传统的信息理论断裂开来。<strong>输入不是「现实内容」，而是认知系统面前的结构潜能。只有当输入被整合为结构单元，它才成为我们所谓的「内容」</strong>。（结构潜能是信息在被认知系统处理前所具有的「可被结构化」的能力。只有当认知系统拥有与之匹配的结构模式（S）与连接方式（C），输入才可能转化为结构单元（即理解的内容））</p>
+      <h4>2.2. 从输入到结构：跃迁的三步发生过程</h4>
+      <p>ESC将理解的发生描述为三步跃迁过程，每一步都不是心理现象，而是结构行为：</p>
+      <p>连接生成（结构潜能激活）：输入单位之间出现模式耦合的可能性；<br>
+      结构闭合（生成最小结构）：多个连接形成封闭路径，构成结构单元；<br>
+      调用验证（系统内验证）：结构被系统识别并纳入可用路径，产生「理解感」。</p>
+      <p>理解的「跃迁感」，往往发生在第三阶段：</p>
+      <p><strong>当结构完成闭合，并被系统整合进整体认知图谱时，系统「承认」了这一结构为稳定的部分，才产生了「我懂了」的体验。</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第3节 命题页 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>第 3 节 · 结构如何发生</div><div>07 / 17</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · 结构生成的最小动力系统</div>
+    <h1 class="h-hero" style="font-size:6.6vw" data-anim>连接 × 模式 × 时间</h1>
+    <p class="lead" style="max-width:66vw" data-anim>这三者构成结构生成的最小动力系统，是认知系统将原始输入组织为有意义结构的必要机制。</p>
+    <div class="callout" style="max-width:62vw" data-anim>
+      <span class="q-big">Connection × Pattern × Time</span>
+      <span class="cite">3.0 · 协同构成一个闭环机制</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 07 · C × P × T</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 结构如何发生：连接 × 模式 × 时间</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 结构如何发生：连接 × 模式 × 时间</h4>
+      <p>结构不是固有于世界的实体，而是认知系统中被生成出来的组织单位。它既不是输入本身，也不是解释结果，而是连接、模式与时间在认知系统中共同运作的产物。ESC认为，理解的本质，即是结构的发生。而结构的发生，本质上是一种时间中的组织行为，需要满足特定的生成机制。</p>
+      <p>本节将结构的生成机制明确拆解为三个协同变量：</p>
+      <p><strong>连接（Connection）× 模式（Pattern）× 时间（Time）</strong></p>
+      <p>这三者构成结构生成的最小动力系统，是认知系统将原始输入组织为有意义结构的必要机制。</p>
+      <h4>3.1. 连接：结构发生的起点机制</h4>
+      <p>连接（C）是结构生成的第一步。没有连接，输入只能孤立存在，无法构成路径，更无法生成结构。连接不是物理上的相邻或信息的并列，而是一种具备结构意向性的组合关系，表现为：</p>
+      <p>逻辑连接：如「因果」、「并列」、「对比」；<br>
+      语义连接：如「意义相似」、「象征映射」、「隐喻抽象」；<br>
+      感知连接：如「视觉接近」、「声音重复」、「节奏共振」；<br>
+      文化连接：如「情境惯性」、「类属联想」、「经验范畴」。</p>
+      <p>ESC强调，连接并非凭空发生，而是被系统激活的结构通道。换言之，输入之间的连接并不自动生成，而是要被结构系统「选择」与「确认」。</p>
+      <h4>3.2. 模式：连接生成结构的组织逻辑</h4>
+      <p>仅有连接还不足以形成结构。结构要求的不只是连接，而是连接之间能够形成某种组织逻辑，即「模式」。</p>
+      <p>模式是系统识别结构稳定性的基本手段，它决定：</p>
+      <p>连接是否可重复调用；输出是否可预测；单元是否可归入已有结构网格中。</p>
+      <p>常见的模式类型包括：</p>
+      <p>重复模式：如节奏、图形、句式；<br>
+      关系模式：如递进、层级、循环；<br>
+      演化模式：如螺旋推进、反馈校准、解构重组；<br>
+      认知模式：如比喻、范畴、剧本结构。</p>
+      <p>模式使连接从「偶然耦合」变为「系统结构」，使结构具备可被识别、可被封装、可被沉淀的可能性。</p>
+      <h4>3.3. 时间：结构形成的递归维度</h4>
+      <p>结构的生成从不是一次性的，它依赖于时间的递进，具体体现在三个层面：</p>
+      <p>延展：结构的展开需要时间，在时间中完成路径激活与闭合；<br>
+      反馈：系统对结构路径的使用结果进行回馈，决定其保留与淘汰；<br>
+      优化：结构在反复使用中被简化、固化、嵌套，成为系统默认路径。</p>
+      <p>ESC在公式中将结构化写作 s(t)，即指出：</p>
+      <p><strong>结构不是静态存在，而是时间维度上的动态生成机制。</strong></p>
+      <p>也正因此，结构化路径是可演化的，理解也是可训练的。</p>
+      <h4>3.4. 三者如何协同构成结构生成单元？</h4>
+      <p>结构发生并不是这三个变量的相加，而是它们之间的协同构成一个闭环机制：</p>
+      <p>1.连接生成组织可能性；<br>
+      2.模式赋予连接以结构逻辑；<br>
+      3.时间保证模式的反馈与优化。</p>
+      <p>只有在三者共同作用下，系统才能从杂乱的输入中生成一个可用的、稳定的、可调用的结构单元。而每一个结构单元的生成，都是一次认知系统的「理解跃迁」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第3节卡（三变量） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · Three Variables</div><div>08 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三个协同变量 · 3.1-3.3</div>
+    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>闭环，而非相加</h2>
+    <div class="pipeline" data-cols="3">
+      <div class="step" data-anim>
+        <div class="step-nb">i</div>
+        <div class="step-title">连接 · 起点机制</div>
+        <div class="step-desc">逻辑 / 语义 / 感知 / 文化四类连接——被系统激活的结构通道，需被「选择」与「确认」。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">ii</div>
+        <div class="step-title">模式 · 组织逻辑</div>
+        <div class="step-desc">重复 / 关系 / 演化 / 认知四类模式——使连接从「偶然耦合」变为「系统结构」。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">iii</div>
+        <div class="step-title">时间 · 递归维度</div>
+        <div class="step-desc">延展 / 反馈 / 优化三个层面——结构不是静态存在，而是 s(t) 动态生成机制。</div>
+      </div>
+    </div>
+    <div class="callout" style="max-width:64vw;margin-top:5vh" data-anim>
+      <span class="q-big">连接生成组织可能性；模式赋予连接以结构逻辑；时间保证模式的反馈与优化。每一个结构单元的生成，都是一次「理解跃迁」。</span>
+      <span class="cite">3.4 · 三者协同构成结构生成单元</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 08 · Three Variables</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.4</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1. 连接：结构发生的起点机制</h4>
+      <p>连接（C）是结构生成的第一步。没有连接，输入只能孤立存在，无法构成路径，更无法生成结构。连接不是物理上的相邻或信息的并列，而是一种具备结构意向性的组合关系，表现为：</p>
+      <p>逻辑连接：如「因果」、「并列」、「对比」；<br>
+      语义连接：如「意义相似」、「象征映射」、「隐喻抽象」；<br>
+      感知连接：如「视觉接近」、「声音重复」、「节奏共振」；<br>
+      文化连接：如「情境惯性」、「类属联想」、「经验范畴」。</p>
+      <p>ESC强调，连接并非凭空发生，而是被系统激活的结构通道。换言之，输入之间的连接并不自动生成，而是要被结构系统「选择」与「确认」。</p>
+      <h4>3.2. 模式：连接生成结构的组织逻辑</h4>
+      <p>仅有连接还不足以形成结构。结构要求的不只是连接，而是连接之间能够形成某种组织逻辑，即「模式」。</p>
+      <p>模式是系统识别结构稳定性的基本手段，它决定：</p>
+      <p>连接是否可重复调用；输出是否可预测；单元是否可归入已有结构网格中。</p>
+      <p>常见的模式类型包括：</p>
+      <p>重复模式：如节奏、图形、句式；<br>
+      关系模式：如递进、层级、循环；<br>
+      演化模式：如螺旋推进、反馈校准、解构重组；<br>
+      认知模式：如比喻、范畴、剧本结构。</p>
+      <p>模式使连接从「偶然耦合」变为「系统结构」，使结构具备可被识别、可被封装、可被沉淀的可能性。</p>
+      <h4>3.3. 时间：结构形成的递归维度</h4>
+      <p>结构的生成从不是一次性的，它依赖于时间的递进，具体体现在三个层面：</p>
+      <p>延展：结构的展开需要时间，在时间中完成路径激活与闭合；<br>
+      反馈：系统对结构路径的使用结果进行回馈，决定其保留与淘汰；<br>
+      优化：结构在反复使用中被简化、固化、嵌套，成为系统默认路径。</p>
+      <p>ESC在公式中将结构化写作 s(t)，即指出：</p>
+      <p><strong>结构不是静态存在，而是时间维度上的动态生成机制。</strong></p>
+      <p>也正因此，结构化路径是可演化的，理解也是可训练的。</p>
+      <h4>3.4. 三者如何协同构成结构生成单元？</h4>
+      <p>结构发生并不是这三个变量的相加，而是它们之间的协同构成一个闭环机制：</p>
+      <p>1.连接生成组织可能性；<br>
+      2.模式赋予连接以结构逻辑；<br>
+      3.时间保证模式的反馈与优化。</p>
+      <p>只有在三者共同作用下，系统才能从杂乱的输入中生成一个可用的、稳定的、可调用的结构单元。而每一个结构单元的生成，都是一次认知系统的「理解跃迁」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第4节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 递归与系统</div><div>09 / 17</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · 结构化的递归性与系统性</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">理解之所以深化，不是内容增加，</span>
+      <span data-anim="line" style="display:block">而是结构系统的组织密度上升。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>递归使结构成为活的路径系统——每一次理解，都是结构的再次生成；每一次失败，都是结构的演化起点。</p>
+  </div>
+  <div class="foot"><div>Page 09 · 递归与系统</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 结构化的递归性与系统性</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 结构化的递归性与系统性</h4>
+      <p>结构一旦被生成，就不会孤立存在于认知系统之中。它总是被调用、被嵌入、被扩展，最终成为一个更大系统的一部分。这种从单一结构单元到结构网络的过程，并非线性堆叠，而是一种递归机制的持续生成与反馈优化过程。</p>
+      <p>本节将探讨：</p>
+      <p>结构如何在系统中被嵌套与再利用；<br>
+      结构的反馈如何形成「演化性稳定」；<br>
+      系统性如何不是结构的集合，而是结构的组织逻辑；<br>
+      结构为什么能够「活下去」，并成为认知系统的秩序基础。</p>
+      <h4>4.1. 理解的本质是结构系统的形成</h4>
+      <p>前几节已指出，结构化不只是生成结构单元，更是理解发生的本体机制。但我们需要更进一步指出：理解之所以可能长期维持，不是因为个别结构强健，而是因为结构之间能够互为支持，构成系统。</p>
+      <p>在ESC中，「理解」可以定义为：<strong>结构单元之间形成系统性调用路径的能力。</strong></p>
+      <p>这就意味着，结构化不止一次性地「构建结构」，还必须：</p>
+      <p>嵌套：结构成为更大结构的子结构；<br>
+      迭代：结构在重复中优化其路径；<br>
+      连接：结构之间构成多维度的可操作网络。</p>
+      <p>理解越深，不是结构越多，而是结构之间的系统性越强。</p>
+      <h4>4.2. 结构的递归性：从调用到反馈再到优化</h4>
+      <p>ESC提出结构化的核心特征之一即为递归性（Recursiveness）：结构不是一次生成后即固定，而是在每次调用中被测试、修正、稳定、演化。结构的递归路径包括：</p>
+      <p>调用：被系统选中用于处理输入——验证其适用性；<br>
+      反馈：成功则路径强化，失败则路径退化——生成适配性判断；<br>
+      修正：与已有结构交互，调整连接或范畴——提高稳定性与调用效率；<br>
+      封装：被内嵌于更大结构中，获得更强存续可能——系统沉淀。</p>
+      <p>递归使得结构不是静态实体，而是活的路径系统：每一次理解，都是结构的再次生成；每一次失败，都是结构的演化起点。</p>
+      <h4>4.3. 系统性不是「结构之和」，而是「结构之网」</h4>
+      <p>一个认知系统的结构能力，不在于它拥有多少独立结构单元，而在于它能否将这些结构形成可互调用的组织网络。</p>
+      <p>ESC认为系统性具有以下四大特征：</p>
+      <p>路径可调用性：任一结构能否被其他结构快速访问；<br>
+      多层嵌套性：结构是否能成为更复杂结构的组成单元；<br>
+      冗余与替代性：结构是否在失效时能被等价替代路径修复；<br>
+      反馈响应性：结构是否能依据输入变化调整输出方式。</p>
+      <p>这不是「积木拼接」，而是一个「演化型网络」的不断自我生成与自我调节系统。</p>
+      <h4>4.4. 理解为何会「越用越深」？</h4>
+      <p>ESC提供一个关键视角：</p>
+      <p><strong>理解之所以深化，不是内容增加，而是结构系统的组织密度上升。</strong></p>
+      <p>「理解加深」实际上是：</p>
+      <p>同一结构被多路径调用，稳定性增强；<br>
+      被嵌套于更多高阶结构中，获取系统支撑；<br>
+      与其他结构连接形成多层关联网络，提高泛化能力；<br>
+      被反馈机制多次强化，获得精细化输入响应能力。</p>
+      <p>我们之所以「越理解越理解」，是因为我们之中，结构越来越像系统。</p>
+      <h4>4.5. 链接下一节：理解即结构、结构即现实单元</h4>
+      <p>结构化的系统性，最终使得结构不仅是认知的中介，更成为现实本身的构成单位。在ESC中，所谓「我们所知的世界」，正是被结构化后稳定存在于认知系统中的内容集合。</p>
+      <p>下一节将以此为基础，展开哲学层次的命题— 理解即结构，结构即可调用的现实单位，并进一步揭示我们如何在认知中「制造现实」，而非「发现现实」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第4节卡1（4.2 递归 表格） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · Recursion</div><div>10 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>结构的递归路径 · 4.2</div>
+    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>活的路径系统</h2>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:16%">阶段</th><th style="width:46%">行为机制</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">调用</td><td>被系统选中用于处理输入</td><td>验证其适用性</td></tr>
+        <tr><td class="em-cell">反馈</td><td>成功则路径强化，失败则路径退化</td><td>生成适配性判断</td></tr>
+        <tr><td class="em-cell">修正</td><td>与已有结构交互，调整连接或范畴</td><td>提高稳定性与调用效率</td></tr>
+        <tr><td class="em-cell">封装</td><td>被内嵌于更大结构中，获得更强存续可能</td><td>系统沉淀</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:66vw;margin-top:4vh" data-anim>
+      <span class="q-big">「理解」= 结构单元之间形成系统性调用路径的能力。理解越深，不是结构越多，而是结构之间的系统性越强。</span>
+      <span class="cite">4.1 / 4.2 · 递归性 Recursiveness</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 10 · Recursion</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1 / 4.2</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1. 理解的本质是结构系统的形成</h4>
+      <p>前几节已指出，结构化不只是生成结构单元，更是理解发生的本体机制。但我们需要更进一步指出：理解之所以可能长期维持，不是因为个别结构强健，而是因为结构之间能够互为支持，构成系统。</p>
+      <p>在ESC中，「理解」可以定义为：<strong>结构单元之间形成系统性调用路径的能力。</strong></p>
+      <p>这就意味着，结构化不止一次性地「构建结构」，还必须：</p>
+      <p>嵌套：结构成为更大结构的子结构；<br>
+      迭代：结构在重复中优化其路径；<br>
+      连接：结构之间构成多维度的可操作网络。</p>
+      <p>理解越深，不是结构越多，而是结构之间的系统性越强。</p>
+      <h4>4.2. 结构的递归性：从调用到反馈再到优化</h4>
+      <p>ESC提出结构化的核心特征之一即为递归性（Recursiveness）：结构不是一次生成后即固定，而是在每次调用中被测试、修正、稳定、演化。结构的递归路径包括：</p>
+      <p>调用：被系统选中用于处理输入——验证其适用性；<br>
+      反馈：成功则路径强化，失败则路径退化——生成适配性判断；<br>
+      修正：与已有结构交互，调整连接或范畴——提高稳定性与调用效率；<br>
+      封装：被内嵌于更大结构中，获得更强存续可能——系统沉淀。</p>
+      <p>递归使得结构不是静态实体，而是活的路径系统：每一次理解，都是结构的再次生成；每一次失败，都是结构的演化起点。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第4节卡2（4.3+4.4） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · The Network</div><div>11 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>系统性的四大特征 · 4.3 / 4.4</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>不是「结构之和」，而是「结构之网」</h2>
+    <div class="grid-2">
+      <div data-anim style="padding:2vh 1.6vw;border-left:3px solid currentColor">
+        <div class="kicker">网络四特征</div>
+        <p class="body-zh" style="margin-top:1.2vh">路径可调用性 · 多层嵌套性 · 冗余与替代性 · 反馈响应性——不是「积木拼接」，而是「演化型网络」的自我生成与自我调节。</p>
+      </div>
+      <div data-anim style="padding:2vh 1.6vw;border-left:3px solid currentColor">
+        <div class="kicker">越用越深的四条路径</div>
+        <p class="body-zh" style="margin-top:1.2vh">多路径调用使稳定性增强 · 嵌入高阶结构获取系统支撑 · 多层关联提高泛化 · 反馈强化带来精细响应。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:62vw;margin-top:4vh" data-anim>
+      <span class="q-big">我们之所以「越理解越理解」，是因为我们之中，结构越来越像系统。</span>
+      <span class="cite">4.4 · 组织密度上升，而非内容增加</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 11 · The Network</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.3 / 4.4 / 4.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.3. 系统性不是「结构之和」，而是「结构之网」</h4>
+      <p>一个认知系统的结构能力，不在于它拥有多少独立结构单元，而在于它能否将这些结构形成可互调用的组织网络。</p>
+      <p>ESC认为系统性具有以下四大特征：</p>
+      <p>路径可调用性：任一结构能否被其他结构快速访问；<br>
+      多层嵌套性：结构是否能成为更复杂结构的组成单元；<br>
+      冗余与替代性：结构是否在失效时能被等价替代路径修复；<br>
+      反馈响应性：结构是否能依据输入变化调整输出方式。</p>
+      <p>这不是「积木拼接」，而是一个「演化型网络」的不断自我生成与自我调节系统。</p>
+      <h4>4.4. 理解为何会「越用越深」？</h4>
+      <p>ESC提供一个关键视角：</p>
+      <p><strong>理解之所以深化，不是内容增加，而是结构系统的组织密度上升。</strong></p>
+      <p>「理解加深」实际上是：</p>
+      <p>同一结构被多路径调用，稳定性增强；<br>
+      被嵌套于更多高阶结构中，获取系统支撑；<br>
+      与其他结构连接形成多层关联网络，提高泛化能力；<br>
+      被反馈机制多次强化，获得精细化输入响应能力。</p>
+      <p>我们之所以「越理解越理解」，是因为我们之中，结构越来越像系统。</p>
+      <h4>4.5. 链接下一节：理解即结构、结构即现实单元</h4>
+      <p>结构化的系统性，最终使得结构不仅是认知的中介，更成为现实本身的构成单位。在ESC中，所谓「我们所知的世界」，正是被结构化后稳定存在于认知系统中的内容集合。</p>
+      <p>下一节将以此为基础，展开哲学层次的命题— 理解即结构，结构即可调用的现实单位，并进一步揭示我们如何在认知中「制造现实」，而非「发现现实」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 第5节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 理解即结构</div><div>12 / 17</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 结构如何成为知识与现实</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.3;max-width:82vw">
+      <span data-anim="line" style="display:block">我们不生活在事实中，</span>
+      <span data-anim="line" style="display:block">而生活在结构之中。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>当结构成为多重系统所共享、跨时间稳定、被语言与工具广泛依赖时，它将从认知系统内部跃迁为「现实单位」。</p>
+  </div>
+  <div class="foot"><div>Page 12 · 理解即结构</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 理解即结构：结构如何成为知识与现实</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 理解即结构：结构如何成为知识与现实</h4>
+      <p>人类所谓的「理解世界」，其实并不是对世界的直接认知，而是通过结构化过程，在认知系统中构建出可被调用的结构单元，并将这些单元沉淀为我们所称之为「知识」的内容。当结构在认知系统中达到高度稳定、被频繁调用、具有高度共识性时，它不再只是结构本身，而是获得了现实地位。</p>
+      <p>ESC提出如下命题：</p>
+      <p><strong>理解 = 结构化生成的可调用单元，</strong></p>
+      <p><strong>结构 = 被系统承认的知识单位，</strong></p>
+      <p><strong>而知识 = 被结构化后的现实构成方式。</strong></p>
+      <p>这一链条最终导出我们最关键的判断：</p>
+      <p><strong>我们所理解的世界，就是结构化构建出的现实。</strong></p>
+      <h4>5.1. 什么叫「结构即理解」？</h4>
+      <p>从前面章节我们知道，结构不是静态内容，而是在系统中被调用、被嵌套、被反馈验证的动态单位。而理解之所以成立，不是因为我们「知道了一个事实」，而是因为：</p>
+      <p><strong>系统中生成了结构；结构适配输入、整合路径；结构获得系统的认知可用性。</strong></p>
+      <p>因此，<strong>理解不是「获取一个概念」，而是「拥有一个结构」。</strong></p>
+      <p>从这个角度来看，「理解」是一种结构在系统中成功建成并能被使用的状态，<strong>而非意识的某种顿悟或内容的拥有。</strong></p>
+      <h4>5.2. 什么叫「结构即知识」？</h4>
+      <p>知识的本质，从ESC视角来看，不是信息本身，而是信息被系统封装为结构之后，所获得的「调用能力」与「确认状态」。也就是说，一个结构成为知识的过程，是：</p>
+      <p>从输入 → 形成连接 → 生成结构；被系统多次调用，产生反馈验证；被嵌入知识图谱，形成范畴位置；被赋予符号、语言、标签、概念；成为稳定的、可共享的认知内容。</p>
+      <p>知识不是存在于外部的「真理」，而是系统内部的结构稳定产物。我们对「能量守恒」「货币交换」「民主」「爱」「线性方程」的理解，全部来自系统中某种结构路径的高频调用与长期稳定。</p>
+      <p>ESC判断：</p>
+      <p><strong>知识 = 被结构化的理解，</strong></p>
+      <p><strong>而理解 = 结构的生成与嵌套。</strong></p>
+      <h4>5.3. 什么叫「结构即现实」？最具哲学意义的命题在此。</h4>
+      <p><strong>当结构不是仅为个体所使用，而成为：</strong></p>
+      <p>多重系统所共享；<br>
+      跨时间维度所稳定；<br>
+      被社会语言、教育系统、工具体系广泛承认并依赖；</p>
+      <p><strong>那么，该结构将从认知系统内部跃迁为我们所称的「现实单位」。</strong></p>
+      <p>我们并不直接面对现实，而是面对结构之后的现实幻影：</p>
+      <p>我们说「国家」，是国家这个概念的结构被长期封装；<br>
+      我们说「自我」，是对自我结构的不断调用与反馈所形成；<br>
+      我们说「宇宙」，是对观察结构的模型化推演结果；<br>
+      我们说「事实」，是对结构路径的共识封装。</p>
+      <p>ESC提出：</p>
+      <p><strong>我们不生活在事实中，而生活在结构之中。</strong></p>
+      <p><strong>我们不理解世界本身，而理解结构对世界的组织形式。</strong></p>
+      <h4>5.4. 结构是现实的「调用接口」</h4>
+      <p>如果我们从系统认知的视角进一步推演，就会发现：</p>
+      <p>系统无法调用未结构化的信息；<br>
+      无法反馈结构不稳定的概念；<br>
+      无法共享未嵌套进系统的路径。</p>
+      <p>因此，现实不是一种「存在本身」，而是一种「被系统成功调用的结构组合状态」。</p>
+      <p>这也解释了为什么「事实」会改变、「世界观」会更新、「科学」会被推翻、「语言」会演化，因为—— <strong>我们对现实的认知边界，就是我们能调用的结构上限。</strong></p>
+      <h4>5.5. ESC关于「现实」的哲学判断</h4>
+      <p>本节将以上判断浓缩为ESC关于「现实」的哲学命题：</p>
+      <p>现实是结构性的，而非本体性的——世界之所以为「世界」，是因为结构的组织所赋予；<br>
+      理解即结构化生成现实的路径——所谓「认知世界」，是系统将信息组织成结构的过程；<br>
+      知识是结构系统的封装结果——知识不是外部真理，而是系统的结构图谱；<br>
+      现实感来自结构的稳定调用——我们「感觉世界真实」，是因为结构长期稳定、反馈正向。</p>
+      <p>这也引出了ESC理论的核心哲学转向：</p>
+      <p><strong>我们面对的世界，不是「存在本身」，而是「被结构化之后的存在形式」。</strong></p>
+      <p><strong>结构化是我们理解世界的最直接表达。</strong></p>
+      <h4>5.6. 链接下一章：结构趋稳如何生成内在原理（IP）</h4>
+      <p>一旦结构高度稳定，它就不再是「个体理解」，而是成为「系统秩序」。</p>
+      <p>下一章将正式探讨：</p>
+      <p>结构何时趋于稳定？<br>
+      结构如何在反馈中获得「法则地位」？<br>
+      系统如何从结构中演化出「内在原理」？</p>
+      <p>我们将从「结构的稳定机制」走向「自然法则的生成逻辑」，进入ESC公式的中轴命题之一：</p>
+      <p><strong>s(t) → IP</strong></p>
+      <p>—— 结构在时间中递归，涌现内在原理。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P13 · 第5节卡（链条+现实哲学） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · Structure = Reality</div><div>13 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三段链条与哲学判断 · 5.1-5.5</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.6vh" data-anim>理解 = 结构 · 知识 = 封装 · 现实 = 调用</h2>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:38%">命题</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">现实是结构性的，而非本体性的</td><td>世界之所以为「世界」，是因为结构的组织所赋予</td></tr>
+        <tr><td class="em-cell">理解即结构化生成现实的路径</td><td>所谓「认知世界」，是系统将信息组织成结构的过程</td></tr>
+        <tr><td class="em-cell">知识是结构系统的封装结果</td><td>知识不是外部真理，而是系统的结构图谱</td></tr>
+        <tr><td class="em-cell">现实感来自结构的稳定调用</td><td>我们「感觉世界真实」，是因为结构长期稳定、反馈正向</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:68vw;margin-top:3.6vh" data-anim>
+      <span class="q-big">我们对现实的认知边界，就是我们能调用的结构上限——「事实」会改变、「科学」会被推翻、「语言」会演化，根源皆在于此。</span>
+      <span class="cite">5.4 / 5.5 · 结构是现实的「调用接口」</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 13 · Structure = Reality</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1. 什么叫「结构即理解」？</h4>
+      <p>从前面章节我们知道，结构不是静态内容，而是在系统中被调用、被嵌套、被反馈验证的动态单位。而理解之所以成立，不是因为我们「知道了一个事实」，而是因为：</p>
+      <p><strong>系统中生成了结构；结构适配输入、整合路径；结构获得系统的认知可用性。</strong></p>
+      <p>因此，<strong>理解不是「获取一个概念」，而是「拥有一个结构」。</strong></p>
+      <p>从这个角度来看，「理解」是一种结构在系统中成功建成并能被使用的状态，<strong>而非意识的某种顿悟或内容的拥有。</strong></p>
+      <h4>5.2. 什么叫「结构即知识」？</h4>
+      <p>知识的本质，从ESC视角来看，不是信息本身，而是信息被系统封装为结构之后，所获得的「调用能力」与「确认状态」。也就是说，一个结构成为知识的过程，是：</p>
+      <p>从输入 → 形成连接 → 生成结构；被系统多次调用，产生反馈验证；被嵌入知识图谱，形成范畴位置；被赋予符号、语言、标签、概念；成为稳定的、可共享的认知内容。</p>
+      <p>知识不是存在于外部的「真理」，而是系统内部的结构稳定产物。我们对「能量守恒」「货币交换」「民主」「爱」「线性方程」的理解，全部来自系统中某种结构路径的高频调用与长期稳定。</p>
+      <p>ESC判断：</p>
+      <p><strong>知识 = 被结构化的理解，</strong></p>
+      <p><strong>而理解 = 结构的生成与嵌套。</strong></p>
+      <h4>5.3. 什么叫「结构即现实」？最具哲学意义的命题在此。</h4>
+      <p><strong>当结构不是仅为个体所使用，而成为：</strong></p>
+      <p>多重系统所共享；<br>
+      跨时间维度所稳定；<br>
+      被社会语言、教育系统、工具体系广泛承认并依赖；</p>
+      <p><strong>那么，该结构将从认知系统内部跃迁为我们所称的「现实单位」。</strong></p>
+      <p>我们并不直接面对现实，而是面对结构之后的现实幻影：</p>
+      <p>我们说「国家」，是国家这个概念的结构被长期封装；<br>
+      我们说「自我」，是对自我结构的不断调用与反馈所形成；<br>
+      我们说「宇宙」，是对观察结构的模型化推演结果；<br>
+      我们说「事实」，是对结构路径的共识封装。</p>
+      <p>ESC提出：</p>
+      <p><strong>我们不生活在事实中，而生活在结构之中。</strong></p>
+      <p><strong>我们不理解世界本身，而理解结构对世界的组织形式。</strong></p>
+      <h4>5.4. 结构是现实的「调用接口」</h4>
+      <p>如果我们从系统认知的视角进一步推演，就会发现：</p>
+      <p>系统无法调用未结构化的信息；<br>
+      无法反馈结构不稳定的概念；<br>
+      无法共享未嵌套进系统的路径。</p>
+      <p>因此，现实不是一种「存在本身」，而是一种「被系统成功调用的结构组合状态」。</p>
+      <p>这也解释了为什么「事实」会改变、「世界观」会更新、「科学」会被推翻、「语言」会演化，因为—— <strong>我们对现实的认知边界，就是我们能调用的结构上限。</strong></p>
+      <h4>5.5. ESC关于「现实」的哲学判断</h4>
+      <p>本节将以上判断浓缩为ESC关于「现实」的哲学命题：</p>
+      <p>现实是结构性的，而非本体性的——世界之所以为「世界」，是因为结构的组织所赋予；<br>
+      理解即结构化生成现实的路径——所谓「认知世界」，是系统将信息组织成结构的过程；<br>
+      知识是结构系统的封装结果——知识不是外部真理，而是系统的结构图谱；<br>
+      现实感来自结构的稳定调用——我们「感觉世界真实」，是因为结构长期稳定、反馈正向。</p>
+      <p>这也引出了ESC理论的核心哲学转向：</p>
+      <p><strong>我们面对的世界，不是「存在本身」，而是「被结构化之后的存在形式」。</strong></p>
+      <p><strong>结构化是我们理解世界的最直接表达。</strong></p>
+      <h4>5.6. 链接下一章：结构趋稳如何生成内在原理（IP）</h4>
+      <p>一旦结构高度稳定，它就不再是「个体理解」，而是成为「系统秩序」。</p>
+      <p>下一章将正式探讨：</p>
+      <p>结构何时趋于稳定？<br>
+      结构如何在反馈中获得「法则地位」？<br>
+      系统如何从结构中演化出「内在原理」？</p>
+      <p>我们将从「结构的稳定机制」走向「自然法则的生成逻辑」，进入ESC公式的中轴命题之一：</p>
+      <p><strong>s(t) → IP</strong></p>
+      <p>—— 结构在时间中递归，涌现内在原理。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P14 · 第6节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 6 节 · 趋稳与 IP</div><div>14 / 17</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 6 节 · 结构趋稳如何生成内在原理（IP）</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
+      <span data-anim="line" style="display:block">原理不是事物自身的属性，</span>
+      <span data-anim="line" style="display:block">而是系统结构在时间演化中生成的稳定路径。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>IP 是结构系统「自己长出来的秩序」，而不是我们「找到」的。</p>
+  </div>
+  <div class="foot"><div>Page 14 · 趋稳与 IP</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第6节 结构趋稳如何生成内在原理（IP）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第6节 | 结构趋稳如何生成内在原理（IP）</h4>
+      <p>结构一旦在系统中被反复调用、获得反馈验证、嵌套于更高阶结构中，便可能进入一种趋于稳定的状态。当这种稳定性穿越个体、场景、时间乃至系统边界时，它便不再只是「结构」，而演化为系统的内在原理（IP, Intrinsic Principles）。</p>
+      <p>本节将作为第4章的收束，同时开启下一章的核心命题：结构的时间稳定机制与内在原理的生成条件。</p>
+      <h4>6.1. 从「结构稳定」到「结构趋稳」</h4>
+      <p>不是所有结构都能演化为原理。ESC指出，只有具备以下特征的结构，才可能进入趋稳轨道：</p>
+      <p>重复可调用：在不同输入情境中均被激活，适配性强；<br>
+      反馈正向积累：调用后系统反馈稳定，调整频率下降；<br>
+      嵌套跨层深植：成为高阶结构的内核部分，具有衍生能力；<br>
+      语言与概念化封装：被符号体系固定下来，可传播与继承。</p>
+      <p>结构一旦满足以上条件，就不仅是一个「通用结构单元」，而是成为系统的结构恒定规则—— 也就是「原理」。</p>
+      <h4>6.2. IP 的出现：不是被发现，而是被演化</h4>
+      <p>传统哲学或科学思维倾向于将「原理」视为：</p>
+      <p>事物本身所蕴含的必然性；<br>
+      世界运行的客观规律；<br>
+      客观存在中被人类发现的秩序。</p>
+      <p>ESC对此提出反向命题：</p>
+      <p><strong>原理不是事物自身的属性，而是系统结构在时间演化中生成的稳定路径。</strong></p>
+      <p>也就是说，IP 是结构系统「自己长出来的秩序」，而不是我们「找到」的。</p>
+      <p>我们不发现真理，我们是在结构的反馈与优化中，逐步生成一种系统内稳态的路径逻辑，并将其命名为「原理」。</p>
+      <h4>6.3. IP 是系统的「自我证明结构」</h4>
+      <p>当一个结构在系统中长期存在，不再被调整、不再被怀疑、具有高适应性与广泛调用性，它就完成了从「路径」到「规则」的跃迁。</p>
+      <p>此时，该结构满足如下三项特征：</p>
+      <p>1.可内嵌：可以被任意高阶结构调用；<br>
+      2.可拓展：可以迁移到新系统中维持稳定；<br>
+      3.可自洽：在系统内部无需额外验证即可运行。</p>
+      <p>这三项标志着它已经成为系统的内在原理（IP）。</p>
+      <h4>6.4. 为什么我们要区分结构与原理？</h4>
+      <p>因为结构是动态生成的，原理是动态稳定的。</p>
+      <p>不做区分，就会将「正在形成」的路径误认为「已被证实」的真理，导致系统过早封闭、阻碍结构演化。</p>
+      <p>ESC强调：</p>
+      <p>结构：可调整、可反馈、不稳定——组织理解与应对输入；<br>
+      原理（IP）：稳定、深植、不可轻易修正——提供系统运作的稳定核心。</p>
+      <p>IP 是结构在时间演化中的高级形式，是结构向法则逼近的「中间站」。</p>
+      <h4>6.5. 链接下一章：结构演化的核心命题 s(t) → IP</h4>
+      <p>本章围绕结构化机制，完成了从信息输入到结构生成、从结构系统到现实建构的认知路径梳理。下一章将正式踏入：</p>
+      <p>结构如何趋稳？<br>
+      趋稳如何形成系统核心原理？<br>
+      什么样的结构演化过程能「长出」IP？</p>
+      <p>这些将以ESC公式的展开作为逻辑主轴：</p>
+      <p><strong>s(t) → IP</strong></p>
+      <p>即：</p>
+      <p><strong>结构化在时间中的演化，生成系统内部的内在原理。</strong></p>
+      <p>这也是我们如何从「理解」走向「秩序」的路径图。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P15 · 第6节卡（四条件+对照表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 6 · Stabilization</div><div>15 / 17</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>趋稳轨道与结构 / 原理之分 · 6.1 / 6.4</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>只有部分结构能进入趋稳轨道</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:26%">趋稳条件</th><th>描述</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">重复可调用</td><td>在不同输入情境中均被激活，适配性强</td></tr>
+        <tr><td class="em-cell">反馈正向积累</td><td>调用后系统反馈稳定，调整频率下降</td></tr>
+        <tr><td class="em-cell">嵌套跨层深植</td><td>成为高阶结构的内核部分，具有衍生能力</td></tr>
+        <tr><td class="em-cell">语言与概念化封装</td><td>被符号体系固定下来，可传播与继承</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:20%">类型</th><th style="width:40%">特征</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">结构</td><td>可调整、可反馈、不稳定</td><td>组织理解与应对输入</td></tr>
+        <tr><td class="em-cell">原理 IP</td><td>稳定、深植、不可轻易修正</td><td>提供系统运作的稳定核心</td></tr>
+      </tbody>
+    </table>
+    <p class="body-zh" style="max-width:70vw;margin-top:2.6vh" data-anim>IP 的三项特征：可内嵌、可拓展、可自洽——它是结构在时间演化中的高级形式，是结构向法则逼近的「中间站」。</p>
+  </div>
+  <div class="foot"><div>Page 15 · Stabilization</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 6.1-6.4</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>6.1. 从「结构稳定」到「结构趋稳」</h4>
+      <p>不是所有结构都能演化为原理。ESC指出，只有具备以下特征的结构，才可能进入趋稳轨道：</p>
+      <p>重复可调用：在不同输入情境中均被激活，适配性强；<br>
+      反馈正向积累：调用后系统反馈稳定，调整频率下降；<br>
+      嵌套跨层深植：成为高阶结构的内核部分，具有衍生能力；<br>
+      语言与概念化封装：被符号体系固定下来，可传播与继承。</p>
+      <p>结构一旦满足以上条件，就不仅是一个「通用结构单元」，而是成为系统的结构恒定规则—— 也就是「原理」。</p>
+      <h4>6.2. IP 的出现：不是被发现，而是被演化</h4>
+      <p>传统哲学或科学思维倾向于将「原理」视为：</p>
+      <p>事物本身所蕴含的必然性；<br>
+      世界运行的客观规律；<br>
+      客观存在中被人类发现的秩序。</p>
+      <p>ESC对此提出反向命题：</p>
+      <p><strong>原理不是事物自身的属性，而是系统结构在时间演化中生成的稳定路径。</strong></p>
+      <p>也就是说，IP 是结构系统「自己长出来的秩序」，而不是我们「找到」的。</p>
+      <p>我们不发现真理，我们是在结构的反馈与优化中，逐步生成一种系统内稳态的路径逻辑，并将其命名为「原理」。</p>
+      <h4>6.3. IP 是系统的「自我证明结构」</h4>
+      <p>当一个结构在系统中长期存在，不再被调整、不再被怀疑、具有高适应性与广泛调用性，它就完成了从「路径」到「规则」的跃迁。</p>
+      <p>此时，该结构满足如下三项特征：</p>
+      <p>1.可内嵌：可以被任意高阶结构调用；<br>
+      2.可拓展：可以迁移到新系统中维持稳定；<br>
+      3.可自洽：在系统内部无需额外验证即可运行。</p>
+      <p>这三项标志着它已经成为系统的内在原理（IP）。</p>
+      <h4>6.4. 为什么我们要区分结构与原理？</h4>
+      <p>因为结构是动态生成的，原理是动态稳定的。</p>
+      <p>不做区分，就会将「正在形成」的路径误认为「已被证实」的真理，导致系统过早封闭、阻碍结构演化。</p>
+      <p>ESC强调：</p>
+      <p>结构：可调整、可反馈、不稳定——组织理解与应对输入；<br>
+      原理（IP）：稳定、深植、不可轻易修正——提供系统运作的稳定核心。</p>
+      <p>IP 是结构在时间演化中的高级形式，是结构向法则逼近的「中间站」。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P16 · s(t) → IP 公式页 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>Section 6 · The Formula</div><div>16 / 17</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>本章完成 · 公式链条的下一环</div>
+    <h1 class="h-hero" style="font-size:7.4vw" data-anim>s(t) → IP</h1>
+    <p class="lead" style="max-width:66vw" data-anim>结构化在时间中的演化，生成系统内部的内在原理——这也是我们如何从「理解」走向「秩序」的路径图。</p>
+    <p class="meta" data-anim>结构在时间中递归，涌现内在原理</p>
+  </div>
+  <div class="foot"><div>Page 16 · s(t) → IP</div><div>Formula</div></div>
+</section>
+
+<!-- ========== P17 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>17 / 17</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:5.4vw" data-anim>结构化，<br>是理解发生的方式。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：结构化是理解机制而非技术；理解发生的三步跃迁；连接 × 模式 × 时间的生成闭环；递归与系统性；理解即结构、结构即现实；趋稳生成 IP。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>下一章将正式展开 s(t) → IP：结构趋稳的三种机制——调用、嵌套、反馈，以及原理如何在系统中「长出来」。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-06/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 3 章 · 认知不是复制，而是构造</div></a>
+    <a href="../deck-codex-08/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 5 章 · 从结构到原理：IP 的生成机制</div></a>
+  </div>
+  <div class="foot"><div>第 5 章 · 从结构到原理</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-06/index.html', chapterNext = '../deck-codex-08/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>

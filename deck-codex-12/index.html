@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC 系列课程 · 第9章 认知的三类路径：结构分化如何生成三种认知机制？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --paper-tint:#eee7d4;
+    --ink-tint:#302a20;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:7vw;line-height:1.12;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5vw;line-height:1.14;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:2.8vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.14vw);line-height:1.7;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.7vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.2vw;flex:1;align-content:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+  .callout{padding:2.6vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.16vw);line-height:1.52;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.45vw);line-height:1.4}
+
+  .pipeline{display:grid;gap:1.3vw}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.4vw;letter-spacing:.01em;line-height:1.25}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.9vw);line-height:1.48;opacity:.72}
+
+  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(12px,.96vw);line-height:1.55}
+  .tbl th{font-family:var(--mono);font-size:max(11px,.82vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.3vh 1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
+  .tbl td{padding:1.3vh 1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
+  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+
+  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
+  .src-toggle:hover{opacity:1}
+  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
+  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
+  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
+  .src-panel.on{display:block}
+  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
+  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
+  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
+  .src-panel h4:first-of-type{margin-top:0}
+  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.02vw,18px);line-height:1.9;margin:0 0 1.3em;opacity:.92}
+  .src-panel .src-body strong{font-weight:700;opacity:1}
+  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
+
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+
+  @media (max-width:900px){
+    .h-hero{font-size:13vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-3,.grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<script>
+  (function(){
+    const KEY = 'guizang-ppt-low-power';
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stored = localStorage.getItem(KEY);
+    window.__lowPowerMode = stored === '1' || (stored === null && reduced);
+    function updateHint(){
+      const hint = document.getElementById('hint');
+      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+    }
+    window.__setLowPowerMode = function(on, opts={}){
+      window.__lowPowerMode = !!on;
+      document.body.classList.toggle('low-power', window.__lowPowerMode);
+      if(opts.persist !== false) localStorage.setItem(KEY, window.__lowPowerMode ? '1' : '0');
+      if(window.__lowPowerMode && document.getAnimations){
+        document.getAnimations().forEach(a=>a.cancel());
+      }
+      updateHint();
+      dispatchEvent(new CustomEvent('ppt-low-power-change', {detail:{on:window.__lowPowerMode}}));
+      if(window.__playSlide) window.__playSlide(window.__currentSlideIndex || 0);
+    };
+    document.body.classList.toggle('low-power', window.__lowPowerMode);
+    addEventListener('DOMContentLoaded', updateHint, {once:true});
+  })();
+</script>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== P1 · Hero ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 第 9 章</div><div>Chapter IX</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>Three Cognitive Paths</div>
+    <h1 class="h-hero" data-anim>认知的三类路径</h1>
+    <h2 class="h-sub" data-anim>结构分化如何生成三种认知机制？</h2>
+    <p class="lead" style="max-width:62vw" data-anim>S₁ 结构路径 · P 投影路径 · R 关系路径——三轴力场而非三种技能模块。</p>
+    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.19</span><span>·</span><span>ESC 系列课程</span></div>
+  </div>
+  <div class="foot"><div>ESC 系列课程 · 第 9 章</div><div>01 / 16</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">本章全文 · 第9章（来源：结构认知实验室 · 2026年3月19日）</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <p>本章六节：第1节 分化不是随机的——结构如何向三类路径展开；第2节 路径 S₁——结构路径的抽象机制；第3节 路径 P——投影路径的表达机制；第4节 路径 R——关系路径的意义机制；第5节 三路径的互动与耦合机制；第6节 如何用结构螺旋图谱整合三类路径。各页可按 E 展开对应小节逐字原文。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P2 · 第1节 命题页 ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 1 节 · 分化不是随机的</div><div>02 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 1 节 · 结构如何向三类路径展开</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
+      <span data-anim="line" style="display:block">结构路径的分化并非任意，</span>
+      <span data-anim="line" style="display:block">而是系统在演化过程中的必然演出结果。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>三类路径并非认知功能的外部分类，而是结构系统演化过程中的内在引力轴——每一个认知行为，都是系统在 S₁ / P / R 三个方向上不同程度的调动与耦合。</p>
+  </div>
+  <div class="foot"><div>Page 02 · 分化不是随机的</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第1节 分化不是随机的：结构如何向三类路径展开？</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第1节 | 分化不是随机的：结构如何向三类路径展开?</h4>
+      <p>结构演化的过程不仅包含生成，更包含方向。当系统已具备自组织能力、可以调度与组合自身结构时，它所面临的不再是「是否能生成」，而是「生成向何处去」。这一「路径走向」的问题，不是系统偶然的选择，而是系统内部结构机制对自身处理方式的一种分化响应。</p>
+      <p>ESC明确提出：</p>
+      <p><strong>结构路径的分化并非任意，而是系统在演化过程中的必然演出结果。</strong></p>
+      <p>本节将阐明这一命题的理论基础，并首次提出三类结构路径分化的原始动力机制，为后续「路径 S₁ / 路径 P / 路径 R」三重认知轴线做出系统定位。</p>
+      <h4>1.1 路径不是流向，而是方向选择的结构产物</h4>
+      <p>我们通常将「路径」理解为从输入走向输出的一段通路。但在ESC中，路径不是流通的轨迹，而是结构之间连接方式的激活与组合方式。路径本身就是结构生成的产物，而结构生成不止关乎有无，更关乎趋向何种模式。</p>
+      <p>系统每一次结构调用后，都面临一个问题：</p>
+      <p><em>是保持原路径？<br>
+      是压缩后嵌套？<br>
+      是向外投射为表达？<br>
+      是与其他路径混合变形？<br>
+      是转向意义或关系的系统重构？</em></p>
+      <p>这些可能性，不是「由内容决定」，而是由结构机制本身的稳定性、压缩率、输出形式与连接张力决定的。这意味着：</p>
+      <p>路径的分化，是结构机制的方向性演化，而非内容决定的功能分支。</p>
+      <h4>1.2 分化是结构在演化中自发产生的「方向力」</h4>
+      <p>当结构具备自组织能力后，它必然会不断处理反馈、嵌套模块、再组合路径。而随着时间推移，它将逐渐形成如下三种方向性的偏移趋势：</p>
+      <p><em>1.向内压缩的趋势：追求路径效率、规则递归与结构精度，导致结构逐步抽象化 → 生成结构路径 S₁；</em></p>
+      <p><em>2.向外表达的趋势：将结构作为可调用模块外化输出，生成语言、模型、行为 → 生成投影路径 P；</em></p>
+      <p><em>3.向互联扩展的趋势：结构路径不断接入新连接、形成交互模式 → 生成关系路径 R。</em></p>
+      <p>这三种方向性，不是由系统「选择」，而是由结构反馈机制、激活方式与连接条件自然分化出的三种功能走向。</p>
+      <h4>1.3 分化不是解构，而是系统复杂化的维度展开</h4>
+      <p>重要的是，路径分化不是系统解体，而是结构复杂度的「维度生成」机制。ESC将其称为结构系统的「横向张力」。</p>
+      <p>如下三类张力决定系统将如何分化：</p>
+      <p>嵌套张力：结构路径压缩后反复组合——趋向 S₁ 抽象路径；<br>
+      输出张力：路径反馈对外部表达提出要求——趋向 P 投影路径；<br>
+      连接张力：多路径重叠、冲突、交互——趋向 R 关系路径。</p>
+      <p>系统越复杂，三类张力越容易同时出现，分化趋势越明显，最终将系统结构引向三类基本认知路径的分布与互动。</p>
+      <h4>1.4 路径不是风格，而是认知发生的结构引力轴</h4>
+      <p>本节所讨论的「路径分化」概念，不应被误解为：</p>
+      <p><em>不同个体偏好不同路径（如学习风格）；<br>
+      不同学科使用不同路径（如理科 vs 文科）；<br>
+      不同功能启用不同路径（如分析 vs 创造）。</em></p>
+      <p>ESC指出：</p>
+      <p><strong>三类路径并非认知功能的外部分类，而是结构系统演化过程中的内在引力轴。</strong></p>
+      <p>每一个认知行为，其实都是系统在 S₁ / P / R 三个方向上不同程度的调动与耦合。路径分化提供的是「认知发生的三种方向力」，而非「认知结果的三种类型」。</p>
+      <h4>1.5 链接下一节：认知路径如何表达三种结构趋向？</h4>
+      <p>本节建立了如下三个基本命题：</p>
+      <p><em>1.路径分化是结构机制的自然展开结果；<br>
+      2.分化方向由结构张力决定，不由内容选择决定；<br>
+      3.S₁ / P / R 三路径构成认知系统的三轴力场，而非三种技能模块。</em></p>
+      <p>下一节将进入三路径中的第一类：</p>
+      <p>S₁：结构路径，它如何从结构压缩中生成抽象推理与高阶认知？</p>
+      <p>这一路径也是ESC模型中最贴近「结构本体」的路径机制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P3 · 第1节卡（张力表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 1 · Three Tensions</div><div>03 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三类张力决定分化方向 · 1.2 / 1.3</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>三种方向力的来源</h2>
+    <div class="pipeline" data-cols="3" style="margin-bottom:3vh">
+      <div class="step" data-anim>
+        <div class="step-nb">S₁</div>
+        <div class="step-title">向内压缩的趋势</div>
+        <div class="step-desc">追求路径效率、规则递归与结构精度 → 结构逐步抽象化。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">P</div>
+        <div class="step-title">向外表达的趋势</div>
+        <div class="step-desc">结构作为可调用模块外化输出 → 语言、模型、行为。</div>
+      </div>
+      <div class="step" data-anim>
+        <div class="step-nb">R</div>
+        <div class="step-title">向互联扩展的趋势</div>
+        <div class="step-desc">结构路径不断接入新连接、形成交互模式。</div>
+      </div>
+    </div>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:20%">张力类型</th><th style="width:44%">作用机制</th><th>导致结构倾向</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">嵌套张力</td><td>结构路径压缩后反复组合</td><td>趋向 S₁ 抽象路径</td></tr>
+        <tr><td class="em-cell">输出张力</td><td>路径反馈对外部表达提出要求</td><td>趋向 P 投影路径</td></tr>
+        <tr><td class="em-cell">连接张力</td><td>多路径重叠、冲突、交互</td><td>趋向 R 关系路径</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 03 · Three Tensions</div><div>Section 1</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>1.1 路径不是流向，而是方向选择的结构产物</h4>
+      <p>我们通常将「路径」理解为从输入走向输出的一段通路。但在ESC中，路径不是流通的轨迹，而是结构之间连接方式的激活与组合方式。路径本身就是结构生成的产物，而结构生成不止关乎有无，更关乎趋向何种模式。</p>
+      <p>系统每一次结构调用后，都面临一个问题：</p>
+      <p><em>是保持原路径？<br>
+      是压缩后嵌套？<br>
+      是向外投射为表达？<br>
+      是与其他路径混合变形？<br>
+      是转向意义或关系的系统重构？</em></p>
+      <p>这些可能性，不是「由内容决定」，而是由结构机制本身的稳定性、压缩率、输出形式与连接张力决定的。这意味着：</p>
+      <p>路径的分化，是结构机制的方向性演化，而非内容决定的功能分支。</p>
+      <h4>1.2 分化是结构在演化中自发产生的「方向力」</h4>
+      <p>当结构具备自组织能力后，它必然会不断处理反馈、嵌套模块、再组合路径。而随着时间推移，它将逐渐形成如下三种方向性的偏移趋势：</p>
+      <p><em>1.向内压缩的趋势：追求路径效率、规则递归与结构精度，导致结构逐步抽象化 → 生成结构路径 S₁；</em></p>
+      <p><em>2.向外表达的趋势：将结构作为可调用模块外化输出，生成语言、模型、行为 → 生成投影路径 P；</em></p>
+      <p><em>3.向互联扩展的趋势：结构路径不断接入新连接、形成交互模式 → 生成关系路径 R。</em></p>
+      <p>这三种方向性，不是由系统「选择」，而是由结构反馈机制、激活方式与连接条件自然分化出的三种功能走向。</p>
+      <h4>1.3 分化不是解构，而是系统复杂化的维度展开</h4>
+      <p>重要的是，路径分化不是系统解体，而是结构复杂度的「维度生成」机制。ESC将其称为结构系统的「横向张力」。</p>
+      <p>如下三类张力决定系统将如何分化：</p>
+      <p>嵌套张力：结构路径压缩后反复组合——趋向 S₁ 抽象路径；<br>
+      输出张力：路径反馈对外部表达提出要求——趋向 P 投影路径；<br>
+      连接张力：多路径重叠、冲突、交互——趋向 R 关系路径。</p>
+      <p>系统越复杂，三类张力越容易同时出现，分化趋势越明显，最终将系统结构引向三类基本认知路径的分布与互动。</p>
+      <h4>1.4 路径不是风格，而是认知发生的结构引力轴</h4>
+      <p>本节所讨论的「路径分化」概念，不应被误解为：</p>
+      <p><em>不同个体偏好不同路径（如学习风格）；<br>
+      不同学科使用不同路径（如理科 vs 文科）；<br>
+      不同功能启用不同路径（如分析 vs 创造）。</em></p>
+      <p>ESC指出：</p>
+      <p><strong>三类路径并非认知功能的外部分类，而是结构系统演化过程中的内在引力轴。</strong></p>
+      <p>每一个认知行为，其实都是系统在 S₁ / P / R 三个方向上不同程度的调动与耦合。路径分化提供的是「认知发生的三种方向力」，而非「认知结果的三种类型」。</p>
+      <h4>1.5 链接下一节：认知路径如何表达三种结构趋向？</h4>
+      <p>本节建立了如下三个基本命题：</p>
+      <p><em>1.路径分化是结构机制的自然展开结果；<br>
+      2.分化方向由结构张力决定，不由内容选择决定；<br>
+      3.S₁ / P / R 三路径构成认知系统的三轴力场，而非三种技能模块。</em></p>
+      <p>下一节将进入三路径中的第一类：</p>
+      <p>S₁：结构路径，它如何从结构压缩中生成抽象推理与高阶认知？</p>
+      <p>这一路径也是ESC模型中最贴近「结构本体」的路径机制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P4 · 第2节 命题页（S₁） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 2 节 · 路径 S₁</div><div>04 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 2 节 · Structure Path · 结构路径的抽象机制</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.6vw;line-height:1.4;max-width:86vw">
+      <span data-anim="line" style="display:block">认知系统在嵌套压缩中生成的高阶结构路径，</span>
+      <span data-anim="line" style="display:block">其目标是最大化路径一致性、稳定性与递归精度。</span>
+    </blockquote>
+    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>常见于数学逻辑、形式语法、程序推演、理论结构建构——认知系统中最具结构纯度的路径形态。</p>
+  </div>
+  <div class="foot"><div>Page 04 · 路径 S₁</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第2节 路径 S₁：结构路径的抽象机制</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第2节 | 路径 S₁：结构路径的抽象机制</h4>
+      <p>结构路径 S₁（Structure Path）是三类认知路径中最贴近系统本体结构的一种走向。它不是为表达而生成，也不是为关系而调度，而是由系统内部结构机制在压缩、嵌套、递归与反馈优化中自然演化出来的抽象路径轴。</p>
+      <p>ESC将S₁定义为：</p>
+      <p><strong>认知系统在嵌套压缩中生成的高阶结构路径，其目标是最大化路径一致性、稳定性与递归精度。</strong></p>
+      <p>这类路径常见于数学逻辑、形式语法、程序推演、理论结构建构等领域，它构成了认知系统中最具结构纯度的路径形态。本节将从生成机制、路径特性、认知功能与系统意义四个方面，对 S₁ 进行深入剖析。</p>
+      <h4>2.1 S₁路径的生成机制：从压缩到递归演化</h4>
+      <p>S₁ 的演化始于系统对路径调用效率的反馈机制。当某一类路径被频繁调用，其结构关系趋于稳定，系统便启动路径压缩，将其封装为模块；而多个模块的再次嵌套，则形成了结构层级；最终，这些层级在反馈回路中形成了自引用与递归机制，从而构成：</p>
+      <p>S₁： 一种不断向上生成的结构抽象路径。</p>
+      <p>其生成逻辑可表述为如下路径链：</p>
+      <p><em>重复调用 → 路径压缩 → 嵌套组合 → 层级演化 → 自引用递归 → 结构路径 S₁</em></p>
+      <p>这类路径并非出于表达或意义，而是出于系统对结构效率与一致性的优化结果。它是结构性精度的产物，代表系统自身的「组织逻辑」。</p>
+      <h4>2.2 S₁路径的特征：稳定性 × 嵌套性 × 演绎性</h4>
+      <p>S₁具备如下三大结构性特征：</p>
+      <p>结构稳定性：路径在多次调用后结构不变——增强结构一致性与预测性；<br>
+      嵌套递归性：路径之间形成可嵌套与可自调用的层级关系——支持系统从局部结构中构建全局图谱；<br>
+      演绎可展性：从核心结构可推演出多个派生结构——支持从原则性结构生成多种应用结构。</p>
+      <p>S₁路径是最适合建立知识系统的底层架构的结构类型，它构成了「知识为何可再现、可复制、可验证」的基础条件。</p>
+      <h4>2.3 S₁路径的认知功能：抽象化与原则建构</h4>
+      <p>S₁路径赋予认知系统如下能力：</p>
+      <p><em>结构抽象能力：从多组实例中提取共性结构，生成稳定图式；<br>
+      原则建构能力：形成可嵌套、可推广的结构规则；<br>
+      系统化能力：将分散结构组织为层级网络；<br>
+      演绎预测能力：通过结构推理预测系统行为与结果。</em></p>
+      <p>这使得 S₁ 不仅适用于数理与程序领域，也适用于理论建构、规划设计、语言法则、模型创建等一切以结构一致性为中心的认知活动。</p>
+      <p>S₁路径是认知系统进行结构性理解与系统化表达的主轴。</p>
+      <h4>2.4 S₁路径与知识系统的结构基础</h4>
+      <p>从知识系统的角度来看，S₁提供了如下三项基础支撑：</p>
+      <p><em>1.结构一致性：知识单元之间以规则方式组织；<br>
+      2.层级封装：复杂概念由多个嵌套结构组成；<br>
+      3.可验证性：路径调用结果稳定，可反复检验与验证。</em></p>
+      <p>因此：</p>
+      <p>知识系统之所以成立，依赖于系统中存在一套可压缩、可递归、可验证的结构路径，而这正是 S₁ 的功能定位。</p>
+      <p>也正因如此，S₁路径成为了现代科学体系、形式逻辑系统与模型理论的深层基础。</p>
+      <h4>2.5 S₁路径的系统意义与局限</h4>
+      <p>虽然 S₁路径是认知系统中结构最稳固的一类，但它也存在局限性：</p>
+      <p><em>适配性不足：面对开放性、不确定性情境时，路径僵化可能导致系统滞后；<br>
+      生成力有限：偏重已有结构的重复优化，缺乏创造性偏移；<br>
+      意义遮蔽：追求结构一致性可能忽略关系、情境、意义的差异性维度。</em></p>
+      <p>因此，系统在演化过程中，不能单独依赖 S₁，而必须引入其他路径轴线（P、R）以保持认知系统的开放性与创造性。</p>
+      <h4>2.6 链接下一节：结构如何外化为表达与行为？</h4>
+      <p>本节完成了如下任务：</p>
+      <p>建立了 S₁ 的生成逻辑：从压缩 → 嵌套 → 递归；<br>
+      明确其三大结构特征：稳定、嵌套、演绎；<br>
+      阐述其在认知功能与知识建构中的关键作用。</p>
+      <p>下一节将进入三类路径中的第二种方向：</p>
+      <p>P路径：结构如何不是生成自身，而是外化为语言、模型与行动？</p>
+      <p>这将带出结构路径如何投影为世界的认知机制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P5 · 第2节卡（S₁特征表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · S₁ Path</div><div>05 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>S₁ 的生成逻辑与三大特征 · 2.1 / 2.2</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>重复调用 → 压缩 → 嵌套 → 层级 → 递归</h2>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:22%">特征名称</th><th style="width:42%">描述</th><th>功能意义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">结构稳定性</td><td>路径在多次调用后结构不变</td><td>增强结构一致性与预测性</td></tr>
+        <tr><td class="em-cell">嵌套递归性</td><td>路径之间形成可嵌套与可自调用的层级关系</td><td>支持系统从局部结构中构建全局图谱</td></tr>
+        <tr><td class="em-cell">演绎可展性</td><td>从核心结构可推演出多个派生结构</td><td>支持从原则性结构生成多种应用结构</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:68vw;margin-top:3vh" data-anim>
+      <span class="q-big">知识系统之所以成立，依赖于系统中存在一套可压缩、可递归、可验证的结构路径，而这正是 S₁ 的功能定位——它构成了「知识为何可再现、可复制、可验证」的基础条件。</span>
+      <span class="cite">2.4 · S₁ 是现代科学体系、形式逻辑系统与模型理论的深层基础</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 05 · S₁ Path</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.1-2.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.1 S₁路径的生成机制：从压缩到递归演化</h4>
+      <p>S₁ 的演化始于系统对路径调用效率的反馈机制。当某一类路径被频繁调用，其结构关系趋于稳定，系统便启动路径压缩，将其封装为模块；而多个模块的再次嵌套，则形成了结构层级；最终，这些层级在反馈回路中形成了自引用与递归机制，从而构成：</p>
+      <p>S₁： 一种不断向上生成的结构抽象路径。</p>
+      <p>其生成逻辑可表述为如下路径链：</p>
+      <p><em>重复调用 → 路径压缩 → 嵌套组合 → 层级演化 → 自引用递归 → 结构路径 S₁</em></p>
+      <p>这类路径并非出于表达或意义，而是出于系统对结构效率与一致性的优化结果。它是结构性精度的产物，代表系统自身的「组织逻辑」。</p>
+      <h4>2.2 S₁路径的特征：稳定性 × 嵌套性 × 演绎性</h4>
+      <p>S₁具备如下三大结构性特征：</p>
+      <p>结构稳定性：路径在多次调用后结构不变——增强结构一致性与预测性；<br>
+      嵌套递归性：路径之间形成可嵌套与可自调用的层级关系——支持系统从局部结构中构建全局图谱；<br>
+      演绎可展性：从核心结构可推演出多个派生结构——支持从原则性结构生成多种应用结构。</p>
+      <p>S₁路径是最适合建立知识系统的底层架构的结构类型，它构成了「知识为何可再现、可复制、可验证」的基础条件。</p>
+      <h4>2.3 S₁路径的认知功能：抽象化与原则建构</h4>
+      <p>S₁路径赋予认知系统如下能力：</p>
+      <p><em>结构抽象能力：从多组实例中提取共性结构，生成稳定图式；<br>
+      原则建构能力：形成可嵌套、可推广的结构规则；<br>
+      系统化能力：将分散结构组织为层级网络；<br>
+      演绎预测能力：通过结构推理预测系统行为与结果。</em></p>
+      <p>这使得 S₁ 不仅适用于数理与程序领域，也适用于理论建构、规划设计、语言法则、模型创建等一切以结构一致性为中心的认知活动。</p>
+      <p>S₁路径是认知系统进行结构性理解与系统化表达的主轴。</p>
+      <h4>2.4 S₁路径与知识系统的结构基础</h4>
+      <p>从知识系统的角度来看，S₁提供了如下三项基础支撑：</p>
+      <p><em>1.结构一致性：知识单元之间以规则方式组织；<br>
+      2.层级封装：复杂概念由多个嵌套结构组成；<br>
+      3.可验证性：路径调用结果稳定，可反复检验与验证。</em></p>
+      <p>因此：</p>
+      <p>知识系统之所以成立，依赖于系统中存在一套可压缩、可递归、可验证的结构路径，而这正是 S₁ 的功能定位。</p>
+      <p>也正因如此，S₁路径成为了现代科学体系、形式逻辑系统与模型理论的深层基础。</p>
+      <h4>2.5 S₁路径的系统意义与局限</h4>
+      <p>虽然 S₁路径是认知系统中结构最稳固的一类，但它也存在局限性：</p>
+      <p><em>适配性不足：面对开放性、不确定性情境时，路径僵化可能导致系统滞后；<br>
+      生成力有限：偏重已有结构的重复优化，缺乏创造性偏移；<br>
+      意义遮蔽：追求结构一致性可能忽略关系、情境、意义的差异性维度。</em></p>
+      <p>因此，系统在演化过程中，不能单独依赖 S₁，而必须引入其他路径轴线（P、R）以保持认知系统的开放性与创造性。</p>
+      <h4>2.6 链接下一节：结构如何外化为表达与行为？</h4>
+      <p>本节完成了如下任务：</p>
+      <p>建立了 S₁ 的生成逻辑：从压缩 → 嵌套 → 递归；<br>
+      明确其三大结构特征：稳定、嵌套、演绎；<br>
+      阐述其在认知功能与知识建构中的关键作用。</p>
+      <p>下一节将进入三类路径中的第二种方向：</p>
+      <p>P路径：结构如何不是生成自身，而是外化为语言、模型与行动？</p>
+      <p>这将带出结构路径如何投影为世界的认知机制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P6 · 第2节卡2（功能+局限） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 2 · S₁ Limits</div><div>06 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>认知功能与局限 · 2.3 / 2.5</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>最稳固，也最有局限</h2>
+    <div class="grid-2">
+      <div data-anim style="padding:2.2vh 1.7vw;border-left:3px solid currentColor">
+        <div class="kicker">四项认知功能</div>
+        <p class="body-zh" style="margin-top:1.2vh">结构抽象（提取共性生成图式）× 原则建构（可嵌套可推广的规则）× 系统化（分散结构组织为层级网络）× 演绎预测（结构推理预测行为与结果）。</p>
+      </div>
+      <div data-anim style="padding:2.2vh 1.7vw;border-left:3px solid currentColor;opacity:.72">
+        <div class="kicker">三项局限</div>
+        <p class="body-zh" style="margin-top:1.2vh">适配性不足（开放情境下路径僵化）× 生成力有限（缺乏创造性偏移）× 意义遮蔽（忽略关系、情境、意义的差异性维度）。</p>
+      </div>
+    </div>
+    <div class="callout" style="max-width:66vw;margin-top:4vh" data-anim>
+      <span class="q-big">系统在演化过程中，不能单独依赖 S₁，而必须引入其他路径轴线（P、R）以保持认知系统的开放性与创造性。</span>
+      <span class="cite">2.5 · S₁ 是认知系统进行结构性理解与系统化表达的主轴</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 06 · S₁ Limits</div><div>Section 2</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 2.3-2.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>2.3 S₁路径的认知功能：抽象化与原则建构</h4>
+      <p>S₁路径赋予认知系统如下能力：</p>
+      <p><em>结构抽象能力：从多组实例中提取共性结构，生成稳定图式；<br>
+      原则建构能力：形成可嵌套、可推广的结构规则；<br>
+      系统化能力：将分散结构组织为层级网络；<br>
+      演绎预测能力：通过结构推理预测系统行为与结果。</em></p>
+      <p>这使得 S₁ 不仅适用于数理与程序领域，也适用于理论建构、规划设计、语言法则、模型创建等一切以结构一致性为中心的认知活动。</p>
+      <p>S₁路径是认知系统进行结构性理解与系统化表达的主轴。</p>
+      <h4>2.4 S₁路径与知识系统的结构基础</h4>
+      <p>从知识系统的角度来看，S₁提供了如下三项基础支撑：</p>
+      <p><em>1.结构一致性：知识单元之间以规则方式组织；<br>
+      2.层级封装：复杂概念由多个嵌套结构组成；<br>
+      3.可验证性：路径调用结果稳定，可反复检验与验证。</em></p>
+      <p>因此：</p>
+      <p>知识系统之所以成立，依赖于系统中存在一套可压缩、可递归、可验证的结构路径，而这正是 S₁ 的功能定位。</p>
+      <p>也正因如此，S₁路径成为了现代科学体系、形式逻辑系统与模型理论的深层基础。</p>
+      <h4>2.5 S₁路径的系统意义与局限</h4>
+      <p>虽然 S₁路径是认知系统中结构最稳固的一类，但它也存在局限性：</p>
+      <p><em>适配性不足：面对开放性、不确定性情境时，路径僵化可能导致系统滞后；<br>
+      生成力有限：偏重已有结构的重复优化，缺乏创造性偏移；<br>
+      意义遮蔽：追求结构一致性可能忽略关系、情境、意义的差异性维度。</em></p>
+      <p>因此，系统在演化过程中，不能单独依赖 S₁，而必须引入其他路径轴线（P、R）以保持认知系统的开放性与创造性。</p>
+      <h4>2.6 链接下一节：结构如何外化为表达与行为？</h4>
+      <p>本节完成了如下任务：</p>
+      <p>建立了 S₁ 的生成逻辑：从压缩 → 嵌套 → 递归；<br>
+      明确其三大结构特征：稳定、嵌套、演绎；<br>
+      阐述其在认知功能与知识建构中的关键作用。</p>
+      <p>下一节将进入三类路径中的第二种方向：</p>
+      <p>P路径：结构如何不是生成自身，而是外化为语言、模型与行动？</p>
+      <p>这将带出结构路径如何投影为世界的认知机制。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P7 · 第3节 命题页（P） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 3 节 · 路径 P</div><div>07 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 3 节 · Projection Path · 投影路径的表达机制</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.8vw;line-height:1.38;max-width:86vw">
+      <span data-anim="line" style="display:block">认知系统中将结构压缩单元转换为外部表达形式的路径系统，</span>
+      <span data-anim="line" style="display:block">它是结构向现实发起的投影机制。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>P路径不是单纯的「输出结果」，而是连接系统内部结构与外部表达的转换边界——结构系统进入可感世界的「外化通道」。</p>
+  </div>
+  <div class="foot"><div>Page 07 · 路径 P</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第3节 路径 P：投影路径的表达机制</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第3节 | 路径 P：投影路径的表达机制</h4>
+      <p>路径 P（Projection Path）是结构系统中负责「表达」与「外化」的路径轴线。当系统不再仅仅调度结构以构建自身，而是将结构投射到语言、行为、图像、符号或模型中，便形成了路径 P 的展开方向。</p>
+      <p>P路径并不是单纯的「输出结果」，而是一个将结构系统转译为外在形式的机制。它连接着系统内部结构与其外部表达的转换边界，是结构系统进入可感世界的「外化通道」。</p>
+      <p>ESC定义路径P为：</p>
+      <p><strong>认知系统中将结构压缩单元转换为外部表达形式的路径系统，它是结构向现实发起的投影机制。</strong></p>
+      <h4>3.1 P路径的生成机制：从结构调用到表达形式</h4>
+      <p>路径 P 的出现，源于系统对结构内容的「表达需求」，即：</p>
+      <p><em>系统需要用语言表达结构；<br>
+      系统需要以行动执行结构；<br>
+      系统需要将结构模型化、图像化、文字化。</em></p>
+      <p>在这种表达需求驱动下，系统中的路径会发生如下转化：</p>
+      <p><strong>结构路径（S₁）→表达模板（P路径）→外部形式（语言、模型、行动）</strong></p>
+      <p>这一过程中，并非结构内容简单映射为语言，而是结构单元在路径调用中被重新组织为适合表达的线性或可感知的形式。这就意味着：</p>
+      <p><strong>P路径是一种「结构投影语言」，而非「结构输出通道」。</strong></p>
+      <h4>3.2 P路径的三大结构特征</h4>
+      <p>投影性：将内部结构转化为外部表达——使结构具备对外传递能力；<br>
+      映射性：建立结构与外部形式之间的相似关系——构成语言、图像、动作等表达机制；<br>
+      调度性：可选择性调用不同结构片段用于表达——提升表达的灵活性与适应性。</p>
+      <p>这一类型路径的最大特点，是其输出并不追求结构纯度，而追求表达适配性——也就是能否在特定语境下「让人理解」、「可被执行」、「可被接收」。</p>
+      <h4>3.3 P路径的认知功能：结构如何进入语言与行为？</h4>
+      <p>认知系统的很多高级能力，实质上都是 P路径的产物：</p>
+      <p><em>语言表达能力：语言并不是信息本身，而是结构压缩单元的线性展开；<br>
+      行动规划能力：系统将结构路径「动作化」，形成可执行的操作指令；<br>
+      模型建构能力：系统将抽象结构「物化」为图、式、架构；<br>
+      隐喻与符号生成：系统通过路径偏移与再组合将结构进行转喻。</em></p>
+      <p>这些能力的本质在于：结构路径被投影为外在形式，而外在形式又反过来成为结构表达的工具。</p>
+      <p>因此：</p>
+      <p><strong>P路径构成了人类认知系统「对外表达」的结构机制。</strong></p>
+      <h4>3.4 P路径在知识系统中的角色：中介、转译、传播</h4>
+      <p>在知识系统中，P路径承担着如下关键任务：</p>
+      <p><em>1.中介作用：作为 S₁路径（结构）与现实接收系统之间的桥梁；<br>
+      2.转译作用：将多维结构转化为线性语言或感知内容；<br>
+      3.传播作用：通过表达形式，使结构跨系统共享或被外部采纳。</em></p>
+      <p>举例说明：</p>
+      <p><em>数学结构需要语言与符号系统表达（P路径）才能被教学；<br>
+      科学理论要以模型和叙述投影出来才能被传播；<br>
+      行动设计必须将内部判断结构「操作化」才能付诸执行。</em></p>
+      <p><strong>没有P路径，结构只能在系统内部循环；有了P路径，结构才能成为「知识」或「现实内容」。</strong></p>
+      <h4>3.5 P路径的局限性：表达 ≠ 结构，转译即偏移</h4>
+      <p>尽管 P路径是结构进入现实的桥梁，但它也带来系统性偏移：</p>
+      <p><em>表达简化结构：外在表达常压缩原始结构的复杂性；<br>
+      表达限制结构：语言与工具的限制使得某些结构无法完全表达；<br>
+      表达扭曲结构：转译过程中结构被重组，产生误解或异构。</em></p>
+      <p>这意味着：</p>
+      <p><strong>表达不是结构的复制，而是结构的选择性投影。</strong></p>
+      <p>P路径不是中性通道，而是「结构如何在现实中以某种方式出现」的决定性机制。理解这一偏移，是破解语言误差、模型错位、行动偏差的关键。</p>
+      <h4>3.6 链接下一节：关系路径如何承接结构间的意义生成？</h4>
+      <p>本节完成了对路径 P 的系统建构：</p>
+      <p><em>阐明其由结构调用转向表达投影的生成机制；<br>
+      明确其三大功能：投影、映射、调度；<br>
+      指出其在语言、行动、模型等认知行为中的关键角色。</em></p>
+      <p>下一节将进入路径系统中的第三种方向：</p>
+      <p>R路径：关系路径，它不从结构生成，不向外表达，而是生成「意义本身」。</p>
+      <p>R路径是结构间关系所构成的意义发生机制，是ESC理论关于「理解为何可能」与「意义如何生成」的关键解构工具。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P8 · 第3节卡（P 特征表） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 3 · P Path</div><div>08 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>P 路径的三大特征与三重偏移 · 3.2 / 3.5</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>表达不是结构的复制，<br>而是结构的选择性投影</h2>
+    <table class="tbl" data-anim style="margin-bottom:2.8vh">
+      <thead><tr><th style="width:18%">特征</th><th style="width:44%">描述</th><th>功能作用</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">投影性</td><td>将内部结构转化为外部表达</td><td>使结构具备对外传递能力</td></tr>
+        <tr><td class="em-cell">映射性</td><td>建立结构与外部形式之间的相似关系</td><td>构成语言、图像、动作等表达机制</td></tr>
+        <tr><td class="em-cell">调度性</td><td>可选择性调用不同结构片段用于表达</td><td>提升表达的灵活性与适应性</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:44%">系统性偏移</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">表达简化结构</td><td>外在表达常压缩原始结构的复杂性</td></tr>
+        <tr><td class="em-cell">表达限制结构</td><td>语言与工具的限制使某些结构无法完全表达</td></tr>
+        <tr><td class="em-cell">表达扭曲结构</td><td>转译过程中结构被重组，产生误解或异构</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 08 · P Path</div><div>Section 3</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 3.1-3.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>3.1 P路径的生成机制：从结构调用到表达形式</h4>
+      <p>路径 P 的出现，源于系统对结构内容的「表达需求」，即：</p>
+      <p><em>系统需要用语言表达结构；<br>
+      系统需要以行动执行结构；<br>
+      系统需要将结构模型化、图像化、文字化。</em></p>
+      <p>在这种表达需求驱动下，系统中的路径会发生如下转化：</p>
+      <p><strong>结构路径（S₁）→表达模板（P路径）→外部形式（语言、模型、行动）</strong></p>
+      <p>这一过程中，并非结构内容简单映射为语言，而是结构单元在路径调用中被重新组织为适合表达的线性或可感知的形式。这就意味着：</p>
+      <p><strong>P路径是一种「结构投影语言」，而非「结构输出通道」。</strong></p>
+      <h4>3.2 P路径的三大结构特征</h4>
+      <p>投影性：将内部结构转化为外部表达——使结构具备对外传递能力；<br>
+      映射性：建立结构与外部形式之间的相似关系——构成语言、图像、动作等表达机制；<br>
+      调度性：可选择性调用不同结构片段用于表达——提升表达的灵活性与适应性。</p>
+      <p>这一类型路径的最大特点，是其输出并不追求结构纯度，而追求表达适配性——也就是能否在特定语境下「让人理解」、「可被执行」、「可被接收」。</p>
+      <h4>3.3 P路径的认知功能：结构如何进入语言与行为？</h4>
+      <p>认知系统的很多高级能力，实质上都是 P路径的产物：</p>
+      <p><em>语言表达能力：语言并不是信息本身，而是结构压缩单元的线性展开；<br>
+      行动规划能力：系统将结构路径「动作化」，形成可执行的操作指令；<br>
+      模型建构能力：系统将抽象结构「物化」为图、式、架构；<br>
+      隐喻与符号生成：系统通过路径偏移与再组合将结构进行转喻。</em></p>
+      <p>这些能力的本质在于：结构路径被投影为外在形式，而外在形式又反过来成为结构表达的工具。</p>
+      <p>因此：</p>
+      <p><strong>P路径构成了人类认知系统「对外表达」的结构机制。</strong></p>
+      <h4>3.4 P路径在知识系统中的角色：中介、转译、传播</h4>
+      <p>在知识系统中，P路径承担着如下关键任务：</p>
+      <p><em>1.中介作用：作为 S₁路径（结构）与现实接收系统之间的桥梁；<br>
+      2.转译作用：将多维结构转化为线性语言或感知内容；<br>
+      3.传播作用：通过表达形式，使结构跨系统共享或被外部采纳。</em></p>
+      <p>举例说明：</p>
+      <p><em>数学结构需要语言与符号系统表达（P路径）才能被教学；<br>
+      科学理论要以模型和叙述投影出来才能被传播；<br>
+      行动设计必须将内部判断结构「操作化」才能付诸执行。</em></p>
+      <p><strong>没有P路径，结构只能在系统内部循环；有了P路径，结构才能成为「知识」或「现实内容」。</strong></p>
+      <h4>3.5 P路径的局限性：表达 ≠ 结构，转译即偏移</h4>
+      <p>尽管 P路径是结构进入现实的桥梁，但它也带来系统性偏移：</p>
+      <p><em>表达简化结构：外在表达常压缩原始结构的复杂性；<br>
+      表达限制结构：语言与工具的限制使得某些结构无法完全表达；<br>
+      表达扭曲结构：转译过程中结构被重组，产生误解或异构。</em></p>
+      <p>这意味着：</p>
+      <p><strong>表达不是结构的复制，而是结构的选择性投影。</strong></p>
+      <p>P路径不是中性通道，而是「结构如何在现实中以某种方式出现」的决定性机制。理解这一偏移，是破解语言误差、模型错位、行动偏差的关键。</p>
+      <h4>3.6 链接下一节：关系路径如何承接结构间的意义生成？</h4>
+      <p>本节完成了对路径 P 的系统建构：</p>
+      <p><em>阐明其由结构调用转向表达投影的生成机制；<br>
+      明确其三大功能：投影、映射、调度；<br>
+      指出其在语言、行动、模型等认知行为中的关键角色。</em></p>
+      <p>下一节将进入路径系统中的第三种方向：</p>
+      <p>R路径：关系路径，它不从结构生成，不向外表达，而是生成「意义本身」。</p>
+      <p>R路径是结构间关系所构成的意义发生机制，是ESC理论关于「理解为何可能」与「意义如何生成」的关键解构工具。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P9 · 第4节 命题页（R） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 4 节 · 路径 R</div><div>09 / 16</div></div>
+  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 4 节 · Relational Path · 关系路径的意义机制</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4vw;line-height:1.36;max-width:84vw">
+      <span data-anim="line" style="display:block">意义不是结构的属性，</span>
+      <span data-anim="line" style="display:block">而是结构之间关系的生成结果。</span>
+    </blockquote>
+    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>R路径不从结构生成、不向外表达，而是生成「意义本身」——理解的轴心，解释与创造的源头，连接其他路径的「结构间桥梁」。</p>
+  </div>
+  <div class="foot"><div>Page 09 · 路径 R</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第4节 路径 R：关系路径的意义机制</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第4节 | 路径 R：关系路径的意义机制</h4>
+      <p>路径 R（Relational Path）是三类结构路径中最具生成性与开放性的一种。它不同于 S₁ 的结构抽象，也不同于 P 的表达投影。R路径并不直接构造结构本体，也不以输出为目标，它关注的是：</p>
+      <p><strong>结构之间的相互关系如何生成意义？</strong></p>
+      <p>在R路径中，认知不再以结构为终点，也不以表达为目的，而是将结构之间的连接、对比、偏移、交互本身作为认知发生的起点。ESC将其定义为：</p>
+      <p><strong>认知系统中通过结构间的关系动态生成「定位、意义与理解」的路径机制。</strong></p>
+      <p><strong>R路径是理解的轴心，是解释与创造的源头，也是连接其他路径的「结构间桥梁」。</strong></p>
+      <h4>4.1 R路径的生成机制：连接激活而非结构调用</h4>
+      <p>与S₁和P路径不同，R路径的启动不是因为某个结构被调用或表达，而是因为两个或多个结构之间产生了联系的需求。这类联系可能是：</p>
+      <p><em>模糊的相似性；<br>
+      情境性的并置；<br>
+      隐喻式的映射；<br>
+      多义性的重构；<br>
+      差异性的触发。</em></p>
+      <p>R路径的逻辑链如下：</p>
+      <p><strong>结构 A + 结构 B →关系张力→意义生成路径（R）</strong></p>
+      <p>也就是说：</p>
+      <p><strong>R路径不是从结构出发，而是从「结构之间」出发。</strong></p>
+      <p>它关心的不是结构本身是什么，而是结构如何与其他结构「发生关系」。</p>
+      <h4>4.2 R路径的三大生成特征</h4>
+      <p>关系启动性：并非结构本体，而是结构之间的相遇触发路径生成——生成意义、隐喻、共鸣；<br>
+      非线性开放性：关系连接可变、可多向、可重组——支持复杂理解与跨域思维；<br>
+      情境依赖性：同一结构对不同结构的关联在不同情境中生成不同意义——构成语境理解与社会认知的基础。</p>
+      <p>R路径不是稳定的逻辑推演，而是动态调度的关系网络。它强调的是：</p>
+      <p><strong>意义不是结构的属性，而是结构之间关系的生成结果。</strong></p>
+      <h4>4.3 R路径的认知功能：理解、意义、象征与定位</h4>
+      <p>R路径激活了如下四种认知功能：</p>
+      <p><em>理解能力：将新输入与已有结构建立「意义联结」；<br>
+      象征能力：用结构B来表达结构A（隐喻、类比）；<br>
+      语境定位能力：判断某结构在特定情境中的功能或角色；<br>
+      多义性处理能力：容纳多个结构之间的交叉解释与重组。</em></p>
+      <p>ESC指出：</p>
+      <p><strong>理解并不是接受输入，而是用结构间的关系「生出」一个新的位置与视角。</strong></p>
+      <p>而这个「位置」与「视角」，就是理解之为理解的基础。</p>
+      <h4>4.4 R路径与知识系统的深层链接</h4>
+      <p>虽然S₁构建知识的逻辑结构，P表达知识的形式系统，但没有R路径，知识将无法产生意义、解释与应用。</p>
+      <p>R路径在知识系统中的功能包括：</p>
+      <p><em>1.解释性生成：知识结构之间建立内在联系，生成理解与阐释；<br>
+      2.跨结构连接：将不同领域知识构筑桥梁，形成综合性理解；<br>
+      3.语义张力调度：处理同一知识在不同语境中的应用方式。</em></p>
+      <p>因此，R路径是知识系统「活性结构」的载体，它使得知识不仅能被储存，还能被理解、被激活、被转化。</p>
+      <h4>4.5 R路径的系统风险与创造潜能</h4>
+      <p>R路径带来高度开放与流动性，也意味着系统面临如下双重可能：</p>
+      <p><em>过度连接：结构之间无限连接，导致理解泛化、逻辑涣散；<br>
+      偏义投射：非同构结构强行连接，导致误解或错义；<br>
+      创造跃迁：结构间连接越过传统路径，生成全新意义模型。</em></p>
+      <p>R路径是一柄双刃剑，它既是误解的起源，也是创造的核心。它是结构系统的张力机制：一旦结构封闭，R路径即沉寂；一旦结构解封，R路径即激活。</p>
+      <h4>4.6 链接下一节：三路径如何协同演化构成认知复杂性？</h4>
+      <p>至此，我们完成了三类认知路径的个体建构：</p>
+      <p>S₁ 抽象结构轴：路径压缩与递归优化——建立结构精度与一致性；<br>
+      P 表达输出轴：外化需求与适配表达——实现结构对外传达；<br>
+      R 关系生成轴：结构间连接与意义生成——赋予结构灵活性与创造性。</p>
+      <p>下一节将进入三路径之间的互动机制：</p>
+      <p>认知系统并不是三路径分工协作的「模块系统」，而是三路径交互耦合的「动态结构体」。</p>
+      <p>我们将探讨结构系统如何在 S₁ × P × R 之间形成反馈回路，构成认知复杂性与多样性的系统基础。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P10 · 第4节卡（R 特征） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 4 · R Path</div><div>10 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>R 的逻辑链与三大特征 · 4.1 / 4.2</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>结构 A + 结构 B → 关系张力 → 意义生成路径</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:22%">特征</th><th style="width:44%">描述</th><th>功能</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">关系启动性</td><td>并非结构本体，而是结构之间的相遇触发路径生成</td><td>生成意义、隐喻、共鸣</td></tr>
+        <tr><td class="em-cell">非线性开放性</td><td>关系连接可变、可多向、可重组</td><td>支持复杂理解与跨域思维</td></tr>
+        <tr><td class="em-cell">情境依赖性</td><td>同一结构对不同结构的关联在不同情境中生成不同意义</td><td>构成语境理解与社会认知的基础</td></tr>
+      </tbody>
+    </table>
+    <div class="callout" style="max-width:68vw" data-anim>
+      <span class="q-big">理解并不是接受输入，而是用结构间的关系「生出」一个新的位置与视角。R路径是一柄双刃剑：结构封闭则沉寂，结构解封则激活——既是误解的起源，也是创造的核心。</span>
+      <span class="cite">4.3 / 4.5 · 四种认知功能：理解 × 象征 × 语境定位 × 多义性处理</span>
+    </div>
+  </div>
+  <div class="foot"><div>Page 10 · R Path</div><div>Section 4</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 4.1-4.6</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>4.1 R路径的生成机制：连接激活而非结构调用</h4>
+      <p>与S₁和P路径不同，R路径的启动不是因为某个结构被调用或表达，而是因为两个或多个结构之间产生了联系的需求。这类联系可能是：</p>
+      <p><em>模糊的相似性；<br>
+      情境性的并置；<br>
+      隐喻式的映射；<br>
+      多义性的重构；<br>
+      差异性的触发。</em></p>
+      <p>R路径的逻辑链如下：</p>
+      <p><strong>结构 A + 结构 B →关系张力→意义生成路径（R）</strong></p>
+      <p>也就是说：</p>
+      <p><strong>R路径不是从结构出发，而是从「结构之间」出发。</strong></p>
+      <p>它关心的不是结构本身是什么，而是结构如何与其他结构「发生关系」。</p>
+      <h4>4.2 R路径的三大生成特征</h4>
+      <p>关系启动性：并非结构本体，而是结构之间的相遇触发路径生成——生成意义、隐喻、共鸣；<br>
+      非线性开放性：关系连接可变、可多向、可重组——支持复杂理解与跨域思维；<br>
+      情境依赖性：同一结构对不同结构的关联在不同情境中生成不同意义——构成语境理解与社会认知的基础。</p>
+      <p>R路径不是稳定的逻辑推演，而是动态调度的关系网络。它强调的是：</p>
+      <p><strong>意义不是结构的属性，而是结构之间关系的生成结果。</strong></p>
+      <h4>4.3 R路径的认知功能：理解、意义、象征与定位</h4>
+      <p>R路径激活了如下四种认知功能：</p>
+      <p><em>理解能力：将新输入与已有结构建立「意义联结」；<br>
+      象征能力：用结构B来表达结构A（隐喻、类比）；<br>
+      语境定位能力：判断某结构在特定情境中的功能或角色；<br>
+      多义性处理能力：容纳多个结构之间的交叉解释与重组。</em></p>
+      <p>ESC指出：</p>
+      <p><strong>理解并不是接受输入，而是用结构间的关系「生出」一个新的位置与视角。</strong></p>
+      <p>而这个「位置」与「视角」，就是理解之为理解的基础。</p>
+      <h4>4.4 R路径与知识系统的深层链接</h4>
+      <p>虽然S₁构建知识的逻辑结构，P表达知识的形式系统，但没有R路径，知识将无法产生意义、解释与应用。</p>
+      <p>R路径在知识系统中的功能包括：</p>
+      <p><em>1.解释性生成：知识结构之间建立内在联系，生成理解与阐释；<br>
+      2.跨结构连接：将不同领域知识构筑桥梁，形成综合性理解；<br>
+      3.语义张力调度：处理同一知识在不同语境中的应用方式。</em></p>
+      <p>因此，R路径是知识系统「活性结构」的载体，它使得知识不仅能被储存，还能被理解、被激活、被转化。</p>
+      <h4>4.5 R路径的系统风险与创造潜能</h4>
+      <p>R路径带来高度开放与流动性，也意味着系统面临如下双重可能：</p>
+      <p><em>过度连接：结构之间无限连接，导致理解泛化、逻辑涣散；<br>
+      偏义投射：非同构结构强行连接，导致误解或错义；<br>
+      创造跃迁：结构间连接越过传统路径，生成全新意义模型。</em></p>
+      <p>R路径是一柄双刃剑，它既是误解的起源，也是创造的核心。它是结构系统的张力机制：一旦结构封闭，R路径即沉寂；一旦结构解封，R路径即激活。</p>
+      <h4>4.6 链接下一节：三路径如何协同演化构成认知复杂性？</h4>
+      <p>至此，我们完成了三类认知路径的个体建构：</p>
+      <p>S₁ 抽象结构轴：路径压缩与递归优化——建立结构精度与一致性；<br>
+      P 表达输出轴：外化需求与适配表达——实现结构对外传达；<br>
+      R 关系生成轴：结构间连接与意义生成——赋予结构灵活性与创造性。</p>
+      <p>下一节将进入三路径之间的互动机制：</p>
+      <p>认知系统并不是三路径分工协作的「模块系统」，而是三路径交互耦合的「动态结构体」。</p>
+      <p>我们将探讨结构系统如何在 S₁ × P × R 之间形成反馈回路，构成认知复杂性与多样性的系统基础。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P11 · 第5节 命题页（耦合） ========== -->
+<section class="slide dark" data-animate="quote">
+  <div class="chrome"><div>第 5 节 · 互动与耦合</div><div>11 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 5 节 · 三路径的互动与耦合机制</div>
+    <h1 class="h-hero" style="font-size:5.4vw" data-anim>S₁（结构建构）→ P（表达输出）→ R（意义生成）→ S₁（结构修正）→ …</h1>
+    <p class="lead" style="max-width:66vw" data-anim>这一循环不是封闭回路，而是螺旋式上升的认知结构进化路径——认知系统不断「建构—表达—理解—再建构」的基础动力。</p>
+  </div>
+  <div class="foot"><div>Page 11 · 互动与耦合</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第5节 三路径的互动与耦合机制</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第5节 | 三路径的互动与耦合机制</h4>
+      <p>在前几节中，我们分别分析了认知系统内部三类结构路径的生成逻辑与功能分化：S₁路径构建结构抽象、P路径完成表达投影、R路径激活关系与意义。它们分别代表了认知系统的结构轴、表达轴与意义轴。</p>
+      <p>但认知从来不是由孤立模块完成的，也不是由单一路径主导的线性活动。相反：</p>
+      <p><strong>真实的认知活动，总是三路径之间不断激活、干扰、融合、重构的耦合过程。</strong></p>
+      <p>本节将对三类路径的互动方式、转换机制与系统耦合展开剖析，并据此揭示认知复杂性产生的结构基础。</p>
+      <h4>5.1 耦合不是叠加，而是路径之间的动态转化</h4>
+      <p>路径之间的「互动」，并非简单意义上的并行或并置，而是：</p>
+      <p><em>S₁路径在生成抽象结构后，必须通过P路径外化为表达；<br>
+      P路径在表达过程中，需要R路径提供意义调度与情境适配；<br>
+      R路径在生成新理解后，反过来激活或修改S₁的结构图谱；<br>
+      而新生成的S₁结构，可能再次以新的P路径重构表达模板。</em></p>
+      <p>这构成了如下回路链：</p>
+      <p><strong>S₁（结构建构）→ P（表达输出）→ R（意义生成）→ S₁（结构修正）→ ...</strong></p>
+      <p>这一循环不是封闭回路，而是螺旋式上升的认知结构进化路径——它是认知系统不断「建构—表达—理解—再建构」的基础动力。</p>
+      <h4>5.2 三路径的协同模型：结构内容 × 外部形式 × 语境定位</h4>
+      <p>可以用三维张力场的方式来理解三路径协同：</p>
+      <p>内容维：组织认知对象本身——高一致性、高精度——S₁；<br>
+      形式维：实现认知的可见性、可执行性——高表达性、适配性——P；<br>
+      语境维：指导认知内容如何解释、理解、变形——高弹性、高创造性——R。</p>
+      <p>这三维度构成认知系统的动态张力结构，使每一次认知行为都成为：</p>
+      <p>一个「结构投射 × 表达适配 × 语境共鸣」的协同事件。</p>
+      <p>例如：</p>
+      <p><em>一句语言（P）若脱离了原始概念（S₁）和上下文关联（R），就会失去意义；<br>
+      一个理论模型（S₁）若不能转化为传播方式（P）或跨学科联结（R），就难以被理解或采纳；<br>
+      一次经验理解（R）若无法嵌入已有知识结构（S₁）并表达出来（P），便难以被认知系统稳定化。</em></p>
+      <h4>5.3 三路径的转换关系：认知多样性的发生机制</h4>
+      <p>认知系统的「灵活性」源于路径间的动态可转换性，具体表现为：</p>
+      <p><em>结构→表达（S₁ → P）：知识建构 → 教学语言、传播语式；<br>
+      表达→意义（P → R）：语言形式 → 意义生成、隐喻理解；<br>
+      意义→结构（R → S₁）：隐喻或解释 → 激发新结构建构；<br>
+      表达→结构（P → S₁）：模型实践 → 推回抽象原则（归纳）；<br>
+      结构→关系（S₁ → R）：抽象规则之间形成新组合意义；<br>
+      关系→表达（R → P）：象征性结构 → 语言或行为表达。</em></p>
+      <p>这六类转换路径构成了认知行为的「路径切换矩阵」，也是个体创造力、系统适应性、知识跨域能力的关键所在。</p>
+      <h4>5.4 路径耦合的张力系统：认知复杂性的核心源泉</h4>
+      <p>路径耦合不是自由拼接，而是受结构张力调控的动态网络系统。ESC指出三种路径耦合中的典型张力表现：</p>
+      <p>S₁ + P：精度 × 适配张力——表达过简化，结构被误读；<br>
+      P + R：形式 × 意义张力——多义过度，歧义扩散；<br>
+      R + S₁：意义 × 原理张力——概念模糊，结构失稳。</p>
+      <p>认知系统的复杂性正是由此而生——它必须时刻在这些张力之间调度平衡，以生成既具结构精度，又具表达可行性与意义深度的认知结果。</p>
+      <h4>5.5 链接下一节：三路径如何进入认知系统的螺旋式演化？</h4>
+      <p>在本节中，我们确认：</p>
+      <p><em>1.三路径是认知系统的基本生成机制；<br>
+      2.它们彼此之间不是隔离的，而是持续转换与耦合的结构系统；<br>
+      3.耦合机制构成了认知系统的动态多维结构网络；<br>
+      4.正是这种网络，生成了认知系统的复杂性、适应性与演化潜能。</em></p>
+      <p>下一节将进入全章的收束与过渡：结构路径如何通过三轴张力展开为「认知演化的坐标系」？这将引领我们进入《第10章 | 结构螺旋的认知演化地图》的核心建构。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P12 · 第5节卡（三维模型+切换矩阵） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 5 · Coupling</div><div>12 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>三维张力场与路径切换矩阵 · 5.2 / 5.3</div>
+    <h2 class="h-xl" style="font-size:4.4vw;margin-bottom:3.2vh" data-anim>结构投射 × 表达适配 × 语境共鸣</h2>
+    <table class="tbl" data-anim style="margin-bottom:2.8vh">
+      <thead><tr><th style="width:16%">维度</th><th style="width:42%">功能</th><th style="width:24%">结构倾向</th><th>路径代号</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">内容维</td><td>组织认知对象本身</td><td>高一致性、高精度</td><td>S₁</td></tr>
+        <tr><td class="em-cell">形式维</td><td>实现认知的可见性、可执行性</td><td>高表达性、适配性</td><td>P</td></tr>
+        <tr><td class="em-cell">语境维</td><td>指导认知内容如何解释、理解、变形</td><td>高弹性、高创造性</td><td>R</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:18%">路径组合</th><th style="width:36%">张力特征</th><th>表现风险</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">S₁ + P</td><td>精度 × 适配张力</td><td>表达过简化，结构被误读</td></tr>
+        <tr><td class="em-cell">P + R</td><td>形式 × 意义张力</td><td>多义过度，歧义扩散</td></tr>
+        <tr><td class="em-cell">R + S₁</td><td>意义 × 原理张力</td><td>概念模糊，结构失稳</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 12 · Coupling</div><div>Section 5</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 5.1-5.5</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>5.1 耦合不是叠加，而是路径之间的动态转化</h4>
+      <p>路径之间的「互动」，并非简单意义上的并行或并置，而是：</p>
+      <p><em>S₁路径在生成抽象结构后，必须通过P路径外化为表达；<br>
+      P路径在表达过程中，需要R路径提供意义调度与情境适配；<br>
+      R路径在生成新理解后，反过来激活或修改S₁的结构图谱；<br>
+      而新生成的S₁结构，可能再次以新的P路径重构表达模板。</em></p>
+      <p>这构成了如下回路链：</p>
+      <p><strong>S₁（结构建构）→ P（表达输出）→ R（意义生成）→ S₁（结构修正）→ ...</strong></p>
+      <p>这一循环不是封闭回路，而是螺旋式上升的认知结构进化路径——它是认知系统不断「建构—表达—理解—再建构」的基础动力。</p>
+      <h4>5.2 三路径的协同模型：结构内容 × 外部形式 × 语境定位</h4>
+      <p>可以用三维张力场的方式来理解三路径协同：</p>
+      <p>内容维：组织认知对象本身——高一致性、高精度——S₁；<br>
+      形式维：实现认知的可见性、可执行性——高表达性、适配性——P；<br>
+      语境维：指导认知内容如何解释、理解、变形——高弹性、高创造性——R。</p>
+      <p>这三维度构成认知系统的动态张力结构，使每一次认知行为都成为：</p>
+      <p>一个「结构投射 × 表达适配 × 语境共鸣」的协同事件。</p>
+      <p>例如：</p>
+      <p><em>一句语言（P）若脱离了原始概念（S₁）和上下文关联（R），就会失去意义；<br>
+      一个理论模型（S₁）若不能转化为传播方式（P）或跨学科联结（R），就难以被理解或采纳；<br>
+      一次经验理解（R）若无法嵌入已有知识结构（S₁）并表达出来（P），便难以被认知系统稳定化。</em></p>
+      <h4>5.3 三路径的转换关系：认知多样性的发生机制</h4>
+      <p>认知系统的「灵活性」源于路径间的动态可转换性，具体表现为：</p>
+      <p><em>结构→表达（S₁ → P）：知识建构 → 教学语言、传播语式；<br>
+      表达→意义（P → R）：语言形式 → 意义生成、隐喻理解；<br>
+      意义→结构（R → S₁）：隐喻或解释 → 激发新结构建构；<br>
+      表达→结构（P → S₁）：模型实践 → 推回抽象原则（归纳）；<br>
+      结构→关系（S₁ → R）：抽象规则之间形成新组合意义；<br>
+      关系→表达（R → P）：象征性结构 → 语言或行为表达。</em></p>
+      <p>这六类转换路径构成了认知行为的「路径切换矩阵」，也是个体创造力、系统适应性、知识跨域能力的关键所在。</p>
+      <h4>5.4 路径耦合的张力系统：认知复杂性的核心源泉</h4>
+      <p>路径耦合不是自由拼接，而是受结构张力调控的动态网络系统。ESC指出三种路径耦合中的典型张力表现：</p>
+      <p>S₁ + P：精度 × 适配张力——表达过简化，结构被误读；<br>
+      P + R：形式 × 意义张力——多义过度，歧义扩散；<br>
+      R + S₁：意义 × 原理张力——概念模糊，结构失稳。</p>
+      <p>认知系统的复杂性正是由此而生——它必须时刻在这些张力之间调度平衡，以生成既具结构精度，又具表达可行性与意义深度的认知结果。</p>
+      <h4>5.5 链接下一节：三路径如何进入认知系统的螺旋式演化？</h4>
+      <p>在本节中，我们确认：</p>
+      <p><em>1.三路径是认知系统的基本生成机制；<br>
+      2.它们彼此之间不是隔离的，而是持续转换与耦合的结构系统；<br>
+      3.耦合机制构成了认知系统的动态多维结构网络；<br>
+      4.正是这种网络，生成了认知系统的复杂性、适应性与演化潜能。</em></p>
+      <p>下一节将进入全章的收束与过渡：结构路径如何通过三轴张力展开为「认知演化的坐标系」？这将引领我们进入《第10章 | 结构螺旋的认知演化地图》的核心建构。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P13 · 第6节 命题页（螺旋） ========== -->
+<section class="slide light" data-animate="quote">
+  <div class="chrome"><div>第 6 节 · 螺旋图谱</div><div>13 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>第 6 节 · 如何用结构螺旋图谱整合三类路径</div>
+    <h1 class="h-hero" style="font-size:3.4vw;line-height:1.3" data-anim>结构螺旋演化图谱<br>The Structural Spiral of Cognitive Evolution</h1>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.2vw;line-height:1.4;max-width:84vw">
+      <span data-anim="line" style="display:block">认知系统的真实形态不是路径线性叠加，而是路径耦合在时间中的递进展开，最终构成结构螺旋的演化轨迹。</span>
+    </blockquote>
+  </div>
+  <div class="foot"><div>Page 13 · 螺旋图谱</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 第6节 如何用结构螺旋图谱整合三类路径？</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>第6节 | 如何用结构螺旋图谱整合三类路径？</h4>
+      <p>至此，我们完成了对 ESC 理论中三类认知路径（S₁、P、R）的系统性展开：</p>
+      <p><em>它们如何由结构系统自然分化而来；<br>
+      如何分别承载结构抽象、表达生成与意义创造的功能；<br>
+      又如何在动态系统中相互转化、彼此耦合、共同推动认知的发生与演化。</em></p>
+      <p>然而，在实际认知过程中，这三类路径并不是分别执行，而是始终以复杂耦合的形式共同运作——这也意味着，认知系统无法用线性结构完整描述，而需要一种动态 × 层次 × 反馈 × 张力驱动的结构模型。</p>
+      <p>ESC 在此提出：</p>
+      <p><strong>认知系统的真实形态不是路径线性叠加，而是路径耦合在时间中的递进展开，最终构成结构螺旋的演化轨迹。</strong></p>
+      <p>本节将作为过渡，连接第9章对路径系统的结构性揭示，导向第10章对「结构螺旋演化地图」的构建任务，并初步说明为何「螺旋」是认知的本体性表达。</p>
+      <h4>6.1 多路径如何形成「认知的螺旋坐标系」？</h4>
+      <p>我们可以将三类路径视作构成认知演化空间的三根主轴：</p>
+      <p>S₁：抽象 × 精度 × 一致性——结构轴；<br>
+      P：表达 × 输出 × 传播性——展开轴；<br>
+      R：意义 × 语境 × 多义性——关系轴。</p>
+      <p>而当这三轴在时间维度上动态交错运行，系统就不再是一个「结构—表达—意义」的循环三角，而是一个不断向外螺旋推进的演化坐标系，我们称之为：</p>
+      <p><strong>结构螺旋演化图谱（The Structural Spiral of Cognitive Evolution）</strong></p>
+      <p>该图谱的意义在于：任何认知过程，不再是「从结构走向表达」或「从表达走向理解」的线性路径，而是在结构、表达与关系三轴之间不断反弹、变形、合成、再演化的「螺旋状结构迁移」。</p>
+      <h4>6.2 螺旋模型为何优于线性模型？</h4>
+      <p>传统认知模型倾向于描述为线性阶段模型：如输入→处理→输出、感觉→知觉→概念→行为。但ESC指出：</p>
+      <p><strong>结构路径从不封闭循环，而是路径张力不断变化导致结构层级不断上升。</strong></p>
+      <p>螺旋模型的优势在于：</p>
+      <p><em>记录层级跳跃：路径在耦合中可能导致结构升维（不是回到起点，而是螺旋上升）；<br>
+      保留遗留结构：旧结构可能被封装进新结构形成「结构记忆」；<br>
+      支持非对称演化：某一阶段可能 P 强 S₁ 弱，下一阶段 R 强 S₁ 弱，非对称性驱动变化；<br>
+      解释认知转型：系统如何在结构路径中走出原模式、构建新结构视角。</em></p>
+      <p>螺旋式结构是三路径在时间张力中展开自身的方式，它才是认知真正的「发生机制」。</p>
+      <h4>6.3 三路径张力如何转化为演化机制？</h4>
+      <p>在认知系统不断运行过程中，三类路径形成如下动力系统：</p>
+      <p>结构压缩张力（S₁）：生成更高阶抽象——向上递归，系统稳定化；<br>
+      表达适配张力（P）：生成更多输出通路——向外扩展，系统传播化；<br>
+      意义张力（R）：生成更多连接与解释——向内整合，系统复杂化。</p>
+      <p>当这些张力互相牵引、交叉作用时，系统不再原地运行，而是在结构张力中推进，在时间中展开，在连接中进化。这种动力形态的本质是：</p>
+      <p><em>路径张力构成认知演化的「驱动机制」；<br>
+      时间结构构成认知演化的「展开维度」；<br>
+      而结构螺旋，是这二者交汇后的「表达图形」。</em></p>
+      <h4>6.4 链接下一章：认知系统的「结构螺旋演化地图」</h4>
+      <p>本节总结如下桥接命题：</p>
+      <p><em>1.三路径不是模块，而是认知张力系统的三个方向；<br>
+      2.路径耦合不是循环，而是推动结构演化的动力机制；<br>
+      3.三轴张力在时间中不断叠加、反馈、激活，最终构成认知的螺旋式展开结构；<br>
+      4.所谓「认知进化」，不是新旧交替，而是螺旋展开的结构重组。</em></p>
+      <p>这也为下一章提出的重大任务铺垫基础：</p>
+      <p>构建结构螺旋的认知演化地图：不仅呈现三路径如何协同演化，更揭示认知如何从局部路径，发展为系统级结构。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P14 · 第6节卡（坐标系） ========== -->
+<section class="slide light">
+  <div class="chrome"><div>Section 6 · Spiral Axes</div><div>14 / 16</div></div>
+  <div class="frame" style="padding-top:4.5vh">
+    <div class="kicker" data-anim>认知演化空间的三根主轴 · 6.1 / 6.3</div>
+    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:3.6vh" data-anim>三轴交错，螺旋推进</h2>
+    <table class="tbl" data-anim style="margin-bottom:3vh">
+      <thead><tr><th style="width:14%">路径</th><th style="width:42%">功能维度</th><th>坐标含义</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">S₁</td><td>抽象 × 精度 × 一致性</td><td>结构轴</td></tr>
+        <tr><td class="em-cell">P</td><td>表达 × 输出 × 传播性</td><td>展开轴</td></tr>
+        <tr><td class="em-cell">R</td><td>意义 × 语境 × 多义性</td><td>关系轴</td></tr>
+      </tbody>
+    </table>
+    <table class="tbl" data-anim>
+      <thead><tr><th style="width:30%">结构张力</th><th style="width:34%">导致路径行为</th><th>推动系统演化</th></tr></thead>
+      <tbody>
+        <tr><td class="em-cell">结构压缩张力 S₁</td><td>生成更高阶抽象</td><td>向上递归，系统稳定化</td></tr>
+        <tr><td class="em-cell">表达适配张力 P</td><td>生成更多输出通路</td><td>向外扩展，系统传播化</td></tr>
+        <tr><td class="em-cell">意义张力 R</td><td>生成更多连接与解释</td><td>向内整合，系统复杂化</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot"><div>Page 14 · Spiral Axes</div><div>Section 6</div></div>
+  <button class="src-toggle">原文 · E</button>
+  <div class="src-panel">
+    <div class="src-head"><div class="src-kicker">原文 · 6.1-6.4</div><div class="src-close">E / 点击收起</div></div>
+    <div class="src-body">
+      <h4>6.1 多路径如何形成「认知的螺旋坐标系」？</h4>
+      <p>我们可以将三类路径视作构成认知演化空间的三根主轴：</p>
+      <p>S₁：抽象 × 精度 × 一致性——结构轴；<br>
+      P：表达 × 输出 × 传播性——展开轴；<br>
+      R：意义 × 语境 × 多义性——关系轴。</p>
+      <p>而当这三轴在时间维度上动态交错运行，系统就不再是一个「结构—表达—意义」的循环三角，而是一个不断向外螺旋推进的演化坐标系，我们称之为：</p>
+      <p><strong>结构螺旋演化图谱（The Structural Spiral of Cognitive Evolution）</strong></p>
+      <p>该图谱的意义在于：任何认知过程，不再是「从结构走向表达」或「从表达走向理解」的线性路径，而是在结构、表达与关系三轴之间不断反弹、变形、合成、再演化的「螺旋状结构迁移」。</p>
+      <h4>6.2 螺旋模型为何优于线性模型？</h4>
+      <p>传统认知模型倾向于描述为线性阶段模型：如输入→处理→输出、感觉→知觉→概念→行为。但ESC指出：</p>
+      <p><strong>结构路径从不封闭循环，而是路径张力不断变化导致结构层级不断上升。</strong></p>
+      <p>螺旋模型的优势在于：</p>
+      <p><em>记录层级跳跃：路径在耦合中可能导致结构升维（不是回到起点，而是螺旋上升）；<br>
+      保留遗留结构：旧结构可能被封装进新结构形成「结构记忆」；<br>
+      支持非对称演化：某一阶段可能 P 强 S₁ 弱，下一阶段 R 强 S₁ 弱，非对称性驱动变化；<br>
+      解释认知转型：系统如何在结构路径中走出原模式、构建新结构视角。</em></p>
+      <p>螺旋式结构是三路径在时间张力中展开自身的方式，它才是认知真正的「发生机制」。</p>
+      <h4>6.3 三路径张力如何转化为演化机制？</h4>
+      <p>在认知系统不断运行过程中，三类路径形成如下动力系统：</p>
+      <p>结构压缩张力（S₁）：生成更高阶抽象——向上递归，系统稳定化；<br>
+      表达适配张力（P）：生成更多输出通路——向外扩展，系统传播化；<br>
+      意义张力（R）：生成更多连接与解释——向内整合，系统复杂化。</p>
+      <p>当这些张力互相牵引、交叉作用时，系统不再原地运行，而是在结构张力中推进，在时间中展开，在连接中进化。这种动力形态的本质是：</p>
+      <p><em>路径张力构成认知演化的「驱动机制」；<br>
+      时间结构构成认知演化的「展开维度」；<br>
+      而结构螺旋，是这二者交汇后的「表达图形」。</em></p>
+      <h4>6.4 链接下一章：认知系统的「结构螺旋演化地图」</h4>
+      <p>本节总结如下桥接命题：</p>
+      <p><em>1.三路径不是模块，而是认知张力系统的三个方向；<br>
+      2.路径耦合不是循环，而是推动结构演化的动力机制；<br>
+      3.三轴张力在时间中不断叠加、反馈、激活，最终构成认知的螺旋式展开结构；<br>
+      4.所谓「认知进化」，不是新旧交替，而是螺旋展开的结构重组。</em></p>
+      <p>这也为下一章提出的重大任务铺垫基础：</p>
+      <p>构建结构螺旋的认知演化地图：不仅呈现三路径如何协同演化，更揭示认知如何从局部路径，发展为系统级结构。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== P15 · 章末金句 ========== -->
+<section class="slide dark">
+  <div class="chrome"><div>Chapter IX · Verdict</div><div>15 / 16</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:78vh">
+    <div class="kicker" data-anim>本章判定 · 三轴力场</div>
+    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4vw;line-height:1.34;max-width:82vw">
+      <span data-anim="line" style="display:block">所谓「认知进化」，</span>
+      <span data-anim="line" style="display:block">不是新旧交替，而是螺旋展开的结构重组。</span>
+    </blockquote>
+    <div class="meta-row" data-anim><span>S₁ 结构轴</span><span>·</span><span>P 展开轴</span><span>·</span><span>R 关系轴</span><span>·</span><span>+ 时间</span></div>
+  </div>
+  <div class="foot"><div>Page 15 · Verdict</div><div>Chapter IX</div></div>
+</section>
+
+<!-- ========== P16 · 尾页 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div>ESC · 本章完成</div><div>16 / 16</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
+    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
+    <h1 class="h-hero" style="font-size:5vw" data-anim>三路径不是模块，<br>而是认知张力系统的三个方向。</h1>
+    <p class="lead" style="max-width:72vw" data-anim>本章完成：分化的三张力来源；S₁ 抽象机制；P 投影机制；R 意义机制；三路径耦合的回路链与切换矩阵；结构螺旋演化图谱。</p>
+    <p class="body-zh" style="max-width:74vw" data-anim>下一章将构建：结构螺旋的认知演化地图——三路径张力如何在时间反馈中展开为五阶段系统进化。</p>
+  </div>
+  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
+    <a href="../deck-codex-11/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 8 章 · 认知的自组织机制</div></a>
+    <a href="../deck-codex-13/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 10 章 · 结构螺旋的认知演化地图</div></a>
+  </div>
+  <div class="foot"><div>第 10 章 · 结构螺旋的认知演化地图</div><div>— ESC —</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 =============== */
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+let drawDark=null, drawLight=null, glRAF=0, glT0=Date.now();
+function startGL(){
+  if(window.__lowPowerMode || glRAF) return;
+  if(!drawDark) drawDark=bootGL('bg-dark',FS_DARK);
+  if(!drawLight) drawLight=bootGL('bg-light',FS_LIGHT);
+  glT0=Date.now();
+  function loop(){
+    if(window.__lowPowerMode){glRAF=0;return;}
+    const t=(Date.now()-glT0)/1000;
+    drawDark(t);drawLight(t);
+    glRAF=requestAnimationFrame(loop);
+  }
+  glRAF=requestAnimationFrame(loop);
+}
+function stopGL(){
+  if(glRAF) cancelAnimationFrame(glRAF);
+  glRAF=0;
+}
+startGL();
+addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length,lock=false;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  if(lock)return;
+  idx=Math.max(0,Math.min(total-1,n));
+  window.__currentSlideIndex = idx;
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
+  lock=true;setTimeout(()=>lock=false,700);
+}
+
+/* =============== 原文层切换 =============== */
+function toggleSrc(){
+  const p=slides[idx].querySelector('.src-panel');
+  if(p)p.classList.toggle('on');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    window.__setLowPowerMode(!window.__lowPowerMode);
+    return;
+  }
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
+    e.preventDefault();
+    if(!overviewOn)toggleSrc();
+    return;
+  }
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){
+    if(window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+1);
+    return;
+  }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){
+    if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
+      wheelAcc=0;
+    }else{
+      go(idx+(wheelAcc>0?1:-1));wheelAcc=0;
+    }
+  }
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  if(e.target.closest && e.target.closest('.src-panel'))return;
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+    if(dx<0 && window.__pipeAdvance && window.__pipeAdvance()) return;
+    go(idx+(dx<0?1:-1));
+  }
+},{passive:true});
+
+const chapterPrev = '../deck-codex-11/index.html', chapterNext = '../deck-codex-13/index.html';
+addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+
+<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<script type="module">
+let motion;
+try {
+  motion = await import('../deck-codex/assets/motion.min.js');
+} catch(e1) {
+  try {
+    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
+  } catch(e2) {
+    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
+    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  }
+}
+
+if(motion){
+  const { animate, stagger } = motion;
+  document.body.classList.add('motion-ready');
+  const EASE = [.22, 1, .36, 1];
+  const slides = [...document.querySelectorAll('.slide')];
+  let lastIdx = -1;
+
+  function resetAnims(slide){
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='';
+      el.style.transform='';
+    });
+  }
+
+  function revealStatic(slide){
+    resetAnims(slide);
+    document.getAnimations?.().forEach(a=>a.cancel());
+    slide.querySelectorAll('[data-anim]').forEach(el=>{
+      el.style.opacity='1';
+      el.style.transform='none';
+    });
+  }
+
+  function playSlide(i){
+    const slide = slides[i];
+    if(!slide) return;
+    lastIdx = i;
+    const recipe = slide.dataset.animate || (slide.classList.contains('hero') ? 'hero' : 'cascade');
+
+    if(window.__lowPowerMode){
+      revealStatic(slide);
+      return;
+    }
+
+    resetAnims(slide);
+    const all = [...slide.querySelectorAll('[data-anim]')];
+    if(!all.length) return;
+
+    if(recipe === 'quote'){
+      const lines = all.filter(el=>el.dataset.anim==='line');
+      const others = all.filter(el=>el.dataset.anim!=='line');
+      if(others.length) animate(others, {opacity:[0,1], y:[8,0]},    {duration:.6, delay:stagger(.12, {start:.2}), easing:EASE});
+      if(lines.length)  animate(lines,  {opacity:[.35,1], y:[10,0]}, {duration:.8, delay:stagger(.55, {start:.5}), easing:EASE});
+      return;
+    }
+
+    if(recipe === 'hero'){
+      animate(all, {opacity:[0,1], y:[14,0]}, {duration:.9, delay:stagger(.16, {start:.2}), easing:EASE});
+      return;
+    }
+
+    animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
+  }
+
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = () => false;
+
+  playSlide(0);
+}
+</script>
+</body>
+</html>
