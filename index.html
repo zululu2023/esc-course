@@ -52,6 +52,16 @@
   .row .go{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.22em;text-transform:uppercase;opacity:.45;white-space:nowrap;transition:opacity .25s}
   a.row:hover .go{opacity:.9}
 
+  /* 目录行内收听入口（音频轨） */
+  .row .mid{display:block;min-width:0}
+  .esc-lines{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:1.3vh;align-items:center}
+  .esc-line{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.12em;opacity:.66;cursor:pointer;color:inherit;text-transform:uppercase}
+  .esc-line:hover{opacity:1}
+  .esc-line .esc-d{width:21px;height:21px;border-radius:50%;border:1px solid rgba(var(--ink-rgb),.5);display:inline-flex;align-items:center;justify-content:center;color:inherit}
+  .esc-line .esc-d svg{width:7px;height:7px;fill:currentColor}
+  .esc-line.esc-on{opacity:1}
+  .esc-line.esc-on .esc-d{background:var(--ink);color:var(--paper)}
+
   .part{margin-top:5vh;margin-bottom:1.6vh;display:flex;align-items:baseline;gap:1.5em}
   .part .p-k{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.26em;text-transform:uppercase;opacity:.5}
   .part .p-line{flex:1;height:1px;background:currentColor;opacity:.15}
@@ -96,7 +106,12 @@
   <a class="row" href="deck-codex-07/index.html"><span class="nb">07</span><span class="t">第4章｜结构化是理解发生的方式<small>连接 × 模式 × 时间 · s(t) → IP</small></span><span class="go">进入 →</span></a>
   <a class="row" href="deck-codex-08/index.html"><span class="nb">08</span><span class="t">第5章｜从结构到原理：IP 的生成机制<small>调用 × 嵌套 × 反馈 · 局部稳定结构</small></span><span class="go">进入 →</span></a>
   <a class="row" href="deck-codex-09/index.html"><span class="nb">09</span><span class="t">第6章｜自然法则不是被发现的，而是被结构演化出来的<small>极限稳定 · 三大生成条件 · 真理幻觉</small></span><span class="go">进入 →</span></a>
-  <a class="row" href="deck-codex-10/index.html"><span class="nb">10</span><span class="t">第7章｜知识系统是对结构法则的反向映射<small>知识 = 结构路径 × 命名 × 再调用</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="deck-codex-10/index.html"><span class="nb">10</span><span class="mid"><span class="t">第7章｜知识系统是对结构法则的反向映射<small>知识 = 结构路径 × 命名 × 再调用</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="0"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 正章</span>
+      <span class="esc-line" data-esc-track="1"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>变奏</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
   <a class="row" href="deck-codex-11/index.html"><span class="nb">11</span><span class="t">第8章｜认知的自组织机制<small>反馈 × 嵌套 × 再组合 · 结构分化</small></span><span class="go">进入 →</span></a>
 
   <div class="part"><span class="p-k">正文 · 第三乐章</span><span class="p-line"></span></div>
@@ -117,5 +132,7 @@
   <div class="formula">E = s(t) = N = IP</div>
 </footer>
 
+<script>window.ESC_AUDIO={kind:'toc',chapter:'第七章',tracks:[{part:'正章',file:'audio/第七章 知识不是客观镜像而是反向映射.m4a'},{part:'变奏',file:'audio/第七章 变奏 错觉是系统寻求稳定的方式.m4a'}]}</script>
+<script src="esc-audio.js"></script>
 </body>
 </html>
