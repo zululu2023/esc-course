@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>结构透镜 · 案例分析 · 导引目录</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{padding:7vh 8vw 10vh}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(60vw 60vh at 82% 8%, rgba(31,26,20,.05), transparent 70%),
+      radial-gradient(50vw 50vh at 8% 92%, rgba(31,26,20,.04), transparent 70%)}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6}
+  .chrome{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:max(11px,.8vw);letter-spacing:.2em;text-transform:uppercase;opacity:.65;margin-bottom:7vh}
+  .chrome a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(31,26,20,.3);padding-bottom:1px}
+  .chrome a:hover{opacity:.7}
+
+  header h1{font-family:var(--serif-zh);font-weight:900;font-size:clamp(34px,4.8vw,72px);line-height:1.12;letter-spacing:-.01em;margin-bottom:1.6vh}
+  header .sub{font-family:var(--serif-zh);font-weight:500;font-size:clamp(16px,1.6vw,26px);opacity:.72;margin-bottom:3vh}
+  header .desc{font-family:var(--serif-zh);font-size:clamp(14px,1.15vw,19px);line-height:1.8;opacity:.78;max-width:74ch;margin-bottom:1.2vh}
+  header .meta-row{display:flex;gap:1.4em;flex-wrap:wrap;font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.16em;text-transform:uppercase;opacity:.55;margin-bottom:5vh}
+
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin-bottom:2vh}
+
+  .toc{display:flex;flex-direction:column}
+  a.row{display:grid;grid-template-columns:6ch 1fr auto;gap:2.5vw;align-items:baseline;padding:2.6vh 1vw;border-top:1px solid rgba(31,26,20,.18);color:inherit;text-decoration:none;transition:background .25s ease,padding-left .25s ease}
+  a.row:last-child{border-bottom:1px solid rgba(31,26,20,.18)}
+  a.row:hover{background:rgba(31,26,20,.05);padding-left:1.8vw}
+  .row .nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:clamp(15px,1.3vw,22px);opacity:.5}
+  .row .t{font-family:var(--serif-zh);font-weight:600;font-size:clamp(16px,1.55vw,26px);line-height:1.35}
+  .row .t small{display:block;font-family:var(--sans-zh);font-weight:400;font-size:clamp(12px,.92vw,16px);opacity:.62;margin-top:.5vh}
+  .row .go{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.22em;text-transform:uppercase;opacity:.45;white-space:nowrap;transition:opacity .25s}
+  a.row:hover .go{opacity:.9}
+
+  .part{margin-top:4vh;margin-bottom:1.6vh;display:flex;align-items:baseline;gap:1.5em}
+  .part .p-k{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.26em;text-transform:uppercase;opacity:.5}
+  .part .p-line{flex:1;height:1px;background:currentColor;opacity:.15}
+
+  footer{margin-top:8vh;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:max(11px,.8vw);letter-spacing:.18em;text-transform:uppercase;opacity:.45}
+  footer a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(31,26,20,.35);padding-bottom:1px}
+  footer a:hover{opacity:.7}
+
+  @media (max-width:760px){
+    body{padding:5vh 6vw 8vh}
+    a.row{grid-template-columns:4ch 1fr;gap:4vw}
+    .row .go{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome"><div>Structural Lens · Case Index</div><div><a href="../index.html">← ESC 全书目录</a></div></div>
+
+<header>
+  <div class="kicker" style="margin-bottom:2vh">结构透镜 · jiegou-lens · 案例分析</div>
+  <h1>为什么它总这样发生</h1>
+  <div class="sub">现象的生成机制 · 判据自造 × 六维探查 × 重组杠杆</div>
+  <p class="desc">结构不是形状，是关系在时间中形成的稳定模式。jiegou-lens（结构透镜）不解释"这是什么"，只追问一句——这个结果为什么会反复如此发生、靠什么撑着、哪根撑得最松、能往哪撬。以下每份 deck，都是一个反复出现的社会文化现象被拆开的过程：从现象内部长出判据，再逐维验证，最后落到可动的杠杆。</p>
+  <div class="meta-row"><span>3 个案例 · 单文件横向翻页</span><span>·</span><span>← → 翻页 · ESC 总览 · P 演讲模式</span><span>·</span><span>B 静态背景</span></div>
+</header>
+
+<div class="rule"></div>
+
+<nav class="toc">
+  <div class="part"><span class="p-k">案例分析 · 收录 01—03</span><span class="p-line"></span></div>
+  <a class="row" href="dao-guan/index.html"><span class="nb">01</span><span class="t">倒灌的美德<small>一套儒家德目的两千年使用史 · 温良恭俭让仁义礼智信，为什么总在教育你</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="education-arms-race/index.html"><span class="nb">02</span><span class="t">军备赛 · 教育内卷<small>为什么人人骂补课军备赛，却谁都停不下来</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="prasangika-tower/index.html"><span class="nb">03</span><span class="t">应成的塔尖<small>格鲁派判教结构分析 · 一个体系如何把自己判在塔尖之下</small></span><span class="go">进入 →</span></a>
+</nav>
+
+<footer>
+  <div><a href="../index.html">返回 ESC：结构化认知的演化路径</a></div>
+  <div>jiegou-lens · 结构透镜</div>
+</footer>
+
+</body>
+</html>
