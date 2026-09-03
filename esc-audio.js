@@ -8,7 +8,7 @@
   var cfg = window.ESC_AUDIO;
   if(!cfg || !cfg.tracks || !cfg.tracks.length) return;
 
-  var TRACKS = cfg.tracks.map(function(t){ return {part:t.part||'', file:t.file, title:t.title||t.part||''}; });
+  var TRACKS = cfg.tracks.map(function(t){ return {part:t.part||'', ch:(t.ch||cfg.chapter||''), file:t.file, title:t.title||t.part||''}; });
   var chapter = cfg.chapter || '';
   var kind = cfg.kind || 'deck';
 
@@ -148,9 +148,14 @@
   }
 
   function paintChips(){
-    if(TRACKS.length < 2){ el.chips.innerHTML = ''; return; }
+    if(i < 0){ el.chips.innerHTML = ''; return; }
+    /* 仅当当前章有多轨（如第7章 正章/变奏）才显示 chip；目录页 12 轨各属不同章，不混列 */
+    var cur = TRACKS[i];
+    var grp = TRACKS.filter(function(t){ return (t.ch||'') === (cur.ch||''); });
+    if(grp.length < 2){ el.chips.innerHTML = ''; return; }
     el.chips.innerHTML = '';
-    TRACKS.forEach(function(t,k){
+    grp.forEach(function(t){
+      var k = TRACKS.indexOf(t);
       var c = document.createElement('button');
       c.className = 'esc-chip' + (k===i ? ' on' : '');
       c.type = 'button';
@@ -165,8 +170,8 @@
     dock.dataset.state = 'live';
     body.classList.add('esc-live');
     var t = TRACKS[i];
-    el.tag.textContent = 'ESC · ' + chapter + (t.part ? ' · ' + t.part : '');
-    el.title.textContent = t.title || t.part;
+    el.tag.textContent = 'ESC · ' + (t.ch || chapter) + (t.part ? ' · ' + t.part : '');
+    el.title.textContent = t.title;
     el.tot.textContent = dur ? fmt(dur) : '--:--';
     paintChips();
     paintIcons();
