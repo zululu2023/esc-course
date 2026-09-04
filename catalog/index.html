@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESC:结构化认知的演化路径 · 全书目录</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1f1a14;
+    --ink-rgb:31,26,20;
+    --paper:#f8f3e7;
+    --paper-rgb:248,243,231;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  body{padding:7vh 8vw 10vh}
+
+  /* 微弱晕光，呼应 deck 亮色页的纸感 */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(60vw 60vh at 82% 8%, rgba(31,26,20,.05), transparent 70%),
+      radial-gradient(50vw 50vh at 8% 92%, rgba(31,26,20,.04), transparent 70%)}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6}
+  .chrome{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:max(11px,.8vw);letter-spacing:.2em;text-transform:uppercase;opacity:.65;margin-bottom:7vh}
+
+  header h1{font-family:var(--serif-zh);font-weight:900;font-size:clamp(34px,4.8vw,72px);line-height:1.12;letter-spacing:-.01em;margin-bottom:1.6vh}
+  header .sub{font-family:var(--serif-zh);font-weight:500;font-size:clamp(16px,1.6vw,26px);opacity:.72;margin-bottom:3vh}
+  header .desc{font-family:var(--serif-zh);font-size:clamp(14px,1.15vw,19px);line-height:1.8;opacity:.78;max-width:72ch;margin-bottom:1.2vh}
+  header .meta-row{display:flex;gap:1.4em;flex-wrap:wrap;font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.16em;text-transform:uppercase;opacity:.55;margin-bottom:5vh}
+
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin-bottom:2vh}
+
+  /* 目录列表：rowline 式 */
+  .toc{display:flex;flex-direction:column}
+  a.row{display:grid;grid-template-columns:6ch 1fr auto;gap:2.5vw;align-items:baseline;padding:2.6vh 1vw;border-top:1px solid rgba(31,26,20,.18);color:inherit;text-decoration:none;transition:background .25s ease,padding-left .25s ease}
+  a.row:last-child{border-bottom:1px solid rgba(31,26,20,.18)}
+  a.row:hover{background:rgba(31,26,20,.05);padding-left:1.8vw}
+  /* 整书导读置顶入口 */
+  .toc a.row.intro{background:rgba(31,26,20,.045);border-top:2px solid rgba(31,26,20,.35);border-bottom:1px solid rgba(31,26,20,.18);margin:1.2vh 0 2.6vh}
+  .toc a.row.intro:hover{background:rgba(31,26,20,.08);padding-left:1.8vw}
+  .row .nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:clamp(15px,1.3vw,22px);opacity:.5}
+  .row .t{font-family:var(--serif-zh);font-weight:600;font-size:clamp(16px,1.55vw,26px);line-height:1.35}
+  .row .t small{display:block;font-family:var(--sans-zh);font-weight:400;font-size:clamp(12px,.92vw,16px);opacity:.62;margin-top:.5vh}
+  .row .go{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.22em;text-transform:uppercase;opacity:.45;white-space:nowrap;transition:opacity .25s}
+  a.row:hover .go{opacity:.9}
+
+  /* 目录行内收听入口（音频轨） */
+  .row .mid{display:block;min-width:0}
+  .esc-lines{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:1.3vh;align-items:center}
+  .esc-line{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.12em;opacity:.66;cursor:pointer;color:inherit;text-transform:uppercase}
+  .esc-line:hover{opacity:1}
+  .esc-line .esc-d{width:21px;height:21px;border-radius:50%;border:1px solid rgba(var(--ink-rgb),.5);display:inline-flex;align-items:center;justify-content:center;color:inherit}
+  .esc-line .esc-d svg{width:7px;height:7px;fill:currentColor}
+  .esc-line.esc-on{opacity:1}
+  .esc-line.esc-on .esc-d{background:var(--ink);color:var(--paper)}
+
+  .part{margin-top:5vh;margin-bottom:1.6vh;display:flex;align-items:baseline;gap:1.5em}
+  .part .p-k{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.26em;text-transform:uppercase;opacity:.5}
+  .part .p-line{flex:1;height:1px;background:currentColor;opacity:.15}
+
+  footer{margin-top:8vh;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:max(11px,.8vw);letter-spacing:.18em;text-transform:uppercase;opacity:.45}
+  footer .formula{font-family:var(--serif-en);font-style:italic;font-size:clamp(16px,1.7vw,28px);opacity:.85;letter-spacing:.02em;text-transform:none}
+
+  @media (max-width:760px){
+    body{padding:5vh 6vw 8vh}
+    a.row{grid-template-columns:4ch 1fr;gap:4vw}
+    .row .go{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome"><div>ESC Series · Index</div><div><a href="../" style="color:inherit">返回阅读导览</a> · 结构认知实验室</div></div>
+
+<header>
+  <div class="kicker" style="margin-bottom:2vh">结构认知实验室 · 原创 · P. · 已完结</div>
+  <h1>ESC:结构化认知的演化路径</h1>
+  <div class="sub">幻灯片课程版 · 全书目录</div>
+  <p class="desc">《ESC:结构化认知的演化路径》内容是 ESC 结构认知理解公式，命题和论证。这是作为结构系统实践者对人类成长、理解与世界本体的深刻困惑，于是用系统建构的能力来对如何理解「理解」的机制进行拆解的尝试。</p>
+  <div class="meta-row"><span>15 篇 · 已完结</span><span>·</span><span>共 10 章 40+ 小节</span><span>·</span><span>每页按 E 展开逐字原文</span></div>
+</header>
+
+<div class="rule"></div>
+
+<nav class="toc">
+  <a class="row intro" href="../deck-intro/index.html"><span class="nb">INTRO</span><span class="t">整书导读 · 快速入门<small>12 页可视化图册 · 我们不是发现世界，而是生成世界</small></span><span class="go">先读这本 →</span></a>
+  <div class="part"><span class="p-k">卷首</span><span class="p-line"></span></div>
+  <a class="row" href="../deck-codex/index.html"><span class="nb">01</span><span class="t">前言｜缘起<small>无法认知世界，就无法理解成长</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-02/index.html"><span class="nb">02</span><span class="t">导读<small>结构符号</small></span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-03/index.html"><span class="nb">03</span><span class="t">序章｜存在的显现<small>从已知出发的认知结构之路</small></span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">正文 · 第一乐章</span><span class="p-line"></span></div>
+  <a class="row" href="../deck-codex-05/index.html"><span class="nb">04</span><span class="mid"><span class="t">第1章｜我们如何知道我们所知道的？<small>E = s(t) 的发生前夜</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="0"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 认知不是反映而是映射</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-04/index.html"><span class="nb">05</span><span class="mid"><span class="t">第2章｜存在不是本质，而是结构显现<small>本体论的陷阱 · 显现视角</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="1"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 存在不是本质而是结构显现</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">正文 · 第二乐章</span><span class="p-line"></span></div>
+  <a class="row" href="../deck-codex-06/index.html"><span class="nb">06</span><span class="mid"><span class="t">第3章｜认知不是复制，而是构造<small>三条构造路径 · 人类构造 H · 边界对</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="2"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 认知不是复制而是构造</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-07/index.html"><span class="nb">07</span><span class="mid"><span class="t">第4章｜结构化是理解发生的方式<small>连接 × 模式 × 时间 · s(t) → IP</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="3"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 结构化是理解发生的方式</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-08/index.html"><span class="nb">08</span><span class="mid"><span class="t">第5章｜从结构到原理：IP 的生成机制<small>调用 × 嵌套 × 反馈 · 局部稳定结构</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="4"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 原理是大脑演化的快捷方式</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-09/index.html"><span class="nb">09</span><span class="mid"><span class="t">第6章｜自然法则不是被发现的，而是被结构演化出来的<small>极限稳定 · 三大生成条件 · 真理幻觉</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="5"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 法则不是发现而是结构演化</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-10/index.html"><span class="nb">10</span><span class="mid"><span class="t">第7章｜知识系统是对结构法则的反向映射<small>知识 = 结构路径 × 命名 × 再调用</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="6"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 知识不是客观镜像而是反向映射</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-11/index.html"><span class="nb">11</span><span class="mid"><span class="t">第8章｜认知的自组织机制<small>反馈 × 嵌套 × 再组合 · 结构分化</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="7"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 自组织是认知秩序生成的方式</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">正文 · 第三乐章</span><span class="p-line"></span></div>
+  <a class="row" href="../deck-codex-12/index.html"><span class="nb">12</span><span class="mid"><span class="t">第9章｜认知的三类路径<small>S₁ 结构路径 · P 投影路径 · R 关系路径</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="8"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 三轴分化是认知路径的演化方式</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-13/index.html"><span class="nb">13</span><span class="mid"><span class="t">第10章｜结构螺旋的认知演化地图<small>五阶段展开 · 再路径化 · 稳定错觉</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="9"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 结构螺旋是认知系统进化的方式</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">卷尾</span><span class="p-line"></span></div>
+  <a class="row" href="../deck-codex-14/index.html"><span class="nb">14</span><span class="mid"><span class="t">后记｜一条路径的开始<small>写于结构仍在生长的时刻</small></span>
+    <span class="esc-lines">
+      <span class="esc-line" data-esc-track="10"><span class="esc-d"><span class="esc-v"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span></span>收听解读 · 一条路径的开始</span>
+    </span>
+  </span><span class="go">进入 →</span></a>
+  <a class="row" href="../deck-codex-15/index.html"><span class="nb">15</span><span class="t">附录 I｜ESC 术语<small>基础公式主构项 · 辅助术语 · 路径系统 · 公式</small></span><span class="go">进入 →</span></a>
+
+  <div class="part"><span class="p-k">番外篇 · BONUS</span><span class="p-line"></span></div>
+  <a class="row" target="_blank" rel="noopener" href="https://zululu2023.github.io/esc-theory-review/"><span class="nb">B1</span><span class="t">安检简报<small>Theory or Story · 这套理论是投影还是框架</small></span><span class="go">打开 →</span></a>
+  <a class="row" target="_blank" rel="noopener" href="https://zululu2023.github.io/esc-cognition-dissection/"><span class="nb">B2</span><span class="t">认知解耦 · X 光片<small>把"真"换成"改不动" · 骨架解剖与理论地图定位</small></span><span class="go">打开 →</span></a>
+  <a class="row" href="../jiegou-lens-cases/index.html"><span class="nb">B3</span><span class="t">Mr. ESC · 瑞士军刀<small>一个柄，几把刀 —— 结构透镜（拆"为什么总这样"）· 净言（换坐标系重述语言）；从下面的案例分析，看这把刀的刀口</small></span><span class="go">浏览 →</span></a>
+</nav>
+
+<footer>
+  <div>ESC 系列课程 · 幻灯片版 · 共 15 单元</div>
+  <div class="formula">E = s(t) = N = IP</div>
+</footer>
+
+<script>window.ESC_AUDIO={kind:'toc',tracks:[{'ch': '第 1 章', 'title': '认知不是反映而是映射', 'file': '../audio/第1章 认知不是反映而是映射.m4a'}, {'ch': '第 2 章', 'title': '存在不是本质而是结构显现', 'file': '../audio/第2章 存在不是本质而是结构显现.m4a'}, {'ch': '第 3 章', 'title': '认知不是复制而是构造', 'file': '../audio/第3章 认知不是复制而是构造.m4a'}, {'ch': '第 4 章', 'title': '结构化是理解发生的方式', 'file': '../audio/第4章 结构化是理解发生的方式.m4a'}, {'ch': '第 5 章', 'title': '原理是大脑演化的快捷方式', 'file': '../audio/第5章 原理是大脑演化的快捷方式.m4a'}, {'ch': '第 6 章', 'title': '法则不是发现而是结构演化', 'file': '../audio/第6章 法则不是发现而是结构演化.m4a'}, {'ch': '第 7 章', 'title': '知识不是客观镜像而是反向映射', 'file': '../audio/第7章 知识不是客观镜像而是反向映射.m4a'}, {'ch': '第 8 章', 'title': '自组织是认知秩序生成的方式', 'file': '../audio/第8章 自组织是认知秩序生成的方式.m4a'}, {'ch': '第 9 章', 'title': '三轴分化是认知路径的演化方式', 'file': '../audio/第9章 三轴分化是认知路径的演化方式.m4a'}, {'ch': '第 10 章', 'title': '结构螺旋是认知系统进化的方式', 'file': '../audio/第10章 结构螺旋是认知系统进化的方式.m4a'}, {'ch': '后记', 'title': '一条路径的开始', 'file': '../audio/后记 一条路径的开始.m4a'}]}</script>
+<script src="../esc-audio.js"></script>
+</body>
+</html>
