@@ -974,7 +974,7 @@ const slides=deck.querySelectorAll('.slide');
 const nav=document.getElementById('nav');
 let idx=0,total=slides.length,lock=false;
 
-const SOURCE_ANCHORS=["chapter","section-1","section-1","section-2","section-2","section-2","section-3","section-3","section-3","section-4","section-4","section-4","section-5","section-5","section-6","section-6","section-6","section-6"];
+const SOURCE_ANCHORS=["chapter","section-1","section-1@sub-1-2","section-2","section-2@sub-2-2","section-2@sub-2-3","section-3@sub-3-2","section-3@sub-3-1","section-3@sub-3-3","section-4","section-4@sub-4-3","section-4@sub-4-4","section-5@sub-5-1","section-5@sub-5-2","section-6@sub-6-1","section-6@sub-6-2","section-6@sub-6-3","section-6@sub-6-4"];
 const sourcePanel=document.getElementById('source-panel');
 const sourceFrame=document.getElementById('source-frame');
 let sourceOn=false;
@@ -984,7 +984,8 @@ function setSource(on){
   sourcePanel.setAttribute('aria-hidden',sourceOn?'false':'true');
   if(sourceOn){
     const theme=slides[idx].classList.contains('light')?'light':'dark';
-    sourceFrame.src='original.html?section='+(SOURCE_ANCHORS[idx]||'chapter')+'&theme='+theme;
+    const [section,anchor]=(SOURCE_ANCHORS[idx]||'chapter').split('@');
+    sourceFrame.src='original.html?section='+section+'&theme='+theme+(anchor?'&anchor='+anchor:'');
     sourceFrame.focus();
   }
 }
