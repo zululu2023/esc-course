@@ -3,27 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESC 系列课程 · 第3章 认知不是复制，而是构造</title>
+<title>认知的构造｜第3章净言图解书刊</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1f1a14;
-    --ink-rgb:31,26,20;
-    --paper:#f8f3e7;
-    --paper-rgb:248,243,231;
-    --paper-tint:#eee7d4;
-    --ink-tint:#302a20;
+    /* ============ 主题色(默认:🖋 墨水经典) ============
+       切换主题:从 references/themes.md 复制对应的 :root 块
+       整体替换这几行(--ink / --ink-rgb / --paper / --paper-rgb)
+       其他地方散落的 rgba() 都走 var(--ink-rgb) / var(--paper-rgb),无需逐处改 */
+    --ink:#0a1f3d;
+    --ink-rgb:10,31,61;
+    --paper:#f1f3f5;
+    --paper-rgb:241,243,245;
+    --paper-tint:#e4e8ec;
+    --ink-tint:#152a4a;
+
+    /* ==== Plus:派生强调色(随主题一起换。杂志主题原是纸+墨单色,此为按各主题调性派生的第三强调色) ====
+       用法:强调词 .mark / 高亮带 .mark-band / 通用着色 .accent
+       中文黑体无真斜体,强调一律用 色+字重+半透明高亮带,不要 font-style:italic */
+    --accent:#2a63b7;
+    --accent-rgb:42,99,183;
+    --accent-soft:rgba(42,99,183,.16);
+    --nav-safe-bottom:10vh;       /* 底部导航安全区,贴底内容勿越过 100vh-此值 */
+
+    /* ============ 字体(跨主题固定) ============ */
     --mono:"IBM Plex Mono",ui-monospace,monospace;
     --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
     --serif-body-en:"Source Serif 4",Georgia,serif;
-    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
-    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+    --serif-zh:"Noto Serif SC","Songti SC","SimSun",serif;
+    --sans-zh:"Noto Sans SC","PingFang SC","Microsoft YaHei UI","Microsoft YaHei",sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 
+  /* ============ WebGL 双背景 ============ */
   canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
   canvas#bg-light{opacity:0}
   canvas#bg-dark{opacity:1}
@@ -31,82 +46,165 @@
   body.light-bg canvas#bg-dark{opacity:0}
   body.low-power canvas.bg{display:none!important}
 
+  /* ============ Deck 容器 + 翻页 ============ */
+  /* width: NSLIDES * 100vw，会在 JS 里动态矫正 */
   #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
   .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
   .slide.light{color:var(--ink);background:var(--paper)}
   .slide.dark{color:var(--paper);background:var(--ink)}
 
+  /* 默认页：遮罩较厚，保证文字可读 */
   .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
   .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
   .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  /* Hero 页：遮罩大幅降低，让 WebGL 背景明显透出 */
   .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
   .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  /* Hero 页顶底微弱渐隐，保证 chrome/foot 区域可读 */
   .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
   .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
   .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
 
-  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
-  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  /* ============ Magazine chrome：顶部 meta + 底部 foot ============
+     （v1 布局 + v2 字号在此合并为唯一定义，不要在别处二次定义） */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:max(12px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:max(12px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
 
+  .tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .rule.v{width:1px;height:100%;margin:0}
+
+  /* ============ 字体规则 ============
+     · 衬线（Noto Serif SC / Playfair）：大标题、重点金句、数字
+     · 非衬线（Noto Sans SC）：正文描述、body、补充说明
+     · 等宽（IBM Plex Mono）：kicker、meta 小标签、foot 右侧
+  */
   .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
-  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:9vw;line-height:1.06;letter-spacing:-.02em}
-  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:5.6vw;line-height:1.12;letter-spacing:-.01em}
-  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3vw;line-height:1.25;opacity:.7}
-  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.1vw;line-height:1.3}
-  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.16vw);line-height:1.72;opacity:.82;letter-spacing:.01em}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
   .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
-  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
-  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .meta{font-family:var(--mono);font-size:max(12px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
 
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.4vw;flex:1;align-content:center}
-  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vw;align-items:start}
+  /* ============ Plus:强调体系(accent) ============
+     中文黑体没有真斜体,<em> 不要用 font-style:italic(浏览器伪斜体会糊),
+     改为 .mark(色+字重) / .mark-band(底部高亮带),浅色页优先 .mark-band */
+  .accent{color:var(--accent)}
+  .mark{color:var(--accent);font-weight:600}
+  .mark-band{font-weight:600;background:linear-gradient(to bottom,transparent 62%,var(--accent-soft) 62%);padding:0 2px}
+  .mark-band.dark-safe{color:var(--paper)}   /* dark 页上用:纸白字 + accent 带 */
+  .num-accent{color:var(--accent)}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+
+  /* ============ 布局工具 ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
   .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
-  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
 
-  .callout{padding:2.8vh 2.2vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.18vw);line-height:1.55;opacity:.92}
+  /* ============ Stat（数字矩阵） ============ */
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+
+  /* ============ Callout（引用框） ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
   .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
   .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
-  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
-  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.5vw);line-height:1.42}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
 
-  .pipeline{display:grid;gap:1.4vw}
-  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
-  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
-  .pipeline[data-cols="5"]{grid-template-columns:repeat(5,1fr)}
-  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
-  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.1vw;opacity:.45}
-  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.42vw;letter-spacing:.01em;line-height:1.25}
-  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.92vw);line-height:1.5;opacity:.72}
+  /* ============ Platform（平台卡） ============ */
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
 
-  .tbl{width:100%;border-collapse:collapse;font-family:var(--sans-zh);font-size:max(13px,1vw);line-height:1.6}
-  .tbl th{font-family:var(--mono);font-size:max(11px,.84vw);letter-spacing:.14em;text-transform:uppercase;text-align:left;padding:1.4vh 1.1vw;border-top:2px solid currentColor;border-bottom:1px solid currentColor;opacity:.78;font-weight:500}
-  .tbl td{padding:1.4vh 1.1vw;border-bottom:1px solid rgba(127,127,127,.25);vertical-align:top;opacity:.9}
-  .tbl tr:nth-child(even) td{background:rgba(127,127,127,.05)}
-  .tbl .em-cell{font-family:var(--serif-zh);font-weight:600;white-space:nowrap}
+  /* ============ Rowline（表格行） ============ */
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
 
-  .src-toggle{position:absolute;right:2vw;bottom:5.6vh;z-index:45;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;padding:7px 16px;border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;cursor:pointer;opacity:.5;transition:opacity .2s}
-  .src-toggle:hover{opacity:1}
-  .src-panel{position:absolute;inset:0;z-index:40;overflow-y:auto;padding:6vh 7vw 9vh;display:none;cursor:default}
-  .slide.light .src-panel{background:rgba(var(--paper-rgb),.99);color:var(--ink)}
-  .slide.dark .src-panel{background:rgba(var(--ink-rgb),.99);color:var(--paper)}
-  .src-panel.on{display:block}
-  .src-panel .src-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid currentColor;padding-bottom:1.6vh;margin-bottom:3vh}
-  .src-panel .src-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
-  .src-panel .src-close{font-family:var(--mono);font-size:11px;letter-spacing:.2em;opacity:.55;text-transform:uppercase}
-  .src-panel h4{font-family:var(--serif-zh);font-weight:700;font-size:clamp(17px,1.5vw,24px);margin:2.2em 0 1em}
-  .src-panel h4:first-of-type{margin-top:0}
-  .src-panel .src-body p{font-family:var(--serif-zh);font-weight:400;font-size:clamp(14px,1.05vw,19px);line-height:1.92;margin:0 0 1.35em;opacity:.92}
-  .src-panel .src-body strong{font-weight:700;opacity:1}
-  .src-panel .src-body em{font-style:italic;font-family:var(--serif-zh)}
-  .src-panel .src-body .tr-note{font-family:var(--mono);font-size:clamp(11px,.85vw,14px);letter-spacing:.06em;opacity:.6;line-height:1.6}
+  /* ============ Pillar（支柱卡片） ============ */
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
 
-  [data-anim]{opacity:1}
-  body.motion-ready [data-anim]{opacity:0}
-  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
-  body.low-power #deck{transition:none!important}
-  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
-  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+  /* ============ Signature / Highlight ============ */
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
 
+  /* ============ Icons（Lucide via CDN） ============ */
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+
+  /* ============ 图片占位（虚线框，提示设计师位置） ============ */
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}
+  .img-slot.r-3x2{aspect-ratio:3/2}
+  .img-slot.r-1x1{aspect-ratio:1/1}
+
+  /* ============ 图片实填框（关键：固定高度 + 只裁底部） ============
+     重要约束：高度用内联 height:Nvh 精确控制，不要用 aspect-ratio（会撑破布局）
+     object-position:top center 保证严禁裁剪顶部和左右，只裁剪底部
+  */
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-img.fit-contain > img{object-fit:contain;object-position:center center}
+  .frame-img.r-16x9{aspect-ratio:16/9;max-height:64vh}
+  .frame-img.r-16x10{aspect-ratio:16/10;max-height:56vh}
+  .frame-img.r-4x3{aspect-ratio:4/3;max-height:56vh}
+  .frame-img.r-3x2{aspect-ratio:3/2;max-height:46vh}
+  .frame-img.r-3x4{aspect-ratio:3/4;max-height:60vh}
+  .frame-img.r-1x1{aspect-ratio:1/1;max-height:50vh}
+  .frame-img.h-16{height:16vh}
+  .frame-img.h-18{height:18vh}
+  .frame-img.h-22{height:22vh}
+  .frame-img.h-26{height:26vh}
+  .frame-img.h-28{height:28vh}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile > .frame-img{flex:0 0 auto}
+
+  /* ============ 导航 ============ */
   #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
   #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
@@ -114,16 +212,323 @@
   body.light-bg #nav{background:rgba(255,255,255,.25)}
   body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
   body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
-  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;display:flex;align-items:center;gap:.65em;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  #hint button{all:unset;display:inline-flex;align-items:center;gap:.45em;cursor:pointer;color:inherit;white-space:nowrap}
+  #hint button:hover,#hint button:focus-visible{opacity:1;text-decoration:underline;text-underline-offset:.35em}
+  #hint .ppt-key{padding:.16em .38em;border:1px solid currentColor;border-radius:3px;letter-spacing:.08em}
+  #hint .ppt-sep{opacity:.55}
   body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
   body.light-bg.low-power #hint{color:var(--ink)}
 
+  /* ============================================================
+     ============ LAYOUTS API · 面向 agent 的类（v2）============
+     所有 layouts.md 中的骨架都基于下面这套命名。
+     如果你在 layouts.md 里看到某个类，它必须在下面有定义。
+     ============================================================ */
+
+  /* ---------- .frame：每页主内容容器 ---------- */
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  /* 当 .frame 同时加了 grid 类时，grid 的 display:grid 覆盖 flex */
+  .frame.grid-2-7-5,
+  .frame.grid-2-6-6,
+  .frame.grid-2-8-4,
+  .frame.grid-3-3,
+  .frame.grid-6{display:grid}
+
+  /* ---------- 标题层级（API 名称，衬线为主） ---------- */
+  .h-hero{
+    font-family:var(--serif-zh);
+    font-weight:900;
+    font-size:10vw;
+    line-height:.96;
+    letter-spacing:-.02em;
+  }
+  .h-xl{
+    font-family:var(--serif-zh);
+    font-weight:700;
+    font-size:6.2vw;
+    line-height:1.08;
+    letter-spacing:-.01em;
+  }
+  .h-sub{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:3.1vw;
+    line-height:1.25;
+    letter-spacing:0;
+    opacity:.7;
+  }
+  .h-md{
+    font-family:var(--serif-zh);
+    font-weight:600;
+    font-size:2.3vw;
+    line-height:1.3;
+  }
+  /* 英文标题专用（Playfair 衬线） */
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+
+  /* ---------- lead 引语：定义见上方“字体规则”区块（已合并，勿重复定义） ---------- */
+
+  /* ---------- meta-row 底部元数据 ---------- */
+  .meta-row{
+    display:flex;
+    gap:1.2em;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:max(12px,.92vw);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- stat-card（数据大字报用） ---------- */
+  .stat-card{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    align-items:flex-start;
+    padding-top:1.6vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.3);
+  }
+  .stat-card .stat-label{
+    font-family:var(--mono);
+    font-size:max(10px,.78vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.55;
+  }
+  .stat-card .stat-nb{
+    font-family:var(--serif-en);
+    font-weight:800;
+    font-size:5.8vw;
+    line-height:.9;
+    letter-spacing:-.03em;
+    font-feature-settings:"tnum";
+    margin-top:.4vh;
+  }
+  .stat-card .stat-nb .stat-unit{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:.38em;
+    letter-spacing:0;
+    opacity:.72;
+    margin-left:.14em;
+  }
+  .stat-card .stat-note{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(13px,1.05vw);
+    line-height:1.5;
+    opacity:.72;
+    margin-top:.6vh;
+  }
+  /* 当 stat-card 用于 grid-4（2x2），数字适度放大；若页面有标题+引文在上方，可内联 style 覆盖为更小值 */
+  .grid-4 .stat-card .stat-nb{font-size:5vw}
+  /* 当只有 3 个，字也可以稍大 */
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+
+  /* ---------- pipeline（流水线） ---------- */
+  .pipeline-section{
+    margin-top:4.4vh;
+    padding-top:2.8vh;
+    border-top:1px dashed rgba(127,127,127,.32);
+  }
+  .pipeline-section:first-of-type{
+    border-top:0;
+    padding-top:0;
+    margin-top:3vh;
+  }
+  .pipeline-label{
+    font-family:var(--mono);
+    font-size:max(11px,.85vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.62;
+    margin-bottom:2.2vh;
+  }
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1.2vw;
+  }
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    padding-top:1.4vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.35);
+  }
+  .step-nb{
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-weight:500;
+    font-size:1.15vw;
+    opacity:.45;
+  }
+  .step-title{
+    font-family:var(--sans-zh);
+    font-weight:700;
+    font-size:1.55vw;
+    letter-spacing:.01em;
+    line-height:1.2;
+  }
+  .step-desc{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(12px,.95vw);
+    line-height:1.45;
+    opacity:.72;
+  }
+
+  /* ---------- 网格（layouts.md 所用） ---------- */
+  /* 这些类独立挂到任何容器上都能生效，不依赖 .frame 复合选择器 */
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    gap:2.4vh 2vw;
+  }
+  /* grid-6 已在旧样式里定义为 3x2，这里仅补 align */
+
+  /* ---------- 图片 frame-img（layouts.md 主命名） ---------- */
+  /* 在旧样式里已定义，这里补 img-cap 命名别名与增强 */
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  /* 有图注时:图片弹性收缩,图注收进固定高度/比例框内部,
+     否则 img 的 height:100% 会把 figcaption 挤出 overflow:hidden 裁掉 */
+  figure.frame-img:has(> .img-cap) > img{flex:1 1 auto;min-height:0;height:auto}
+  .img-cap{
+    display:block;
+    flex:0 0 auto;
+    padding:.7vh .9em .9vh;
+    font-family:var(--mono);
+    font-size:max(10px,.8vw);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  /* callout src 命名别名 */
+  .callout-src{
+    display:block;
+    margin-top:1.6vh;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- chrome & foot：定义见上方“Magazine chrome”区块（已合并，勿重复定义） ---------- */
+
+  /* ============ 动效系统(Motion One 驱动) ============
+     所有 [data-anim] 元素默认隐藏,进入页面时由 JS 逐个揭示。
+     - cascade(默认):按 DOM 顺序 stagger 120ms 淡入 + y:16→0
+     - hero(hero 页自动):慢一点的 stagger 180ms
+     - quote(含 [data-anim="line"]):逐行 600ms 淡入
+     - directional(含 [data-anim="left|right"]):左→分隔线→右
+     - pipeline(data-animate="pipeline"):Space/→ 手动推进
+     Motion One 没加载成功时(CDN 断 + 本地丢),所有 [data-anim] 会兜底显示。
+  */
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,
+  body.low-power *::before,
+  body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],
+  body.low-power [data-anim]{opacity:1!important;transform:none!important}
+  /* ESC 索引缩略图：克隆的 slide 不经过动效播放，强制显示所有待动画元素 */
+  #overview [data-anim]{opacity:1!important;transform:none!important}
+
+  /* ---------- 响应式降级 ---------- */
   @media (max-width:900px){
-    .h-hero{font-size:13vw}
+    .display{font-size:16vw}
+    .display-zh{font-size:12vw}
+    .h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}
     .h-xl{font-size:9vw}
     .pipeline{grid-template-columns:repeat(2,1fr)}
-    .grid-3,.grid-2{grid-template-columns:1fr}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
   }
+
+  /* 第3章阅读版：关系图、对照与手机单栏 */
+  .reader-frame{display:grid;align-content:center;min-height:78vh;gap:3vh}
+  .reader-title{font-family:var(--serif-zh);font-weight:650;font-size:min(4.4vw,8vh);line-height:1.15;letter-spacing:-.01em;max-width:82vw}
+  .reader-lead{font-family:var(--sans-zh);font-size:max(18px,1.35vw);line-height:1.72;max-width:72vw;opacity:.86}
+  .reading-copy{font-size:max(18px,1.2vw);line-height:1.72;opacity:.88}
+  .reading-copy p+p{margin-top:1.3vh}
+  .eyebrow{font-family:var(--mono);font-size:max(12px,.82vw);letter-spacing:.23em;text-transform:uppercase;opacity:.62}
+  .quiet-note{font-family:var(--sans-zh);font-size:max(14px,.92vw);line-height:1.6;opacity:.62}
+  .art-caption{font-size:max(14px,.88vw);line-height:1.55;opacity:.66;margin-top:1.2vh}
+  .concept-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5vw;align-items:stretch}
+  .concept-card{border-top:2px solid currentColor;padding:2.2vh 1.4vw 1.2vh;min-height:19vh;display:flex;flex-direction:column;gap:1.2vh}
+  .concept-card .nb{font:600 12px var(--mono);letter-spacing:.18em;color:var(--accent)}
+  .concept-card h3{font:600 min(2vw,3.4vh) var(--serif-zh)}
+  .concept-card p{font-size:max(15px,1.02vw);line-height:1.55;opacity:.76}
+  .path-row{display:grid;grid-template-columns:repeat(4,1fr);gap:2.5vw;position:relative;align-items:start}
+  .path-row::before{content:"";position:absolute;left:8%;right:8%;top:24px;height:1px;background:currentColor;opacity:.3}
+  .path-node{position:relative;padding-top:5.2vh}
+  .path-node::before{content:"";position:absolute;top:15px;left:0;width:18px;height:18px;border:2px solid currentColor;background:var(--paper);transform:rotate(45deg)}
+  .slide.dark .path-node::before{background:var(--ink)}
+  .path-node h3{font:600 min(2.1vw,3.8vh) var(--serif-zh);margin-bottom:1vh}
+  .path-node p{font-size:max(15px,1.02vw);line-height:1.55;opacity:.72}
+  .orbit{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw;align-items:center}
+  .orbit-item{min-height:20vh;border:1px solid rgba(127,127,127,.35);padding:2.2vh 1.2vw;display:flex;flex-direction:column;justify-content:space-between}
+  .orbit-item strong{font:600 min(1.75vw,3vh) var(--serif-zh)}
+  .orbit-item span{font-size:max(14px,.94vw);line-height:1.5;opacity:.67}
+  .split-ideas{display:grid;grid-template-columns:1fr 1px 1fr;gap:3vw;align-items:stretch}
+  .split-ideas .divider{background:currentColor;opacity:.25}
+  .idea-panel{padding:2vh 0;display:flex;flex-direction:column;gap:2vh}
+  .idea-panel h3{font:600 min(2.5vw,4.3vh) var(--serif-zh)}
+  .idea-panel p{font-size:max(17px,1.16vw);line-height:1.65;opacity:.78}
+  .stack-map{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2vw;align-items:end}
+  .stack-layer{border-top:4px solid var(--accent);padding:2vh 1.2vw;background:rgba(var(--accent-rgb),.08)}
+  .stack-layer h3{font:600 min(1.75vw,3vh) var(--serif-zh);margin-bottom:1vh}
+  .stack-layer p{font-size:max(14px,.95vw);line-height:1.5;opacity:.73}
+  .loop{display:grid;grid-template-columns:repeat(3,1fr);gap:5vw;align-items:center;position:relative}
+  .loop::before{content:"↻";position:absolute;left:50%;top:50%;transform:translate(-50%,-51%);font:300 14vw var(--serif-en);opacity:.08}
+  .loop-card{text-align:center;border:1px solid rgba(127,127,127,.34);padding:4vh 1.5vw;min-height:22vh}
+  .loop-card b{display:block;font:650 min(2.3vw,4vh) var(--serif-zh);margin-bottom:1.2vh}
+  .loop-card span{font-size:max(15px,1vw);line-height:1.55;opacity:.72}
+  .chapter-map{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5vw}
+  .chapter-map div{border-top:1px solid currentColor;padding:2vh 1vw;min-height:12vh}
+  .chapter-map b{display:block;font:600 min(1.5vw,2.8vh) var(--serif-zh);margin-bottom:.7vh}
+  .chapter-map span{font-size:max(14px,.92vw);line-height:1.45;opacity:.65}
+  .img-art{height:52vh;background:var(--paper);border-radius:3px;overflow:hidden}
+  .img-art img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+  .img-art.wide{height:43vh}
+  @media(max-width:900px){
+    html,body{overflow:auto;background:var(--paper)}
+    #deck{position:relative;width:100%!important;height:auto;display:block;transform:none!important;transition:none}
+    .slide{width:100%;height:auto;min-height:100svh;padding:5vh 7vw 12vh;overflow:visible}
+    .slide:not(.active){display:flex}
+    #nav,#hint,canvas.bg{display:none!important}
+    .reader-frame{min-height:82svh}.reader-title{font-size:10vw;max-width:100%}.reader-lead{max-width:100%;font-size:18px}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4,.split-ideas{grid-template-columns:1fr;gap:3vh}.split-ideas .divider{display:none}
+    .concept-grid,.path-row,.orbit,.stack-map,.chapter-map{grid-template-columns:1fr 1fr}
+    .loop{grid-template-columns:1fr}.img-art,.img-art.wide{height:auto;aspect-ratio:4/3}.img-art.wide{aspect-ratio:16/9}
+    .reading-copy{font-size:17px}.chrome,.foot{position:static;margin-bottom:2vh}.foot{margin-top:5vh}
+  }
+
+  /* ============ 原文对照层 ============ */
+  .src-panel{position:fixed;inset:0;z-index:120;display:grid;grid-template-rows:auto 1fr;background:rgba(20,22,20,.92);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .src-panel.on{opacity:1;visibility:visible;pointer-events:auto}
+  .src-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px clamp(18px,3vw,42px);color:#f4f0e6;border-bottom:1px solid rgba(255,255,255,.16);background:rgba(20,22,20,.82);font-family:var(--sans-zh,"Noto Sans SC"),sans-serif}
+  .src-head div{display:flex;align-items:baseline;gap:14px}.src-head span{font:10px var(--mono);letter-spacing:.18em;opacity:.58}.src-head strong{font-size:16px;letter-spacing:.04em}
+  .src-head button{border:1px solid rgba(255,255,255,.35);border-radius:999px;background:transparent;color:inherit;padding:7px 13px;cursor:pointer;font:11px var(--mono);letter-spacing:.08em}.src-head button:hover{background:#f4f0e6;color:#1d211d}
+  .src-panel iframe{width:100%;height:100%;border:0;background:#f4f0e6}
 </style>
 </head>
 <body>
@@ -134,8 +539,8 @@
     const stored = localStorage.getItem(KEY);
     window.__lowPowerMode = stored === '1' || (stored === null && reduced);
     function updateHint(){
-      const hint = document.getElementById('hint');
-      if(hint) hint.textContent = `点击左右侧翻页 · E 原文 · B ${window.__lowPowerMode ? '动态' : '静态'} · ESC 索引`;
+      const label = document.querySelector('.ppt-low-power-label');
+      if(label) label.textContent = window.__lowPowerMode ? '动态' : '静态';
     }
     window.__setLowPowerMode = function(on, opts={}){
       window.__lowPowerMode = !!on;
@@ -155,1071 +560,292 @@
 
 <canvas id="bg-dark" class="bg"></canvas>
 <canvas id="bg-light" class="bg"></canvas>
-<div id="hint">点击左右侧翻页 · E 原文 · B 静态 · ESC 索引</div>
+<div id="hint" role="toolbar" aria-label="快捷控制">
+  <span>← → 翻页</span><span class="ppt-sep">·</span>
+  <button id="ppt-source-btn" class="src-toggle" type="button"><span class="ppt-key">E</span><span>原文</span></button><span class="ppt-sep">·</span>
+  <button id="ppt-low-power-btn" type="button"><span class="ppt-key">B</span><span class="ppt-low-power-label">静态</span></button><span class="ppt-sep">·</span>
+  <button id="ppt-overview-btn" type="button"><span class="ppt-key">ESC</span>总览</button>
+</div>
+
+<aside id="source-panel" class="src-panel" aria-hidden="true" aria-label="章节原文">
+  <div class="src-head"><div><span>第 3 章</span><strong>原文对照</strong></div><button id="source-close" type="button" aria-label="关闭原文">关闭 · E</button></div>
+  <iframe id="source-frame" title="认知不是复制而是构造原文" loading="eager"></iframe>
+</aside>
 
 <div id="deck">
 
-<!-- ========== P1 · Hero ========== -->
-<section class="slide hero light" data-animate="hero">
-  <div class="chrome"><div>ESC · 第 3 章</div><div>Chapter III</div></div>
-  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>Construction, Not Copying</div>
-    <h1 class="h-hero" data-anim>认知不是复制，</h1>
-    <h2 class="h-sub" data-anim>而是构造</h2>
-    <p class="lead" style="max-width:62vw" data-anim>三条构造路径——输入到结构、语言到现实、知识到投影——以及它们的边界：人类构造（H）与时间（t）。</p>
-    <div class="meta-row" data-anim><span>结构认知实验室 · P.</span><span>·</span><span>2026.03.10</span><span>·</span><span>ESC 系列课程</span></div>
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     每页模板参考 references/page-patterns.md
+     页面组件参考 references/components.md
+     ============================================================ -->
+
+<section class="slide hero dark" data-slide-id="cover">
+  <div class="chrome"><div>ESC · 净言图解书刊</div><div>01 / 18</div></div>
+  <div class="reader-frame">
+    <div class="eyebrow" data-anim>Chapter 03 · Language Reset</div>
+    <h1 class="h-hero" data-anim>认知的构造</h1>
+    <p class="lead" style="max-width:60vw" data-anim>我们接触到的是信号，真正进入生活的是被组织过的结果。</p>
+    <div class="meta-row" data-anim><span>零基础精读</span><span>·</span><span>18 页</span><span>·</span><span>约 12 分钟</span></div>
   </div>
-  
-  <aside class="esc-hero-audio" aria-label="收听本章解读">
-    <div class="eh-k"><span>本章解读 · Voice</span><span>第 3 章 · 1 轨</span></div>
-    <button class="eh-row" type="button" data-esc-track="0">
-      <span class="esc-i"><svg viewBox="0 0 10 10"><path d="M1.5 1 L8.5 5 L1.5 9 Z"/></svg></span>
-      <span class="eh-txt"><span class="eh-part">全章</span><span class="eh-sub">认知不是复制而是构造</span></span>
-    </button>
-  </aside><div class="foot"><div>ESC 系列课程 · 第 3 章</div><div>01 / 21</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">本章全文 · 第3章（来源：结构认知实验室 · 2026年3月10日）</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <p>本章六节：第1节 认知的错觉——我们以为我们在复制世界；第2节 构造路径一——从输入到结构化输出；第3节 构造路径二——语言与概念如何制造现实；第4节 构造路径三——知识如何成为结构投影；第5节 人类构造（H）作为认知生成的限定结构；第6节 结构系统的自组织起点（含「理解即存在」与边界对）。各页可按 E 展开对应小节逐字原文。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">认知不是复制，而是构造</span><span>→ 开始阅读</span></div>
 </section>
 
-<!-- ========== P2 · 第1节 命题页 ========== -->
-<section class="slide light" data-animate="quote">
-  <div class="chrome"><div>第 1 节 · 认知的错觉</div><div>02 / 21</div></div>
-  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>第 1 节 · 我们以为我们在复制世界</div>
-    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.4vw;line-height:1.32;max-width:82vw">
-      <span data-anim="line" style="display:block">认知从不是对世界的还原，</span>
-      <span data-anim="line" style="display:block">而是对输入的组织。</span>
-      <span data-anim="line" style="display:block">它不是复制世界，而是构造现实。</span>
-    </blockquote>
-    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>"复制的错觉"塑造了整个现代认识论的主流结构，也构成对认知本质最根本的遮蔽。</p>
-  </div>
-  <div class="foot"><div>Page 02 · 复制的错觉</div><div>Section 1</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 第1节 认知的错觉：我们以为我们在复制世界</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>第1节 | 认知的错觉：我们以为我们在复制世界</h4>
-      <p>当我们观察、理解或描述世界时，常会产生一种深刻却隐蔽的错觉—— 我们是在复制现实。我们相信自己所感知的「外部世界」就是那个世界本身，相信语言是事物的名称，相信知识是对客观规律的还原。这样的认知习惯塑造了整个现代认识论的主流结构，也成为科学方法论的隐性基础。</p>
-      <p>但正是这种「复制的错觉」，构成了对认知本质最根本的遮蔽。</p>
-      <p>ESC结构哲学指出：</p>
-      <p><strong>认知从不是对世界的还原，而是对输入的组织。它不是复制世界，而是构造现实。</strong></p>
-      <h4>1.1. 认知不是反映机制，而是组织机制</h4>
-      <p><strong>我们并不会「看到世界」，我们只会「看到某种被结构系统允许我们看到的内容」。我们不会「理解真理」，我们只会「在结构系统中形成某种稳定连接的输出」。</strong></p>
-      <p>也就是说，<strong>我们面对的不是「世界本身」，而是结构处理之后的显现世界。</strong></p>
-      <p>反映论（reflectionism）之所以不成立，是因为它无法解释以下三个基本事实：</p>
-      <p>信息被主动选择：我们只处理与认知系统路径相关的输入；<br>
-      意义被动态建构：同一信息在不同结构中可能生成全异的意义；<br>
-      知识是历史性投影：我们拥有的知识系统不是对世界的映射，而是对结构经验的沉淀。</p>
-      <p>因此，所谓「复制现实」的认知过程，其实只是我们在现有结构框架中完成一次再组织过程，这种组织从一开始就受制于结构路径、语言体系、文化范畴、认知惯性等因素。</p>
-      <h4>1.2. 感知也不中立：输入并非世界，而是结构边界下的截面</h4>
-      <p>即使是最初级的感知，也并非对「实在」的直接接收，而是认知结构系统对世界信号的选择性响应。我们所知觉的色彩、声音、形状、关系，都是在我们神经系统结构与认知通路下能够被「组织出来」的表现形式。</p>
-      <p>这种认知边界不是缺陷，而是构造条件。它使得我们能在复杂混沌的输入中形成稳定认知，但代价是：我们永远不会知道「世界本身是什么」。</p>
-      <p><strong>我们知道，只是我们能结构出的「现实」。</strong></p>
-      <h4>1.3. 「事实」是结构化的产物，不是世界的客观切片</h4>
-      <p>科学认知系统曾试图将「事实」作为稳定的基础，但ESC指出：事实本身就是结构化过程中的输出项。</p>
-      <p>我们所以称为「事实」的东西，实质上必须具备以下三个条件：</p>
-      <p>被系统识别为稳定结构单位；<br>
-      能在语言中形成可重复描述路径；<br>
-      能在结构反馈中保持可预测性与可操作性。</p>
-      <p>若脱离这三者，它便不再是「事实」，而是「噪声」或「不可知项」。这表明：<strong>事实不是独立存在的，它是结构系统在自身运行规则下生成的稳定结果。</strong></p>
-      <h4>1.4. 为什么我们会误以为认知是复制？</h4>
-      <p>这一错觉有四个根源：</p>
-      <p>语言的映射性错觉：词语看似「指向」世界，但其实只是结构路径的调取标签；<br>
-      经验的重复性误导：重复感知被误认为「现实一致」，但本质是结构路径的再使用；<br>
-      逻辑的封闭性循环：推理被认为是客观演绎，但其实仅在结构系统内部闭合；<br>
-      科学的实证假设：实验结果的稳定被误读为「世界本身的性质」，而非结构设计之结果。</p>
-      <p>这些机制共同构建了一种幻象：我们通过认知接触现实；但实际上，我们只是通过结构系统生成「现实感」。</p>
-      <h4>1.5. 进入构造视角：认知必须被重构为构造机制</h4>
-      <p>一旦我们放弃「认知复制世界」的想象，我们就必须构建新的认知理论地基。而这正是ESC在本章的使命：</p>
-      <p>认知是构造机制，不是反映机制；<br>
-      信息是原材料，结构是生成条件；<br>
-      世界不是原初给予的，而是结构系统不断构造出来的。</p>
-      <p>我们将进入下一节，分析认知的第一个构造路径：从输入到结构化输出，也即感知与结构之间如何构成系统的第一生成机制。</p>
+<section class="slide light" data-slide-id="same-input">
+  <div class="chrome"><div>01 · 复制的错觉</div><div>02 / 18</div></div>
+  <div class="frame grid-2-7-5" style="padding-top:5vh">
+    <div class="col" style="justify-content:space-between;min-height:66vh">
+      <div>
+        <div class="kicker" data-anim>同一条消息</div>
+        <h2 class="h-xl" data-anim>抵达两个人时，已经不是同一个意思</h2>
+        <div class="reading-copy" style="margin-top:3vh" data-anim><p>群里出现一句“明天再说”。有人读到委婉拒绝，有人觉得只是时间不够。输入相同，注意、经历和期待却在各自参与理解。</p></div>
+      </div>
+      <div class="callout" data-anim><span class="q-big">理解发生在输入与过去经验的相遇处。</span></div>
     </div>
+    <figure data-anim>
+      <div class="img-art"><img src="images/02-same-input.png" alt="两个人查看同一条消息，却形成不同理解的靛蓝编辑插画"></div>
+      <figcaption class="art-caption">同一个信号可以沿不同的经验路径，被组织成不同的可行动意义。</figcaption>
+    </figure>
   </div>
+  <div class="foot"><span class="title">同一输入 · 不同组织</span><span>02</span></div>
 </section>
 
-<!-- ========== P3 · 第1节卡1（1.1-1.2） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 1 · Against Reflectionism</div><div>03 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>反映论为何不成立 · 1.1-1.2</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>我们面对的不是世界本身，<br>而是结构处理之后的显现世界</h2>
-    <div class="grid-3">
-      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
-        <div class="kicker">01</div>
-        <h3 class="h-md">信息被主动选择</h3>
-        <p class="body-zh" style="margin-top:1.6vh">我们只处理与认知系统路径相关的输入。</p>
-      </div>
-      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
-        <div class="kicker">02</div>
-        <h3 class="h-md">意义被动态建构</h3>
-        <p class="body-zh" style="margin-top:1.6vh">同一信息在不同结构中可能生成全异的意义。</p>
-      </div>
-      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
-        <div class="kicker">03</div>
-        <h3 class="h-md">知识是历史性投影</h3>
-        <p class="body-zh" style="margin-top:1.6vh">知识系统不是对世界的映射，而是对结构经验的沉淀。</p>
-      </div>
+<section class="slide dark" data-slide-id="selective-attention" data-animate="directional">
+  <div class="chrome"><div>01 · 复制的错觉</div><div>03 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>走进同一间屋子</div><h2 class="reader-title" data-anim>现实没有分叉，注意先分了方向</h2></div>
+    <div class="split-ideas">
+      <div class="idea-panel" data-anim="left"><div class="eyebrow">设计师</div><h3>空间、动线、光</h3><p>训练让某些线索更快进入中央。它们组成了“这间屋子怎样工作”。</p></div>
+      <div class="divider" data-anim></div>
+      <div class="idea-panel" data-anim="right"><div class="eyebrow">带孩子的家长</div><h3>尖角、插座、视线</h3><p>责任让另一组线索被优先选择。它们组成了“这间屋子是否安全”。</p></div>
     </div>
-    <div class="callout" style="max-width:62vw;margin-top:4vh" data-anim>
-      <span class="q-big">感知也不中立：我们知道，只是我们能结构出的「现实」。认知边界不是缺陷，而是构造条件。</span>
-      <span class="cite">1.2 · 输入并非世界，而是结构边界下的截面</span>
-    </div>
+    <p class="reader-lead" data-anim>人没有把整个世界等比例收进来。人从世界里取出与自身条件有关的部分，再把它们连成一个可以行动的版本。</p>
   </div>
-  <div class="foot"><div>Page 03 · Against Reflectionism</div><div>Section 1</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 1.1-1.2</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>1.1. 认知不是反映机制，而是组织机制</h4>
-      <p><strong>我们并不会「看到世界」，我们只会「看到某种被结构系统允许我们看到的内容」。我们不会「理解真理」，我们只会「在结构系统中形成某种稳定连接的输出」。</strong></p>
-      <p>也就是说，<strong>我们面对的不是「世界本身」，而是结构处理之后的显现世界。</strong></p>
-      <p>反映论（reflectionism）之所以不成立，是因为它无法解释以下三个基本事实：</p>
-      <p>信息被主动选择：我们只处理与认知系统路径相关的输入；<br>
-      意义被动态建构：同一信息在不同结构中可能生成全异的意义；<br>
-      知识是历史性投影：我们拥有的知识系统不是对世界的映射，而是对结构经验的沉淀。</p>
-      <p>因此，所谓「复制现实」的认知过程，其实只是我们在现有结构框架中完成一次再组织过程，这种组织从一开始就受制于结构路径、语言体系、文化范畴、认知惯性等因素。</p>
-      <h4>1.2. 感知也不中立：输入并非世界，而是结构边界下的截面</h4>
-      <p>即使是最初级的感知，也并非对「实在」的直接接收，而是认知结构系统对世界信号的选择性响应。我们所知觉的色彩、声音、形状、关系，都是在我们神经系统结构与认知通路下能够被「组织出来」的表现形式。</p>
-      <p>这种认知边界不是缺陷，而是构造条件。它使得我们能在复杂混沌的输入中形成稳定认知，但代价是：我们永远不会知道「世界本身是什么」。</p>
-      <p><strong>我们知道，只是我们能结构出的「现实」。</strong></p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">感知也在选择</span><span>03</span></div>
 </section>
 
-<!-- ========== P4 · 第1节卡2（1.3-1.5） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 1 · Facts &amp; Illusions</div><div>04 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>事实的三条件 · 错觉的四根源 · 1.3-1.5</div>
-    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>「事实」是结构化的产物</h2>
-    <div class="pipeline" data-cols="3" style="margin-bottom:4vh">
-      <div class="step" data-anim>
-        <div class="step-nb">i</div>
-        <div class="step-title">被系统识别为稳定结构单位</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">ii</div>
-        <div class="step-title">能在语言中形成可重复描述路径</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iii</div>
-        <div class="step-title">能在结构反馈中保持可预测性与可操作性</div>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div data-anim style="padding:2vh 1.6vw;border-left:3px solid currentColor">
-        <div class="kicker">错觉根源 · 其一</div>
-        <p class="body-zh" style="margin-top:1.2vh">语言的映射性错觉——词语看似「指向」世界，实则只是结构路径的调取标签；经验的重复性误导——重复感知被误认为「现实一致」，本质是结构路径的再使用。</p>
-      </div>
-      <div data-anim style="padding:2vh 1.6vw;border-left:3px solid currentColor">
-        <div class="kicker">错觉根源 · 其二</div>
-        <p class="body-zh" style="margin-top:1.2vh">逻辑的封闭性循环——推理仅在结构系统内部闭合；科学的实证假设——实验结果的稳定被误读为「世界本身的性质」。</p>
-      </div>
-    </div>
+<section class="slide hero light" data-slide-id="path-one">
+  <div class="chrome"><div>02 · 第一条路径</div><div>04 / 18</div></div>
+  <div class="reader-frame center">
+    <div class="eyebrow" data-anim>Path 01</div>
+    <h2 class="h-hero" data-anim>从信号到理解</h2>
+    <p class="lead" style="max-width:68vw" data-anim>真正需要看的，不只是“输入了什么”，还有中间怎样被选择、连接和命名。</p>
   </div>
-  <div class="foot"><div>Page 04 · Facts &amp; Illusions</div><div>Section 1</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 1.3-1.5</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>1.3. 「事实」是结构化的产物，不是世界的客观切片</h4>
-      <p>科学认知系统曾试图将「事实」作为稳定的基础，但ESC指出：事实本身就是结构化过程中的输出项。</p>
-      <p>我们所以称为「事实」的东西，实质上必须具备以下三个条件：</p>
-      <p>被系统识别为稳定结构单位；<br>
-      能在语言中形成可重复描述路径；<br>
-      能在结构反馈中保持可预测性与可操作性。</p>
-      <p>若脱离这三者，它便不再是「事实」，而是「噪声」或「不可知项」。这表明：<strong>事实不是独立存在的，它是结构系统在自身运行规则下生成的稳定结果。</strong></p>
-      <h4>1.4. 为什么我们会误以为认知是复制？</h4>
-      <p>这一错觉有四个根源：</p>
-      <p>语言的映射性错觉：词语看似「指向」世界，但其实只是结构路径的调取标签；<br>
-      经验的重复性误导：重复感知被误认为「现实一致」，但本质是结构路径的再使用；<br>
-      逻辑的封闭性循环：推理被认为是客观演绎，但其实仅在结构系统内部闭合；<br>
-      科学的实证假设：实验结果的稳定被误读为「世界本身的性质」，而非结构设计之结果。</p>
-      <p>这些机制共同构建了一种幻象：我们通过认知接触现实；但实际上，我们只是通过结构系统生成「现实感」。</p>
-      <h4>1.5. 进入构造视角：认知必须被重构为构造机制</h4>
-      <p>一旦我们放弃「认知复制世界」的想象，我们就必须构建新的认知理论地基。而这正是ESC在本章的使命：</p>
-      <p>认知是构造机制，不是反映机制；<br>
-      信息是原材料，结构是生成条件；<br>
-      世界不是原初给予的，而是结构系统不断构造出来的。</p>
-      <p>我们将进入下一节，分析认知的第一个构造路径：从输入到结构化输出，也即感知与结构之间如何构成系统的第一生成机制。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">输入不会自动成为意义</span><span>04</span></div>
 </section>
 
-<!-- ========== P5 · 第2节 命题页 ========== -->
-<section class="slide dark" data-animate="quote">
-  <div class="chrome"><div>第 2 节 · 构造路径一</div><div>05 / 21</div></div>
-  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>第 2 节 · 从输入到结构化输出</div>
-    <h1 class="h-hero" style="font-size:6.4vw" data-anim>输入 → 结构化 → 输出</h1>
-    <p class="lead" style="max-width:66vw;opacity:.8" data-anim>「输入」并非等于现实，「输出」也并非等于真理——关键在于「结构化」的方式。正是在这一环节中，信息被组织、意义被赋予、现实被建构。</p>
-  </div>
-  <div class="foot"><div>Page 05 · 构造路径一</div><div>Section 2</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 第2节 构造路径一：从输入到结构化输出</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>第2节 | 构造路径一：从输入到结构化输出</h4>
-      <p>若我们不再将认知视为对世界的复制，而是视为一个生成结构的机制，那么第一个问题便是：<strong>认知到底是如何「构造」出其所理解的世界的？</strong></p>
-      <p>ESC将这一构造过程分解为一条基本路径链条：</p>
-      <p><strong>输入→结构化→输出</strong></p>
-      <p>其中，「输入」并非等于现实，「输出」也并非等于真理，关键在于「结构化」的方式。正是在这一环节中，信息被组织、意义被赋予、现实被建构。</p>
-      <h4>2.1. 输入是未经组织的原始材料</h4>
-      <p>在ESC的定义中，输入不是世界，而是被认知系统接收的信号集合。这些信号可能来源于感官刺激、符号接触、社会互动、语言输入，甚至是内部想象。但它们共同的特征是：</p>
-      <p>杂乱：缺乏秩序；<br>
-      无义：尚未获得可调用的语义结构；<br>
-      非结构性：无法嵌入认知系统中既有结构路径。</p>
-      <p>输入是构造系统的「原材料」，但它们本身不具备「现实」属性，只有当被认知系统成功结构化之后，才可能显现为「存在」、「事实」或「理解」。</p>
-      <h4>2.2. 结构化是将输入转化为认知单位的机制</h4>
-      <p><strong>结构化（s）是认知的第一操作。</strong>它的功能不是解释，而是生成。它将无意义的输入组织为有结构的认知单位，使得系统可以进行调用、判断、记忆与传播。</p>
-      <p>结构化包含以下关键机制：</p>
-      <p>选择：在大量输入中选择可用信号（受注意、范畴、文化、语境影响）；<br>
-      连接：将多个输入单元组装成结构组合（根据模式、逻辑、关系等）；<br>
-      映射：将结构链接至已有的语义系统或认知框架中；<br>
-      命名/分类：赋予结构单位稳定的标识形式，生成语言或观念上的调用接口。</p>
-      <p>这一过程不是中性的，也不是被动的，而是深度依赖于结构系统本身的构造历史。也就是说，我们如何结构化一个输入，完全取决于我们「是谁」「如何被建构」，这将在第5节引出人类构造（H，Human Constructs）的问题。</p>
-      <h4>2.3. 输出是结构稳定后的认知产物</h4>
-      <p>一旦输入被结构化，系统就获得了一个可调用的认知单元。我们可以对其：</p>
-      <p>进行判断（它是什么）；<br>
-      进行操作（它如何运作）；<br>
-      进行传播（它可以被他人理解）；<br>
-      进行记忆（它可以在系统中保留）；<br>
-      进行积累（它可以成为更大结构的基础）。</p>
-      <p>这些输出，并非还原了输入，更不是还原了世界，它们是结构系统对输入的一次性组织结果。而我们所谓「现实」，其实就是一系列被稳定调用的结构化输出的集合。</p>
-      <h4>2.4. E = s(t) 在此路径中的首次工作</h4>
-      <p>在本路径中，我们可以看到 E = s(t) 的基础作用：</p>
-      <p>E（存在）：不是原始输入，而是结构化输出；<br>
-      s（结构化）：不是处理信息的工具，而是构成现实的机制；<br>
-      t（时间）：结构化无法一瞬完成，它需要时间中的展开、反馈、优化、固化。</p>
-      <p>换言之：</p>
-      <p><strong>存在（E）不是「从外部给予的」，而是「在结构系统中被生成的」。</strong></p>
-      <h4>2.5. 从此路径进入语言与范畴的构造机制</h4>
-      <p>然而，仅有结构化还不足以让输入成为「现实」中稳定的认知单元。下一步，结构系统必须引入语言与范畴系统，使得输出结构不仅可用，而且可传递、可扩展、可重构。</p>
-      <p>因此，第3节将进入第二条构造路径：语言与概念如何制造现实，揭示语言系统并不是表达存在的工具，而是构造存在的机制本身。</p>
+<section class="slide light" data-slide-id="four-operations">
+  <div class="chrome"><div>02 · 第一条路径</div><div>05 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>雨天出门</div><h2 class="reader-title" data-anim>理解由四个动作接力完成</h2></div>
+    <div class="path-row">
+      <div class="path-node" data-anim><h3>选择</h3><p>天空变暗、空气发潮，少数信号进入注意。</p></div>
+      <div class="path-node" data-anim><h3>连接</h3><p>这些变化与过去的雨天经验被放到一起。</p></div>
+      <div class="path-node" data-anim><h3>命名</h3><p>一组联系获得名字：“可能要下雨”。</p></div>
+      <div class="path-node" data-anim><h3>行动</h3><p>关窗、带伞，并把判断讲给家人。</p></div>
     </div>
+    <div class="callout" data-anim><span class="q-big">理解不是输入的终点，而是一条行动路径的起点。</span></div>
   </div>
+  <div class="foot"><span class="title">选择 → 连接 → 命名 → 行动</span><span>05</span></div>
 </section>
 
-<!-- ========== P6 · 第2节卡1（2.1+2.3） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 2 · Input / Output</div><div>06 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>原材料与认知产物 · 2.1 / 2.3</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>输入是材料，输出是组织结果</h2>
-    <div class="grid-2">
-      <div data-anim style="padding:2.4vh 1.8vw;border-left:3px solid currentColor;opacity:.85">
-        <div class="kicker">输入 · 未组织的原始材料</div>
-        <p class="body-zh" style="margin-top:1.4vh">信号集合（感官刺激、符号接触、社会互动、语言、想象）共同的特征：<strong>杂乱</strong>（缺乏秩序）、<strong>无义</strong>（无可调用的语义结构）、<strong>非结构性</strong>（无法嵌入既有结构路径）。本身不具备「现实」属性。</p>
-      </div>
-      <div data-anim style="padding:2.4vh 1.8vw;border-left:3px solid currentColor">
-        <div class="kicker">输出 · 结构稳定后的认知产物</div>
-        <p class="body-zh" style="margin-top:1.4vh">可调用的认知单元——可判断、可操作、可传播、可记忆、可积累。「现实」就是一系列被稳定调用的结构化输出的集合。</p>
-      </div>
+<section class="slide dark" data-slide-id="usable-output">
+  <div class="chrome"><div>02 · 第一条路径</div><div>06 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>何时算“懂了”</div><h2 class="reader-title" data-anim>当一个结果可以继续做事</h2></div>
+    <div class="orbit">
+      <div class="orbit-item" data-anim><strong>判断</strong><span>它是什么，此刻意味着什么</span></div>
+      <div class="orbit-item" data-anim><strong>行动</strong><span>接下来可以采取哪一步</span></div>
+      <div class="orbit-item" data-anim><strong>交流</strong><span>能否让别人沿着线索理解</span></div>
+      <div class="orbit-item" data-anim><strong>记忆</strong><span>以后能否再次提取这条路径</span></div>
+      <div class="orbit-item" data-anim><strong>积累</strong><span>能否成为下一次理解的材料</span></div>
     </div>
-    <div class="callout" style="max-width:66vw;margin-top:4vh" data-anim>
-      <span class="q-big">E = s(t) 在此路径中的首次工作：E 不是原始输入而是结构化输出；s 不是工具而是构成现实的机制；t——结构化需要时间中的展开、反馈、优化、固化。</span>
-      <span class="cite">2.4 · 存在不是「从外部给予的」，而是「在结构系统中被生成的」</span>
-    </div>
+    <p class="reader-lead" data-anim>现实感常来自一条路径已经熟到不再被察觉。熟练提高效率，也会让中间的选择显得像“世界本来如此”。</p>
   </div>
-  <div class="foot"><div>Page 06 · Input / Output</div><div>Section 2</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 2.1 / 2.3 / 2.4</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>2.1. 输入是未经组织的原始材料</h4>
-      <p>在ESC的定义中，输入不是世界，而是被认知系统接收的信号集合。这些信号可能来源于感官刺激、符号接触、社会互动、语言输入，甚至是内部想象。但它们共同的特征是：</p>
-      <p>杂乱：缺乏秩序；<br>
-      无义：尚未获得可调用的语义结构；<br>
-      非结构性：无法嵌入认知系统中既有结构路径。</p>
-      <p>输入是构造系统的「原材料」，但它们本身不具备「现实」属性，只有当被认知系统成功结构化之后，才可能显现为「存在」、「事实」或「理解」。</p>
-      <h4>2.3. 输出是结构稳定后的认知产物</h4>
-      <p>一旦输入被结构化，系统就获得了一个可调用的认知单元。我们可以对其：</p>
-      <p>进行判断（它是什么）；<br>
-      进行操作（它如何运作）；<br>
-      进行传播（它可以被他人理解）；<br>
-      进行记忆（它可以在系统中保留）；<br>
-      进行积累（它可以成为更大结构的基础）。</p>
-      <p>这些输出，并非还原了输入，更不是还原了世界，它们是结构系统对输入的一次性组织结果。而我们所谓「现实」，其实就是一系列被稳定调用的结构化输出的集合。</p>
-      <h4>2.4. E = s(t) 在此路径中的首次工作</h4>
-      <p>在本路径中，我们可以看到 E = s(t) 的基础作用：</p>
-      <p>E（存在）：不是原始输入，而是结构化输出；<br>
-      s（结构化）：不是处理信息的工具，而是构成现实的机制；<br>
-      t（时间）：结构化无法一瞬完成，它需要时间中的展开、反馈、优化、固化。</p>
-      <p>换言之：</p>
-      <p><strong>存在（E）不是「从外部给予的」，而是「在结构系统中被生成的」。</strong></p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">可使用的认知结果</span><span>06</span></div>
 </section>
 
-<!-- ========== P7 · 第2节卡2（2.2） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 2 · Structuring</div><div>07 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>认知的第一操作 · 2.2</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>结构化：功能不是解释，而是生成</h2>
-    <div class="pipeline" data-cols="4">
-      <div class="step" data-anim>
-        <div class="step-nb">i</div>
-        <div class="step-title">选择</div>
-        <div class="step-desc">在大量输入中选择可用信号——受注意、范畴、文化、语境影响。</div>
+<section class="slide light" data-slide-id="language-frame">
+  <div class="chrome"><div>03 · 语言与概念</div><div>07 / 18</div></div>
+  <div class="frame grid-2-7-5" style="padding-top:5vh">
+    <div class="col" style="justify-content:space-between;min-height:66vh">
+      <div><div class="kicker" data-anim>同一组物件</div><h2 class="h-xl" data-anim>换一种分类，关系就重新显影</h2>
+        <div class="reading-copy" style="margin-top:3vh" data-anim><p>杯子、书、苹果、钥匙，可以按颜色分，也可以按用途分。物件没变，被看见的相似与差别却变了。</p><p>概念参与了注意和连接，让某些关系突出，让另一些退到背景。</p></div>
       </div>
-      <div class="step" data-anim>
-        <div class="step-nb">ii</div>
-        <div class="step-title">连接</div>
-        <div class="step-desc">将多个输入单元组装成结构组合——根据模式、逻辑、关系。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iii</div>
-        <div class="step-title">映射</div>
-        <div class="step-desc">将结构链接至已有的语义系统或认知框架中。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iv</div>
-        <div class="step-title">命名 / 分类</div>
-        <div class="step-desc">赋予结构单位稳定的标识形式，生成调用接口。</div>
-      </div>
+      <div class="callout" data-anim><span class="q-big">词语像取景框：它决定此刻什么进入画面。</span></div>
     </div>
-    <p class="body-zh" style="max-width:70vw;margin-top:4.5vh" data-anim>这一过程不是中性的，也不是被动的——我们如何结构化一个输入，完全取决于我们「是谁」「如何被建构」。</p>
+    <figure data-anim><div class="img-art"><img src="images/07-language-frame.png" alt="同一组日常物件被不同连接方式组织的靛蓝编辑插画"></div><figcaption class="art-caption">图中的两组连线代表两种分类方式，不代表唯一正确的分类。</figcaption></figure>
   </div>
-  <div class="foot"><div>Page 07 · Structuring</div><div>Section 2</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 2.2</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>2.2. 结构化是将输入转化为认知单位的机制</h4>
-      <p><strong>结构化（s）是认知的第一操作。</strong>它的功能不是解释，而是生成。它将无意义的输入组织为有结构的认知单位，使得系统可以进行调用、判断、记忆与传播。</p>
-      <p>结构化包含以下关键机制：</p>
-      <p>选择：在大量输入中选择可用信号（受注意、范畴、文化、语境影响）；<br>
-      连接：将多个输入单元组装成结构组合（根据模式、逻辑、关系等）；<br>
-      映射：将结构链接至已有的语义系统或认知框架中；<br>
-      命名/分类：赋予结构单位稳定的标识形式，生成语言或观念上的调用接口。</p>
-      <p>这一过程不是中性的，也不是被动的，而是深度依赖于结构系统本身的构造历史。也就是说，我们如何结构化一个输入，完全取决于我们「是谁」「如何被建构」，这将在第5节引出人类构造（H，Human Constructs）的问题。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">语言参与组织</span><span>07</span></div>
 </section>
 
-<!-- ========== P8 · 第3节 命题页 ========== -->
-<section class="slide dark" data-animate="quote">
-  <div class="chrome"><div>第 3 节 · 构造路径二</div><div>08 / 21</div></div>
-  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>第 3 节 · 语言与概念如何制造现实</div>
-    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.2vw;line-height:1.34;max-width:84vw">
-      <span data-anim="line" style="display:block">语言不是描述现实的工具，</span>
-      <span data-anim="line" style="display:block">而是制造现实的机制。</span>
-      <span data-anim="line" style="display:block">概念不是对事实的抽象，而是构成事实的范式。</span>
-    </blockquote>
-    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>语言 × 概念系统，是认知结构进入社会性、系统性、历史性的大门，也是「现实」的最终显影机制。</p>
+<section class="slide hero dark" data-slide-id="categories">
+  <div class="chrome"><div>03 · 语言与概念</div><div>08 / 18</div></div>
+  <div class="reader-frame center">
+    <div class="eyebrow" data-anim>Frame & Category</div>
+    <h2 class="h-hero" data-anim>名字给经验划出边界</h2>
+    <p class="lead" style="max-width:70vw" data-anim>能够说出“害怕、羞愧、委屈、愤怒”的差别，感受才有机会被分别看见和处理。</p>
+    <div class="tag" data-anim>命名没有凭空制造感受 · 它改变感受如何被区分</div>
   </div>
-  <div class="foot"><div>Page 08 · 构造路径二</div><div>Section 3</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 第3节 构造路径二：语言与概念如何制造现实</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>第3节 | 构造路径二：语言与概念如何制造现实</h4>
-      <p>在认知系统完成了对输入的初步结构化之后，尚不足以构成所谓「现实」。只有当结构化产物被嵌入到语言与概念的系统中，获得可命名性、可共享性与可传播性，它才从「内部认知结构」转变为「外部世界的一部分」。</p>
-      <p>ESC提出一个立场：<strong>语言不是描述现实的工具，而是制造现实的机制。概念不是对事实的抽象，而是构成事实的范式。</strong></p>
-      <p>语言 × 概念系统，是认知结构进入社会性、系统性、历史性的大门，也是我们所知「现实」的最终显影机制。</p>
-      <h4>3.1. 语言不是命名现实，而是构成现实</h4>
-      <p>传统语言观认为：语言是给世界中的事物「贴标签」的工具。但ESC指出，这一理解错置了语言的根本位置。</p>
-      <p>语言的作用不在于「指出已经存在的东西」，而在于构造可以存在的东西。换句话说：</p>
-      <p>没有被命名的东西，不会被认知系统稳定调用；<br>
-      没有被组织进语义结构的输入，无法成为可传播的知识；<br>
-      没有被语言系统纳入的感知，最终将被遗忘或拒斥。</p>
-      <p>我们说「某物存在」，首先是因为我们拥有了用于组织它的语言单元。这不是修辞现象，而是结构机制。语言之于现实，不是「翻译关系」，而是「生成关系」。</p>
-      <h4>3.2. 概念范畴是结构生成的模板系统</h4>
-      <p>语言赋予认知结构以外显形态，而概念范畴系统则提供了结构化输出的模板结构。这些模板决定了：</p>
-      <p>什么样的东西可以被归类为「对象」、「过程」、「属性」；<br>
-      什么样的联系被称为「因果」、「功能」、「关系」；<br>
-      什么样的行为被认为是「合理」、「规范」、「有效」。</p>
-      <p>我们并不是「识别」这些结构，而是依据范畴系统构造出这些结构。例如，「情绪」这一类别，在不同文化中结构方式完全不同，所感知到的「情绪现实」也随之改变。</p>
-      <p>由此可见：</p>
-      <p><strong>现实不是先在的，而是由范畴系统决定的可构造性产物。</strong></p>
-      <h4>3.3. 语言 × 概念联合作为「现实显影系统」</h4>
-      <p>我们可以把语言系统 × 概念系统的联合作用，称为现实显影系统。它完成以下功能：</p>
-      <p>稳定性：赋予结构单位一致性、可再现性；<br>
-      传播性：使结构可在社会系统中共享与操作；<br>
-      制度性：构成组织行为、知识分类与价值体系的基础；<br>
-      记忆性：构建「现实」的历史存储结构。</p>
-      <p>正因如此，我们认为「世界是语言建成的」。这不是一种文学修辞，而是一个结构哲学事实。</p>
-      <h4>3.4. 语言不是中性容器，而是结构化主轴</h4>
-      <p>语言之所以能制造现实，是因为它不只是一个表达工具，而是一个结构化路径的主轴。它规定：</p>
-      <p>结构能否被组织；<br>
-      信息能否被分类；<br>
-      意义能否被生成；<br>
-      知识能否被保留。</p>
-      <p>语言不是附加在认知之后的「翻译」，而是参与认知之前的「编排」。语言系统决定了我们能看到什么、能想到什么、能理解什么—— 这使语言成为ESC中连接存在显现与结构生成之间的主控机制之一。</p>
-      <h4>3.5. 从语言进入知识系统的结构沉积</h4>
-      <p>语言与概念的构造能力，并不止于个体经验。当结构化路径经由语言稳定下来，它就会被沉积为知识系统。也就是说：</p>
-      <p>语言 → 结构显现<br>
-      语言 × 概念 → 结构系统<br>
-      结构系统 × 历史时间 → 知识图谱</p>
-      <p>这意味着：<strong>我们称之为「知识」的东西，并非事实累积，而是结构生成的演化结果。</strong></p>
-      <p>下一节将正式进入构造路径三，揭示知识如何成为认知结构的历史映射系统，并完成ESC理论关于「世界知识」的根本重构。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">从模糊感受到可分辨经验</span><span>08</span></div>
 </section>
 
-<!-- ========== P9 · 第3节卡1（3.1+3.2） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 3 · Language Constitutes</div><div>09 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>语言之于现实是「生成关系」· 3.1-3.2</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>语言不是命名现实，而是构成现实</h2>
-    <div class="grid-3">
-      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
-        <div class="kicker">没有被命名</div>
-        <p class="body-zh" style="margin-top:1.4vh">不会被认知系统稳定调用。</p>
-      </div>
-      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
-        <div class="kicker">没有组织进语义结构</div>
-        <p class="body-zh" style="margin-top:1.4vh">无法成为可传播的知识。</p>
-      </div>
-      <div data-anim style="border-top:1px solid currentColor;padding-top:1.8vh">
-        <div class="kicker">没有纳入语言系统</div>
-        <p class="body-zh" style="margin-top:1.4vh">最终将被遗忘或拒斥。</p>
-      </div>
+<section class="slide light" data-slide-id="shared-reality">
+  <div class="chrome"><div>03 · 语言与概念</div><div>09 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>从“我感到”到“我们能讨论”</div><h2 class="reader-title" data-anim>语言给理解一条公共通道</h2></div>
+    <div class="path-row">
+      <div class="path-node" data-anim><h3>分辨</h3><p>模糊经验获得可以比较的边界。</p></div>
+      <div class="path-node" data-anim><h3>表达</h3><p>内部感觉变成别人可以接近的线索。</p></div>
+      <div class="path-node" data-anim><h3>协作</h3><p>人们围绕相近说法协调判断与行动。</p></div>
+      <div class="path-node" data-anim><h3>保存</h3><p>经验越过当下，进入记录与传承。</p></div>
     </div>
-    <div class="callout" style="max-width:66vw;margin-top:4vh" data-anim>
-      <span class="q-big">概念范畴是结构生成的模板系统——现实不是先在的，而是由范畴系统决定的可构造性产物。「情绪」在不同文化中的结构方式不同，所感知的「情绪现实」也随之改变。</span>
-      <span class="cite">3.2 · 我们不是「识别」结构，而是依据范畴系统构造结构</span>
-    </div>
+    <p class="reader-lead" data-anim>语言不只给完成后的理解贴标签。它参与了理解怎样成形，也让一份经验能够被共同修订。</p>
   </div>
-  <div class="foot"><div>Page 09 · Language Constitutes</div><div>Section 3</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 3.1 / 3.2</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>3.1. 语言不是命名现实，而是构成现实</h4>
-      <p>传统语言观认为：语言是给世界中的事物「贴标签」的工具。但ESC指出，这一理解错置了语言的根本位置。</p>
-      <p>语言的作用不在于「指出已经存在的东西」，而在于构造可以存在的东西。换句话说：</p>
-      <p>没有被命名的东西，不会被认知系统稳定调用；<br>
-      没有被组织进语义结构的输入，无法成为可传播的知识；<br>
-      没有被语言系统纳入的感知，最终将被遗忘或拒斥。</p>
-      <p>我们说「某物存在」，首先是因为我们拥有了用于组织它的语言单元。这不是修辞现象，而是结构机制。语言之于现实，不是「翻译关系」，而是「生成关系」。</p>
-      <h4>3.2. 概念范畴是结构生成的模板系统</h4>
-      <p>语言赋予认知结构以外显形态，而概念范畴系统则提供了结构化输出的模板结构。这些模板决定了：</p>
-      <p>什么样的东西可以被归类为「对象」、「过程」、「属性」；<br>
-      什么样的联系被称为「因果」、「功能」、「关系」；<br>
-      什么样的行为被认为是「合理」、「规范」、「有效」。</p>
-      <p>我们并不是「识别」这些结构，而是依据范畴系统构造出这些结构。例如，「情绪」这一类别，在不同文化中结构方式完全不同，所感知到的「情绪现实」也随之改变。</p>
-      <p>由此可见：</p>
-      <p><strong>现实不是先在的，而是由范畴系统决定的可构造性产物。</strong></p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">分辨 → 表达 → 协作 → 保存</span><span>09</span></div>
 </section>
 
-<!-- ========== P10 · 第3节卡2（3.3-3.5） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 3 · Developing System</div><div>10 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>现实显影系统 · 3.3-3.5</div>
-    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>世界是语言建成的</h2>
-    <div class="pipeline" data-cols="4">
-      <div class="step" data-anim>
-        <div class="step-nb">i</div>
-        <div class="step-title">稳定性</div>
-        <div class="step-desc">赋予结构单位一致性、可再现性。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">ii</div>
-        <div class="step-title">传播性</div>
-        <div class="step-desc">使结构可在社会系统中共享与操作。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iii</div>
-        <div class="step-title">制度性</div>
-        <div class="step-desc">构成组织行为、知识分类与价值体系的基础。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iv</div>
-        <div class="step-title">记忆性</div>
-        <div class="step-desc">构建「现实」的历史存储结构。</div>
-      </div>
+<section class="slide dark" data-slide-id="knowledge-map">
+  <div class="chrome"><div>04 · 知识的沉积</div><div>10 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>经验怎样变成知识</div><h2 class="reader-title" data-anim>一条路被反复走通，也被压缩成地图</h2></div>
+    <div class="stack-map">
+      <div class="stack-layer" data-anim><h3>发生</h3><p>一次具体经验留下线索。</p></div>
+      <div class="stack-layer" data-anim style="min-height:18vh"><h3>表达</h3><p>线索被命名、描述和比较。</p></div>
+      <div class="stack-layer" data-anim style="min-height:23vh"><h3>检验</h3><p>多人多次使用，反馈修正路径。</p></div>
+      <div class="stack-layer" data-anim style="min-height:28vh"><h3>知识</h3><p>经验被压缩成可重复使用的方法。</p></div>
     </div>
-    <div class="callout" style="max-width:64vw;margin-top:4vh" data-anim>
-      <span class="q-big">语言 → 结构显现；语言 × 概念 → 结构系统；结构系统 × 历史时间 → 知识图谱。知识并非事实累积，而是结构生成的演化结果。</span>
-      <span class="cite">3.5 · 语言不是认知之后的「翻译」，而是参与认知之前的「编排」</span>
-    </div>
+    <p class="quiet-note" data-anim>来源说明：原始转录在 4.1 节有一处缺文，现存原典副本同样缺失；本页未猜补，只沿用前后完整论证。</p>
   </div>
-  <div class="foot"><div>Page 10 · Developing System</div><div>Section 3</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 3.3 / 3.4 / 3.5</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>3.3. 语言 × 概念联合作为「现实显影系统」</h4>
-      <p>我们可以把语言系统 × 概念系统的联合作用，称为现实显影系统。它完成以下功能：</p>
-      <p>稳定性：赋予结构单位一致性、可再现性；<br>
-      传播性：使结构可在社会系统中共享与操作；<br>
-      制度性：构成组织行为、知识分类与价值体系的基础；<br>
-      记忆性：构建「现实」的历史存储结构。</p>
-      <p>正因如此，我们认为「世界是语言建成的」。这不是一种文学修辞，而是一个结构哲学事实。</p>
-      <h4>3.4. 语言不是中性容器，而是结构化主轴</h4>
-      <p>语言之所以能制造现实，是因为它不只是一个表达工具，而是一个结构化路径的主轴。它规定：</p>
-      <p>结构能否被组织；<br>
-      信息能否被分类；<br>
-      意义能否被生成；<br>
-      知识能否被保留。</p>
-      <p>语言不是附加在认知之后的「翻译」，而是参与认知之前的「编排」。语言系统决定了我们能看到什么、能想到什么、能理解什么—— 这使语言成为ESC中连接存在显现与结构生成之间的主控机制之一。</p>
-      <h4>3.5. 从语言进入知识系统的结构沉积</h4>
-      <p>语言与概念的构造能力，并不止于个体经验。当结构化路径经由语言稳定下来，它就会被沉积为知识系统。也就是说：</p>
-      <p>语言 → 结构显现<br>
-      语言 × 概念 → 结构系统<br>
-      结构系统 × 历史时间 → 知识图谱</p>
-      <p>这意味着：<strong>我们称之为「知识」的东西，并非事实累积，而是结构生成的演化结果。</strong></p>
-      <p>下一节将正式进入构造路径三，揭示知识如何成为认知结构的历史映射系统，并完成ESC理论关于「世界知识」的根本重构。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">知识保存结构路径</span><span>10</span></div>
 </section>
 
-<!-- ========== P11 · 第4节 命题页 ========== -->
-<section class="slide light" data-animate="quote">
-  <div class="chrome"><div>第 4 节 · 构造路径三</div><div>11 / 21</div></div>
-  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>第 4 节 · 知识如何成为结构投影</div>
-    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.3;max-width:82vw">
-      <span data-anim="line" style="display:block">知识不是现实的记录，</span>
-      <span data-anim="line" style="display:block">而是结构的投影。</span>
-    </blockquote>
-    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>知识是一种二阶结构：不是对世界的反映，而是对认知结构如何组织世界的「显影地图」。</p>
-  </div>
-  <div class="foot"><div>Page 11 · 构造路径三</div><div>Section 4</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 第4节 构造路径三：知识如何成为结构投影</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>第4节 | 构造路径三：知识如何成为结构投影</h4>
-      <p>知识，历来被视作人类认知的巅峰成果，是我们用来描述世界、理解规律、保存经验、指导行动的集体系统。但ESC提出一个根本性的重构命题：</p>
-      <p><strong>知识不是现实的记录，而是结构的投影。</strong></p>
-      <p>换言之，我们所称之为「知识」的，并不是从现实中提取出来的客观内容，而是认知系统在时间中对自身结构过程的再组织、再表达与再部署。这使得知识成为一种二阶结构：</p>
-      <p><strong>它不是对世界的反映，而是对认知结构如何组织世界的「显影地图」。</strong></p>
-      <h4>4.1. 知识不是对事实的还原，而是对结构的固定</h4>
-      <p>我们不能再将知识理解为对「事实」的集合。所谓「事实」，如前所述，本身就是结构系统生成的输出。而当这些结构输出在时间中被系统化、语言化、标准化之后，我们称之为「知识」。</p>
-      <h4>4.2. 知识的四重结构性维度</h4>
-      <p>ESC将知识系统理解为四重结构机制的沉积产物：</p>
-      <p>结构通道化：知识是将结构路径通道化、标准化，使其可重复使用；<br>
-      时间沉积性：知识是结构在时间中的保留机制，不是即时判断，而是系统沉淀；<br>
-      连接封闭性：知识构成封闭结构图谱，形成结构系统的内部逻辑自洽；<br>
-      系统增量性：知识允许结构的扩展、组合、升级，是结构系统的进化机制。</p>
-      <p>这些维度共同构成一个关键命题：</p>
-      <p><strong>知识是一种「结构显影技术」，它以语言、范畴、逻辑为载体，将结构路径封装为可被调用的认知模块。</strong></p>
-      <h4>4.3. 为什么「知识不是真理」，但依然有效？</h4>
-      <p>知识不是自然法则的揭示物，而是结构系统在运行中自我建构出的稳定表达体系。这种表达体系有效的原因，不是它「等于世界」，而是它能在结构系统内部：</p>
-      <p>保持连接的连续性；<br>
-      提供认知路径的调用接口；<br>
-      维持系统的反馈闭环；<br>
-      承载系统的结构演化。</p>
-      <p>也就是说，知识的「真理性」并不来自其是否「符合现实」，而来自其是否「在结构中起效」。这不是相对主义，而是结构主义—— 它将有效性置于结构运作的可验证性之中。</p>
-      <h4>4.4. 知识是系统「对自身结构的再认识」</h4>
-      <p>从ESC角度看，知识的本质是：</p>
-      <p><strong>认知系统对自身结构生成过程的反射性重组。</strong></p>
-      <p>它是系统将自身运行机制「外化为可调用形式」的过程。这一过程不仅用于理解，更用于部署与传承。这也是为什么知识系统总是与以下机制紧密绑定：</p>
-      <p>教育：结构路径的复制机制；<br>
-      语言：结构连接的封装方式；<br>
-      学科：结构区块的组织逻辑；<br>
-      理论：结构深度的演绎与推广。</p>
-      <p>因此，知识不是对世界的说明书，而是对结构的操作手册。</p>
-      <h4>4.5. 进入下一节：构造系统的边界—— 人类构造（H）</h4>
-      <p>至此我们完成了对「构造三路径」的系统展开：</p>
-      <p>1.输入 → 结构输出：生成现实单元；<br>
-      2.语言 × 范畴：显现现实系统；<br>
-      3.知识系统：封装结构演化。</p>
-      <p>那么问题随之而来：这些构造路径的界限在哪里？结构的生成机制是否可以无限扩展？还是受限于某些「认知边界条件」？</p>
-      <p>ESC认为，结构之所以能够生成，但又无法任意生成，是因为存在一个决定性边界变量：人类构造（H）。H 既是认知系统的生成基础，也是其局限根源。因此，第5节将正式引入ESC核心术语之一「人类构造（H）」，开启对结构生成边界的揭示。</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== P12 · 第4节卡1（4.2 表格） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 4 · Four Dimensions</div><div>12 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>知识的四重结构性维度 · 4.2</div>
-    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>知识是一种「结构显影技术」</h2>
-    <table class="tbl" data-anim>
-      <thead><tr><th style="width:22%">维度</th><th>描述</th></tr></thead>
-      <tbody>
-        <tr><td class="em-cell">结构通道化</td><td>知识是将结构路径通道化、标准化，使其可重复使用</td></tr>
-        <tr><td class="em-cell">时间沉积性</td><td>知识是结构在时间中的保留机制，不是即时判断，而是系统沉淀</td></tr>
-        <tr><td class="em-cell">连接封闭性</td><td>知识构成封闭结构图谱，形成结构系统的内部逻辑自洽</td></tr>
-        <tr><td class="em-cell">系统增量性</td><td>知识允许结构的扩展、组合、升级，是结构系统的进化机制</td></tr>
-      </tbody>
-    </table>
-    <div class="callout" style="max-width:70vw;margin-top:4vh" data-anim>
-      <span class="q-big">知识以语言、范畴、逻辑为载体，将结构路径封装为可被调用的认知模块。它的有效性不来自「等于世界」，而来自「在结构中起效」——这不是相对主义，而是结构主义。</span>
-      <span class="cite">4.2 / 4.3 · 知识不是真理，但依然有效</span>
-    </div>
-  </div>
-  <div class="foot"><div>Page 12 · Four Dimensions</div><div>Section 4</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 4.1 / 4.2 / 4.3</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>4.1. 知识不是对事实的还原，而是对结构的固定</h4>
-      <p>我们不能再将知识理解为对「事实」的集合。所谓「事实」，如前所述，本身就是结构系统生成的输出。而当这些结构输出在时间中被系统化、语言化、标准化之后，我们称之为「知识」。</p>
-      <h4>4.2. 知识的四重结构性维度</h4>
-      <p>ESC将知识系统理解为四重结构机制的沉积产物：</p>
-      <p>结构通道化：知识是将结构路径通道化、标准化，使其可重复使用；<br>
-      时间沉积性：知识是结构在时间中的保留机制，不是即时判断，而是系统沉淀；<br>
-      连接封闭性：知识构成封闭结构图谱，形成结构系统的内部逻辑自洽；<br>
-      系统增量性：知识允许结构的扩展、组合、升级，是结构系统的进化机制。</p>
-      <p>这些维度共同构成一个关键命题：</p>
-      <p><strong>知识是一种「结构显影技术」，它以语言、范畴、逻辑为载体，将结构路径封装为可被调用的认知模块。</strong></p>
-      <h4>4.3. 为什么「知识不是真理」，但依然有效？</h4>
-      <p>知识不是自然法则的揭示物，而是结构系统在运行中自我建构出的稳定表达体系。这种表达体系有效的原因，不是它「等于世界」，而是它能在结构系统内部：</p>
-      <p>保持连接的连续性；<br>
-      提供认知路径的调用接口；<br>
-      维持系统的反馈闭环；<br>
-      承载系统的结构演化。</p>
-      <p>也就是说，知识的「真理性」并不来自其是否「符合现实」，而来自其是否「在结构中起效」。这不是相对主义，而是结构主义—— 它将有效性置于结构运作的可验证性之中。</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== P13 · 第4节卡2（4.4） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 4 · Operation Manual</div><div>13 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>知识系统的四个绑定机制 · 4.4</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>对结构的操作手册</h2>
-    <div class="pipeline" data-cols="4">
-      <div class="step" data-anim>
-        <div class="step-nb">i</div>
-        <div class="step-title">教育</div>
-        <div class="step-desc">结构路径的复制机制。</div>
+<section class="slide light" data-slide-id="map-and-street">
+  <div class="chrome"><div>04 · 知识的沉积</div><div>11 / 18</div></div>
+  <div class="frame grid-2-7-5" style="padding-top:5vh">
+    <div class="col" style="justify-content:space-between;min-height:66vh">
+      <div><div class="kicker" data-anim>地图与街道</div><h2 class="h-xl" data-anim>有效，不需要成为完整复制</h2>
+        <div class="reading-copy" style="margin-top:3vh" data-anim><p>地图删掉气味、天气和行人的表情，只保留与用途有关的道路、方向与距离。</p><p>地铁图、驾车图和无障碍地图描绘同一座城，却突出不同关系。知识也会选择、简化和固定。</p></div>
       </div>
-      <div class="step" data-anim>
-        <div class="step-nb">ii</div>
-        <div class="step-title">语言</div>
-        <div class="step-desc">结构连接的封装方式。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iii</div>
-        <div class="step-title">学科</div>
-        <div class="step-desc">结构区块的组织逻辑。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iv</div>
-        <div class="step-title">理论</div>
-        <div class="step-desc">结构深度的演绎与推广。</div>
-      </div>
+      <div class="callout" data-anim><span class="q-big">知识的价值来自可使用、可检查、可修订。</span></div>
     </div>
-    <div class="callout" style="max-width:64vw;margin-top:5vh" data-anim>
-      <span class="q-big">知识的本质：认知系统对自身结构生成过程的反射性重组——知识不是对世界的说明书，而是对结构的操作手册。</span>
-      <span class="cite">4.4 · 外化为可调用形式，用于部署与传承</span>
-    </div>
+    <figure data-anim><div class="img-art"><img src="images/11-map-and-street.png" alt="纸上地图与真实街道相接但保持差别的靛蓝编辑插画"></div><figcaption class="art-caption">地图是解释知识的类比：它强调选择与用途，不表示知识与地图完全同构。</figcaption></figure>
   </div>
-  <div class="foot"><div>Page 13 · Operation Manual</div><div>Section 4</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 4.4 / 4.5</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>4.4. 知识是系统「对自身结构的再认识」</h4>
-      <p>从ESC角度看，知识的本质是：</p>
-      <p><strong>认知系统对自身结构生成过程的反射性重组。</strong></p>
-      <p>它是系统将自身运行机制「外化为可调用形式」的过程。这一过程不仅用于理解，更用于部署与传承。这也是为什么知识系统总是与以下机制紧密绑定：</p>
-      <p>教育：结构路径的复制机制；<br>
-      语言：结构连接的封装方式；<br>
-      学科：结构区块的组织逻辑；<br>
-      理论：结构深度的演绎与推广。</p>
-      <p>因此，知识不是对世界的说明书，而是对结构的操作手册。</p>
-      <h4>4.5. 进入下一节：构造系统的边界—— 人类构造（H）</h4>
-      <p>至此我们完成了对「构造三路径」的系统展开：</p>
-      <p>1.输入 → 结构输出：生成现实单元；<br>
-      2.语言 × 范畴：显现现实系统；<br>
-      3.知识系统：封装结构演化。</p>
-      <p>那么问题随之而来：这些构造路径的界限在哪里？结构的生成机制是否可以无限扩展？还是受限于某些「认知边界条件」？</p>
-      <p>ESC认为，结构之所以能够生成，但又无法任意生成，是因为存在一个决定性边界变量：人类构造（H）。H 既是认知系统的生成基础，也是其局限根源。因此，第5节将正式引入ESC核心术语之一「人类构造（H）」，开启对结构生成边界的揭示。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">知识像地图，不是街道的副本</span><span>11</span></div>
 </section>
 
-<!-- ========== P14 · 第5节 命题页 ========== -->
-<section class="slide light" data-animate="quote">
-  <div class="chrome"><div>第 5 节 · 人类构造 H</div><div>14 / 21</div></div>
-  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>第 5 节 · Human Constructs</div>
-    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:3.6vw;line-height:1.4;max-width:86vw">
-      <span data-anim="line" style="display:block">所有认知生成路径中，源于人类种属生理基础、神经机制、文化图谱、</span>
-      <span data-anim="line" style="display:block">语言结构与历史经验共同构成的限定性结构系统。</span>
-    </blockquote>
-    <p class="lead" style="max-width:64vw;opacity:.75" data-anim>H 不直接生成现实，而是限定我们能生成什么样的结构。它是认知系统的「启动框架」，也是结构系统的「边界条件」。</p>
-  </div>
-  <div class="foot"><div>Page 14 · Human Constructs</div><div>Section 5</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 第5节 人类构造（H）作为认知生成的限定结构</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>第5节 | 人类构造（H）作为认知生成的限定结构</h4>
-      <p>我们已经看到，认知系统通过结构化将输入转化为输出，通过语言与范畴制造现实，通过知识系统封装结构路径—— 但这些构造路径，并非无限开放。它们之所以以某种方式发生、组织与稳定，是因为存在一个根本性边界变量：人类构造（H, Human Constructs）。</p>
-      <p>ESC将 H 定义为：</p>
-      <p><strong>所有认知生成路径中，源于人类种属生理基础、神经机制、文化图谱、语言结构与历史经验共同构成的限定性结构系统。</strong></p>
-      <p>H 并不直接生成现实，而是限定了我们能生成什么样的结构、组织什么样的路径、构造什么样的世界。它是认知系统的<strong>「启动框架」</strong>，也是结构系统的<strong>「边界条件」</strong>。</p>
-      <h4>5.1. 人类构造不是认知的工具，而是认知的前提</h4>
-      <p>传统认知科学往往将感知能力、语言习得、社会背景等视作「外部变量」，而ESC认为：这些变量本身就构成了认知机制的内核。我们所谓的「结构能力」，从来不是抽象逻辑的能力，而是在 H 的限定下发生的路径组织行为。</p>
-      <p>H 不是工具，而是地基。</p>
-      <p>具体而言，H 包含但不限于以下五大系统性结构：</p>
-      <p>生理结构：感知器官、神经系统、身体形态；<br>
-      心理结构：情绪路径、记忆机制、注意网络；<br>
-      语言结构：语法规则、范畴逻辑、隐喻系统；<br>
-      文化结构：共享经验、社会语境、信念建模；<br>
-      历史结构：演化记忆、制度沉积、知识传承。</p>
-      <p>这些结构并非认知之后的「影响因素」，而是认知之前的「构造条件」。</p>
-      <h4>5.2. H 不是被动限制，而是主动构型</h4>
-      <p>H 不仅限定我们认知的范围，更定义我们认知的方式。换言之：</p>
-      <p>不是我们用语言描述世界，而是语言本身定义了我们能感知的世界形态；<br>
-      不是我们依据文化解释经验，而是文化本身构成了经验可被理解的格式；<br>
-      不是我们带着身体去理解世界，而是身体决定了我们可以构建哪种世界结构。</p>
-      <p>因此，H 是认知系统的「结构模板系统」，它将所有结构化路径、语言范畴、知识图谱收编入一个种属特定的生成框架中。</p>
-      <h4>5.3. H 是 ESC 结构公式中的隐含常量</h4>
-      <p>在公式 E = s(t) = N = IP 中，H 虽未被直接表达，但它始终作为结构系统 s(t) 能否展开的隐性边界。我们可以在结构展开的实际路径中识别出 H 的存在：</p>
-      <p>当某一结构在系统中反复失败，可能是它超出了 H 的感知能力；<br>
-      当某一连接方式在逻辑上成立但文化中无效，说明它不被 H 的符号系统所容纳；<br>
-      当某一理论具备结构美感却无法落地，问题常常出在它与 H 的实践历史不兼容。</p>
-      <p>因此，ESC对结构生成路径的完整公式应理解为：</p>
-      <p><strong>E = s(t | H)</strong></p>
-      <p>结构化（s）并非在真空中发生，而是始终在 H 的限定下展开，其输出的存在（E）也始终是「人类可构造的存在」。</p>
-      <h4>5.4. H 不等于主观性，而是结构条件性</h4>
-      <p>需明确指出：H 的提出并不是为了主张「万事主观」，也不是为了取消客观性，而是要揭示：</p>
-      <p>所谓「客观」，也是在 H 的结构系统中能重复稳定显现的结构；<br>
-      所谓「主观」，只是 H 在特定条件下的路径偏差；<br>
-      所谓「普遍性」，必须是在 H 的边界内保持稳定的结构生成逻辑。</p>
-      <p>ESC理论因此拒绝二元对立（主观 / 客观），而转向结构约束（bounded structure）视角。H 是所有认知结构的「起源地」和「可行性判定系统」。</p>
-      <h4>5.5. 下一节：结构系统的自组织起点</h4>
-      <p>至此，我们完成了 ESC 结构认知的五重命题链：</p>
-      <p>1.输入并非现实，而是可组织信号；<br>
-      2.结构不是反映，而是生成机制；<br>
-      3.语言 × 范畴系统制造现实；<br>
-      4.知识系统是结构沉积的反射；<br>
-      5.人类构造（H）是所有结构路径的生成边界。</p>
-      <p>但仍有一个问题未被解答：如果结构不是被给予的，它又是如何被「系统地」构造起来的？</p>
-      <p>我们将由此进入第6节，探讨ESC的关键机制之一：结构系统的自组织能力，揭示结构如何从路径形成、自我增强、连接稳固到趋向稳定，成为认知系统的基础秩序。</p>
+<section class="slide hero light" data-slide-id="revise-loop">
+  <div class="chrome"><div>04 · 知识的沉积</div><div>12 / 18</div></div>
+  <div class="reader-frame">
+    <div class="center"><div class="eyebrow" data-anim>Knowledge in Motion</div><h2 class="h-xl" data-anim>一张好地图，允许改线</h2></div>
+    <div class="loop">
+      <div class="loop-card" data-anim><b>使用</b><span>知识进入新的情境，帮助判断和行动。</span></div>
+      <div class="loop-card" data-anim><b>反馈</b><span>结果暴露有效处、遗漏处与失效边界。</span></div>
+      <div class="loop-card" data-anim><b>修订</b><span>旧路径被调整，再回到下一轮使用。</span></div>
     </div>
+    <p class="reader-lead" style="text-align:center;max-width:78vw;margin:auto" data-anim>稳定让知识可以被传承；可修订让稳定不至于变成僵化。</p>
   </div>
+  <div class="foot"><span class="title">使用 · 反馈 · 修订</span><span>12</span></div>
 </section>
 
-<!-- ========== P15 · 第5节卡1（5.1+5.2） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 5 · Five Structures</div><div>15 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>H 的五大系统性结构 · 5.1 / 5.2</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>H 不是工具，而是地基</h2>
-    <div class="pipeline" data-cols="5">
-      <div class="step" data-anim>
-        <div class="step-nb">i</div>
-        <div class="step-title">生理结构</div>
-        <div class="step-desc">感知器官、神经系统、身体形态。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">ii</div>
-        <div class="step-title">心理结构</div>
-        <div class="step-desc">情绪路径、记忆机制、注意网络。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iii</div>
-        <div class="step-title">语言结构</div>
-        <div class="step-desc">语法规则、范畴逻辑、隐喻系统。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">iv</div>
-        <div class="step-title">文化结构</div>
-        <div class="step-desc">共享经验、社会语境、信念建模。</div>
-      </div>
-      <div class="step" data-anim>
-        <div class="step-nb">v</div>
-        <div class="step-title">历史结构</div>
-        <div class="step-desc">演化记忆、制度沉积、知识传承。</div>
-      </div>
+<section class="slide light" data-slide-id="five-conditions">
+  <div class="chrome"><div>05 · 理解的条件</div><div>13 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>理解不在真空中发生</div><h2 class="reader-title" data-anim>五类条件共同决定，我们此刻能组织出什么</h2></div>
+    <div class="orbit">
+      <div class="orbit-item" data-anim><strong>身体</strong><span>感官与行动能力提供最初入口</span></div>
+      <div class="orbit-item" data-anim><strong>心理</strong><span>注意、记忆与情绪改变线索权重</span></div>
+      <div class="orbit-item" data-anim><strong>语言</strong><span>命名与分类提供组织格式</span></div>
+      <div class="orbit-item" data-anim><strong>文化</strong><span>共享经验规定常见解释路径</span></div>
+      <div class="orbit-item" data-anim><strong>历史</strong><span>制度与知识留下可继承的路</span></div>
     </div>
-    <div class="callout" style="max-width:70vw;margin-top:4vh" data-anim>
-      <span class="q-big">H 不是被动限制，而是主动构型：不是我们用语言描述世界，而是语言本身定义了我们能感知的世界形态。</span>
-      <span class="cite">5.2 · 这些结构是认知之前的「构造条件」，不是认知之后的「影响因素」</span>
-    </div>
+    <p class="reader-lead" data-anim>这些条件既带来限制，也使清晰的理解成为可能。有限并不等于缺陷。</p>
   </div>
-  <div class="foot"><div>Page 15 · Five Structures</div><div>Section 5</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 5.1 / 5.2</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>5.1. 人类构造不是认知的工具，而是认知的前提</h4>
-      <p>传统认知科学往往将感知能力、语言习得、社会背景等视作「外部变量」，而ESC认为：这些变量本身就构成了认知机制的内核。我们所谓的「结构能力」，从来不是抽象逻辑的能力，而是在 H 的限定下发生的路径组织行为。</p>
-      <p>H 不是工具，而是地基。</p>
-      <p>具体而言，H 包含但不限于以下五大系统性结构：</p>
-      <p>生理结构：感知器官、神经系统、身体形态；<br>
-      心理结构：情绪路径、记忆机制、注意网络；<br>
-      语言结构：语法规则、范畴逻辑、隐喻系统；<br>
-      文化结构：共享经验、社会语境、信念建模；<br>
-      历史结构：演化记忆、制度沉积、知识传承。</p>
-      <p>这些结构并非认知之后的「影响因素」，而是认知之前的「构造条件」。</p>
-      <h4>5.2. H 不是被动限制，而是主动构型</h4>
-      <p>H 不仅限定我们认知的范围，更定义我们认知的方式。换言之：</p>
-      <p>不是我们用语言描述世界，而是语言本身定义了我们能感知的世界形态；<br>
-      不是我们依据文化解释经验，而是文化本身构成了经验可被理解的格式；<br>
-      不是我们带着身体去理解世界，而是身体决定了我们可以构建哪种世界结构。</p>
-      <p>因此，H 是认知系统的「结构模板系统」，它将所有结构化路径、语言范畴、知识图谱收编入一个种属特定的生成框架中。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">理解的起点与边界</span><span>13</span></div>
 </section>
 
-<!-- ========== P16 · 第5节卡2（5.3+5.4）公式页 ========== -->
-<section class="slide dark">
-  <div class="chrome"><div>Section 5 · Hidden Constant</div><div>16 / 21</div></div>
-  <div class="frame" style="display:grid;gap:3.4vh;align-content:center;min-height:78vh">
-    <div class="kicker" data-anim>H 是结构公式中的隐含常量 · 5.3 / 5.4</div>
-    <h1 class="h-hero" style="font-size:6.8vw" data-anim>E = s(t | H)</h1>
-    <p class="lead" style="max-width:68vw" data-anim>结构化并非在真空中发生，而是始终在 H 的限定下展开——其输出的存在（E），也始终是「人类可构造的存在」。</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:3vw;max-width:84vw" data-anim>
-      <div><div class="kicker">结构反复失败</div><p class="body-zh">可能超出了 H 的感知能力。</p></div>
-      <div><div class="kicker">逻辑成立但文化无效</div><p class="body-zh">不被 H 的符号系统所容纳。</p></div>
-      <div><div class="kicker">有结构美感却无法落地</div><p class="body-zh">与 H 的实践历史不兼容。</p></div>
+<section class="slide dark" data-slide-id="boundary-enables" data-animate="directional">
+  <div class="chrome"><div>05 · 理解的条件</div><div>14 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>边界的两面</div><h2 class="reader-title" data-anim>有限的装置，形成清晰的世界</h2></div>
+    <div class="split-ideas">
+      <div class="idea-panel" data-anim="left"><div class="eyebrow">它限制</div><h3>有些差别暂时进不来</h3><p>感官达不到、经验没发生、语言还没有相应区分，理解会停在边缘。</p></div>
+      <div class="divider" data-anim></div>
+      <div class="idea-panel" data-anim="right"><div class="eyebrow">它也创造</div><h3>有限让关系可以被看清</h3><p>耳朵听不到所有频率，正因如此，有限的声音才可能形成可辨认的世界。</p></div>
     </div>
-    <div class="callout" style="max-width:66vw" data-anim>
-      <span class="q-big">H 不等于主观性，而是结构条件性——ESC 拒绝「主观 / 客观」二元对立，转向结构约束（bounded structure）视角。</span>
-      <span class="cite">5.4 · H 是所有认知结构的「起源地」和「可行性判定系统」</span>
-    </div>
+    <div class="callout" data-anim><span class="q-big">边界不是给人盖章的命运。新的经验、工具与表达会扩展可理解的范围。</span></div>
   </div>
-  <div class="foot"><div>Page 16 · Hidden Constant</div><div>Section 5</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 5.3 / 5.4 / 5.5</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>5.3. H 是 ESC 结构公式中的隐含常量</h4>
-      <p>在公式 E = s(t) = N = IP 中，H 虽未被直接表达，但它始终作为结构系统 s(t) 能否展开的隐性边界。我们可以在结构展开的实际路径中识别出 H 的存在：</p>
-      <p>当某一结构在系统中反复失败，可能是它超出了 H 的感知能力；<br>
-      当某一连接方式在逻辑上成立但文化中无效，说明它不被 H 的符号系统所容纳；<br>
-      当某一理论具备结构美感却无法落地，问题常常出在它与 H 的实践历史不兼容。</p>
-      <p>因此，ESC对结构生成路径的完整公式应理解为：</p>
-      <p><strong>E = s(t | H)</strong></p>
-      <p>结构化（s）并非在真空中发生，而是始终在 H 的限定下展开，其输出的存在（E）也始终是「人类可构造的存在」。</p>
-      <h4>5.4. H 不等于主观性，而是结构条件性</h4>
-      <p>需明确指出：H 的提出并不是为了主张「万事主观」，也不是为了取消客观性，而是要揭示：</p>
-      <p>所谓「客观」，也是在 H 的结构系统中能重复稳定显现的结构；<br>
-      所谓「主观」，只是 H 在特定条件下的路径偏差；<br>
-      所谓「普遍性」，必须是在 H 的边界内保持稳定的结构生成逻辑。</p>
-      <p>ESC理论因此拒绝二元对立（主观 / 客观），而转向结构约束（bounded structure）视角。H 是所有认知结构的「起源地」和「可行性判定系统」。</p>
-      <h4>5.5. 下一节：结构系统的自组织起点</h4>
-      <p>至此，我们完成了 ESC 结构认知的五重命题链：</p>
-      <p>1.输入并非现实，而是可组织信号；<br>
-      2.结构不是反映，而是生成机制；<br>
-      3.语言 × 范畴系统制造现实；<br>
-      4.知识系统是结构沉积的反射；<br>
-      5.人类构造（H）是所有结构路径的生成边界。</p>
-      <p>但仍有一个问题未被解答：如果结构不是被给予的，它又是如何被「系统地」构造起来的？</p>
-      <p>我们将由此进入第6节，探讨ESC的关键机制之一：结构系统的自组织能力，揭示结构如何从路径形成、自我增强、连接稳固到趋向稳定，成为认知系统的基础秩序。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">限制与可能来自同一组条件</span><span>14</span></div>
 </section>
 
-<!-- ========== P17 · 第6节 命题页 ========== -->
-<section class="slide light" data-animate="quote">
-  <div class="chrome"><div>第 6 节 · 自组织起点</div><div>17 / 21</div></div>
-  <div class="frame" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>第 6 节 · 结构系统的自组织起点</div>
-    <blockquote style="font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.3;max-width:82vw">
-      <span data-anim="line" style="display:block">认知系统的结构，</span>
-      <span data-anim="line" style="display:block">不是「被创造」的，而是「被涌现」的。</span>
-    </blockquote>
-    <p class="lead" style="max-width:66vw;opacity:.75" data-anim>结构不是设计出来的，也不是预设赋予的，而是认知系统在长期反馈中自组织生成的结果。</p>
+<section class="slide light" data-slide-id="path-emerges">
+  <div class="chrome"><div>06 · 自组织</div><div>15 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>一条小径的诞生</div><h2 class="reader-title" data-anim>稳定的路，起初只是一次局部成功</h2></div>
+    <figure data-anim><div class="img-art wide"><img src="images/15-path-emerges.png" alt="从一次脚步到清晰小径的三阶段靛蓝编辑插画"></div><figcaption class="art-caption">偶然经过 → 相近脚步反复出现 → 旧痕迹开始引导后来者。小径是自组织的生活类比。</figcaption></figure>
+    <p class="reader-lead" data-anim>认知结构也会这样生长：一次连接带来结果，反馈让它更容易被采用，重复又把它变成不必多想就会启动的路径。</p>
   </div>
-  <div class="foot"><div>Page 17 · 自组织起点</div><div>Section 6</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 第6节 结构系统的自组织起点</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>第6节 | 结构系统的自组织起点</h4>
-      <p>当我们已经认识到：结构是认知的第一机制，语言与概念制造现实，知识是结构的历史封装，而人类构造（H）提供了认知生成的限定边界—— 问题便逐渐指向一个核心：</p>
-      <p><strong>这些结构是如何被形成的？它们从何而来，又为何能够持续？</strong></p>
-      <p>ESC提出，结构不是设计出来的，也不是预设赋予的，而是认知系统在长期反馈中自组织生成的结果。这标志着认知哲学从语言范畴过渡到系统演化，从逻辑建构进入结构动力学，从「认知之所是」进入「结构之所能」。</p>
-      <h4>6.1. 自组织不是秩序的预设，而是秩序的涌现</h4>
-      <p>传统哲学或科学常假设秩序来源于外部力量：理性、逻辑、上帝、自然法则或生物本能。但ESC认为，认知中的秩序并不需要外部授予，它可以由系统内部的动态相互作用自发形成。</p>
-      <p>所谓自组织，指的是：</p>
-      <p>在无需外部指令的情况下；<br>
-      系统内部元素通过局部连接与反馈；<br>
-      形成全局结构性秩序与稳定路径。</p>
-      <p>换言之：</p>
-      <p><strong>认知系统的结构，不是「被创造」的，而是「被涌现」的。</strong></p>
-      <h4>6.2. 结构从何而起：初始路径的形成机制</h4>
-      <p>结构系统并非从空白状态中突然产生，它的生成需要三个基本前提条件：</p>
-      <p>连接性（Connection Potential）：输入之间存在某种相互作用或潜在耦合关系；<br>
-      重复性（Repetition）：相似结构在时间中反复出现，增强路径感知；<br>
-      反馈性（Feedback Loop）：输出结果反过来强化输入路径，形成自增强机制。</p>
-      <p>初始结构可能只是一次偶然连接，但当这种连接在时间中不断重复、获得反馈、增强稳定，它就可能成为第一个被「承认」的结构单元，并从此形成系统的增长点。</p>
-      <p>这就是结构的「萌芽现象」：</p>
-      <p><strong>在没有中心控制的情况下，认知系统通过多次局部成功路径的积累，自然地「组织出」结构性秩序。</strong></p>
-      <h4>6.3. 自组织的三阶段模型</h4>
-      <p>ESC将结构系统的自组织过程划分为三大阶段：</p>
-      <p>涌现期：局部连接初现，不稳定但有重复趋势（偶发性连接 × 初级反馈）；<br>
-      聚合期：局部结构联结形成较大单元，路径频繁调用（局部连接集成 × 中继节点形成）；<br>
-      稳定期：系统开始形成稳定结构图谱，结构单位具备「现实性」（系统正向反馈 × 结构封闭性增强）。</p>
-      <p>这些阶段并非线性展开，而是以嵌套迭代、动态交错、局部稳定、整体演化的形式持续推进。（「嵌套迭代」第5章第2节、「动态交错」第4章第3节、「局部稳定」第6章第3节、「整体演化」第10章）</p>
-      <h4>6.4. 自组织结构即是「现实感」的来源</h4>
-      <p>ESC指出，人类的「现实感」并不是从「外部世界」中得来，而是来自我们结构系统内部：</p>
-      <p>那些被频繁调用的结构路径被认为是「真实的」；<br>
-      那些能够稳定反馈的结构被视为「合理的」；<br>
-      那些可以与他人共享的结构被当作「客观的」。</p>
-      <p>这不是意识形态层面的相对主义，而是结构机制层面的系统现实：</p>
-      <p><strong>我们所感知的「现实」，是认知结构在自组织中逐渐稳定下来的连接系统。</strong></p>
-      <p>这也意味着，当结构路径改变，我们的现实观就会随之改变；当系统反馈断裂，我们对「世界」的理解就会失效。</p>
-      <p>在认知生成机制的限定性结构系统中，除 H 为前提边界外，结构的展开维度 t(时间）亦构成一种演化边界。所有结构认知的路径性展开，皆无法脱离时间的序列性限制与阶段性递归，形成对理解的「递归深度」与「演化速度」的限制。</p>
-      <p>换言之：</p>
-      <p><strong>结构化认知只能在「人类构造的空间 H」中，沿「时间的展开轴 t」进行递归生成。H 与 t，构成所有结构认知的边界对。</strong></p>
-      <p>边界对（Boundary Pair）是结构生成过程中，任何结构化系统必须同时受到两类边界限制：</p>
-      <p>一类来自结构的构造起点（结构起源空间）；</p>
-      <p>一类来自结构的展开路径（结构演化维度）。</p>
-      <p>这两类边界共同定义了结构的生成可能性 × 展开路径性，并构成结构认知的基本限制系统。「理解」，不仅受限于你能调用什么（H），也受限于你何时才能生成它(t)。所有的理解都是边界对的函数展开，可以表达为：</p>
-      <p><strong>understanding = s(t | H) = f(BP) = f(H,t)</strong></p>
-      <p>你无法理解你尚未走到的结构(t 的边界)，也无法理解你不具备构造能力的结构(H 的边界)，所以对于认知来说，「存在」不是外在的客观实物，而是你所能结构化的理解本身。所有你能理解的「存在」= 你能结构化生成的结构输出；而结构输出的极限 = s(t|H)，即边界对决定了理解的上限，于是：</p>
-      <p>「理解」就是「存在」，对认知者而言。我们不说「世界是什么」，我们说：「你能理解什么」。在结构化认知中，<strong>理解即存在</strong>。不是因为世界不存在，而是你只有通过结构，才能让任何东西「对你而言存在」。</p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">路径被脚步反复生成</span><span>15</span></div>
 </section>
 
-<!-- ========== P18 · 第6节卡1（6.1+6.2 表格） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 6 · Emergence</div><div>18 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>初始路径的形成机制 · 6.1 / 6.2</div>
-    <h2 class="h-xl" style="font-size:4.6vw;margin-bottom:4vh" data-anim>结构从何而起：三个前提条件</h2>
-    <table class="tbl" data-anim>
-      <thead><tr><th style="width:34%">条件</th><th>描述</th></tr></thead>
-      <tbody>
-        <tr><td class="em-cell">连接性 Connection Potential</td><td>输入之间存在某种相互作用或潜在耦合关系</td></tr>
-        <tr><td class="em-cell">重复性 Repetition</td><td>相似结构在时间中反复出现，增强路径感知</td></tr>
-        <tr><td class="em-cell">反馈性 Feedback Loop</td><td>输出结果反过来强化输入路径，形成自增强机制</td></tr>
-      </tbody>
-    </table>
-    <div class="callout" style="max-width:68vw;margin-top:4vh" data-anim>
-      <span class="q-big">结构的「萌芽现象」：在没有中心控制的情况下，认知系统通过多次局部成功路径的积累，自然地「组织出」结构性秩序。</span>
-      <span class="cite">6.2 · 一次偶然连接 → 重复 → 反馈 → 第一个被「承认」的结构单元</span>
+<section class="slide hero dark" data-slide-id="self-organization">
+  <div class="chrome"><div>06 · 自组织</div><div>16 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="eyebrow" data-anim>Emergence</div><h2 class="h-xl" data-anim>结构从局部连接里长出来</h2></div>
+    <div class="path-row">
+      <div class="path-node" data-anim><h3>萌芽</h3><p>偶然连接出现，尚不稳定。</p></div>
+      <div class="path-node" data-anim><h3>重复</h3><p>相近路径再次带来可用结果。</p></div>
+      <div class="path-node" data-anim><h3>聚合</h3><p>局部联系连成更大的组织。</p></div>
+      <div class="path-node" data-anim><h3>稳定</h3><p>路径开始反过来引导新的输入。</p></div>
     </div>
+    <p class="reader-lead" data-anim>稳定提高行动速度，也可能遮住别的可能。反馈负责把路踩实，也负责提醒系统何时改道。</p>
   </div>
-  <div class="foot"><div>Page 18 · Emergence</div><div>Section 6</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 6.1 / 6.2</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>6.1. 自组织不是秩序的预设，而是秩序的涌现</h4>
-      <p>传统哲学或科学常假设秩序来源于外部力量：理性、逻辑、上帝、自然法则或生物本能。但ESC认为，认知中的秩序并不需要外部授予，它可以由系统内部的动态相互作用自发形成。</p>
-      <p>所谓自组织，指的是：</p>
-      <p>在无需外部指令的情况下；<br>
-      系统内部元素通过局部连接与反馈；<br>
-      形成全局结构性秩序与稳定路径。</p>
-      <p>换言之：</p>
-      <p><strong>认知系统的结构，不是「被创造」的，而是「被涌现」的。</strong></p>
-      <h4>6.2. 结构从何而起：初始路径的形成机制</h4>
-      <p>结构系统并非从空白状态中突然产生，它的生成需要三个基本前提条件：</p>
-      <p>连接性（Connection Potential）：输入之间存在某种相互作用或潜在耦合关系；<br>
-      重复性（Repetition）：相似结构在时间中反复出现，增强路径感知；<br>
-      反馈性（Feedback Loop）：输出结果反过来强化输入路径，形成自增强机制。</p>
-      <p>初始结构可能只是一次偶然连接，但当这种连接在时间中不断重复、获得反馈、增强稳定，它就可能成为第一个被「承认」的结构单元，并从此形成系统的增长点。</p>
-      <p>这就是结构的「萌芽现象」：</p>
-      <p><strong>在没有中心控制的情况下，认知系统通过多次局部成功路径的积累，自然地「组织出」结构性秩序。</strong></p>
-    </div>
-  </div>
+  <div class="foot"><span class="title">萌芽 · 重复 · 聚合 · 稳定</span><span>16</span></div>
 </section>
 
-<!-- ========== P19 · 第6节卡2（6.3 表格） ========== -->
-<section class="slide light">
-  <div class="chrome"><div>Section 6 · Three Phases</div><div>19 / 21</div></div>
-  <div class="frame" style="padding-top:4.5vh">
-    <div class="kicker" data-anim>自组织的三阶段模型 · 6.3</div>
-    <h2 class="h-xl" style="font-size:4.8vw;margin-bottom:4vh" data-anim>涌现 · 聚合 · 稳定</h2>
-    <table class="tbl" data-anim>
-      <thead><tr><th style="width:16%">阶段</th><th style="width:48%">描述</th><th>关键机制</th></tr></thead>
-      <tbody>
-        <tr><td class="em-cell">涌现期</td><td>局部连接初现，不稳定但有重复趋势</td><td>偶发性连接 × 初级反馈</td></tr>
-        <tr><td class="em-cell">聚合期</td><td>局部结构联结形成较大单元，路径频繁调用</td><td>局部连接集成 × 中继节点形成</td></tr>
-        <tr><td class="em-cell">稳定期</td><td>系统开始形成稳定结构图谱，结构单位具备「现实性」</td><td>系统正向反馈 × 结构封闭性增强</td></tr>
-      </tbody>
-    </table>
-    <p class="body-zh" style="max-width:72vw;margin-top:3.6vh" data-anim>这些阶段并非线性展开，而是以嵌套迭代、动态交错、局部稳定、整体演化的形式持续推进。</p>
-  </div>
-  <div class="foot"><div>Page 19 · Three Phases</div><div>Section 6</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 6.3</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>6.3. 自组织的三阶段模型</h4>
-      <p>ESC将结构系统的自组织过程划分为三大阶段：</p>
-      <p>涌现期：局部连接初现，不稳定但有重复趋势（偶发性连接 × 初级反馈）；<br>
-      聚合期：局部结构联结形成较大单元，路径频繁调用（局部连接集成 × 中继节点形成）；<br>
-      稳定期：系统开始形成稳定结构图谱，结构单位具备「现实性」（系统正向反馈 × 结构封闭性增强）。</p>
-      <p>这些阶段并非线性展开，而是以嵌套迭代、动态交错、局部稳定、整体演化的形式持续推进。（「嵌套迭代」第5章第2节、「动态交错」第4章第3节、「局部稳定」第6章第3节、「整体演化」第10章）</p>
+<section class="slide light" data-slide-id="conditions-and-time">
+  <div class="chrome"><div>06 · 自组织</div><div>17 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>理解的两重边界</div><h2 class="reader-title" data-anim>手里有什么条件，也经历了多少生成</h2></div>
+    <div class="split-ideas">
+      <div class="idea-panel" data-anim><div class="eyebrow">构造条件</div><h3>我能用什么来理解</h3><p>身体、注意、记忆、语言、文化与历史，为理解提供装置和起点。</p></div>
+      <div class="divider" data-anim></div>
+      <div class="idea-panel" data-anim><div class="eyebrow">时间历程</div><h3>这些条件走过多少轮反馈</h3><p>仅仅等待不会自动带来理解；时间要承载尝试、反馈和重新组织。</p></div>
     </div>
+    <div class="callout" data-anim><span class="q-big">暂时不懂，可能缺少条件，也可能还没有走到能形成连接的那一步。</span></div>
   </div>
+  <div class="foot"><span class="title">条件 × 经历</span><span>17</span></div>
 </section>
 
-<!-- ========== P20 · 理解即存在（6.4+边界对） ========== -->
-<section class="slide dark">
-  <div class="chrome"><div>Section 6 · Boundary Pair</div><div>20 / 21</div></div>
-  <div class="frame" style="display:grid;gap:3.4vh;align-content:center;min-height:78vh">
-    <div class="kicker" data-anim>现实感的来源 · 边界对 Boundary Pair · 6.4</div>
-    <h1 class="h-hero" style="font-size:6vw" data-anim>理解即存在</h1>
-    <p class="meta" data-anim>understanding = s(t | H) = f(BP) = f(H, t)</p>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:3vw;max-width:82vw" data-anim>
-      <div><div class="kicker">H · 构造起点</div><p class="body-zh">来自结构的起源空间——你无法理解你不具备构造能力的结构。</p></div>
-      <div><div class="kicker">t · 展开路径</div><p class="body-zh">来自结构的演化维度——你无法理解你尚未走到的结构。</p></div>
+<section class="slide dark" data-slide-id="closing">
+  <div class="chrome"><div>回看 · Chapter Map</div><div>18 / 18</div></div>
+  <div class="reader-frame">
+    <div><div class="kicker" data-anim>六节，一条路</div><h2 class="reader-title" data-anim>认知让世界在我们这里获得可走的形状</h2></div>
+    <div class="chapter-map">
+      <div data-anim><b>01 · 选择</b><span>感知已经在取舍线索</span></div>
+      <div data-anim><b>02 · 组织</b><span>连接与命名生成理解</span></div>
+      <div data-anim><b>03 · 共享</b><span>语言让经验可以共同使用</span></div>
+      <div data-anim><b>04 · 沉积</b><span>反复走通的路径成为知识</span></div>
+      <div data-anim><b>05 · 条件</b><span>理解总有起点与边界</span></div>
+      <div data-anim><b>06 · 生长</b><span>反馈让局部连接形成稳定结构</span></div>
     </div>
-    <div class="callout" style="max-width:70vw" data-anim>
-      <span class="q-big">我们不说「世界是什么」，我们说：「你能理解什么」。不是因为世界不存在，而是你只有通过结构，才能让任何东西「对你而言存在」。</span>
-      <span class="cite">第 3 章 · 收束命题</span>
-    </div>
+    <p class="lead" style="max-width:80vw" data-anim>理解不是把世界搬进来。理解，是让世界在我们这里获得一条能走的路。</p>
+    <p class="quiet-note" data-anim>本书刊是对原章的净言重述。它保留理论视角，也保留被质疑、被修订的空间。</p>
   </div>
-  <div class="foot"><div>Page 20 · Boundary Pair</div><div>Section 6</div></div>
-  <button class="src-toggle">原文 · E</button>
-  <div class="src-panel">
-    <div class="src-head"><div class="src-kicker">原文 · 6.4 及边界对</div><div class="src-close">E / 点击收起</div></div>
-    <div class="src-body">
-      <h4>6.4. 自组织结构即是「现实感」的来源</h4>
-      <p>ESC指出，人类的「现实感」并不是从「外部世界」中得来，而是来自我们结构系统内部：</p>
-      <p>那些被频繁调用的结构路径被认为是「真实的」；<br>
-      那些能够稳定反馈的结构被视为「合理的」；<br>
-      那些可以与他人共享的结构被当作「客观的」。</p>
-      <p>这不是意识形态层面的相对主义，而是结构机制层面的系统现实：</p>
-      <p><strong>我们所感知的「现实」，是认知结构在自组织中逐渐稳定下来的连接系统。</strong></p>
-      <p>这也意味着，当结构路径改变，我们的现实观就会随之改变；当系统反馈断裂，我们对「世界」的理解就会失效。</p>
-      <p>在认知生成机制的限定性结构系统中，除 H 为前提边界外，结构的展开维度 t(时间）亦构成一种演化边界。所有结构认知的路径性展开，皆无法脱离时间的序列性限制与阶段性递归，形成对理解的「递归深度」与「演化速度」的限制。</p>
-      <p>换言之：</p>
-      <p><strong>结构化认知只能在「人类构造的空间 H」中，沿「时间的展开轴 t」进行递归生成。H 与 t，构成所有结构认知的边界对。</strong></p>
-      <p>边界对（Boundary Pair）是结构生成过程中，任何结构化系统必须同时受到两类边界限制：</p>
-      <p>一类来自结构的构造起点（结构起源空间）；</p>
-      <p>一类来自结构的展开路径（结构演化维度）。</p>
-      <p>这两类边界共同定义了结构的生成可能性 × 展开路径性，并构成结构认知的基本限制系统。「理解」，不仅受限于你能调用什么（H），也受限于你何时才能生成它(t)。所有的理解都是边界对的函数展开，可以表达为：</p>
-      <p><strong>understanding = s(t | H) = f(BP) = f(H,t)</strong></p>
-      <p>你无法理解你尚未走到的结构(t 的边界)，也无法理解你不具备构造能力的结构(H 的边界)，所以对于认知来说，「存在」不是外在的客观实物，而是你所能结构化的理解本身。所有你能理解的「存在」= 你能结构化生成的结构输出；而结构输出的极限 = s(t|H)，即边界对决定了理解的上限，于是：</p>
-      <p>「理解」就是「存在」，对认知者而言。我们不说「世界是什么」，我们说：「你能理解什么」。在结构化认知中，<strong>理解即存在</strong>。不是因为世界不存在，而是你只有通过结构，才能让任何东西「对你而言存在」。</p>
-    </div>
-  </div>
-</section>
-
-<!-- ========== P21 · 尾页 ========== -->
-<section class="slide hero light" data-animate="hero">
-  <div class="chrome"><div>ESC · 本章完成</div><div>21 / 21</div></div>
-  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:58vh">
-    <div class="kicker" data-anim>本章结论 · 进入下一章</div>
-    <h1 class="h-hero" style="font-size:5.4vw" data-anim>认知不是复制，<br>而是构造。</h1>
-    <p class="lead" style="max-width:72vw" data-anim>本章完成构造三路径（输入→结构化→输出 / 语言×范畴制造现实 / 知识封装结构演化），引入限定边界：人类构造 H 与时间 t 构成的「边界对」。</p>
-    <p class="body-zh" style="max-width:74vw" data-anim>下一章将在此基础上展开：结构化如何成为理解发生的方式——连接 × 模式 × 时间的协同生成机制。</p>
-  </div>
-  <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;border-top:1px solid currentColor;padding-top:2.5vh;gap:3vw" data-anim>
-    <a href="../deck-codex-04/index.html" style="color:inherit;text-decoration:none"><div class="kicker">← 上一单元</div><div class="h-md" style="font-size:1.45vw">第 2 章 · 存在不是本质，而是结构显现</div></a>
-    <a href="../deck-codex-07/index.html" style="color:inherit;text-decoration:none;text-align:right"><div class="kicker">下一单元 →</div><div class="h-md" style="font-size:1.45vw">第 4 章 · 结构化是理解发生的方式</div></a>
-  </div>
-  <div class="foot"><div>第 4 章 · 结构化是理解发生的方式</div><div>— ESC —</div></div>
+  <div class="foot"><span class="title">结构仍在生长，理解仍在被生成</span><span>18</span></div>
 </section>
 
 </div>
 
 <div id="nav"></div>
 
+
 <script>
-/* =============== WebGL 双背景 =============== */
+/* =============== WebGL 双背景 ===============
+   深色页：Holographic Dispersion（全息色散 · 钛金暗流）—— 彩虹微扰、鼠标径向涟漪
+   浅色页：Spiral Vortex（旋转涡流 · 银色珍珠）—— domain-warp 流动、无中心
+   修改风格请参考 references/webgl-backgrounds.md
+*/
 const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
 
 const FS_DARK = `precision highp float;
@@ -1343,12 +969,29 @@ function stopGL(){
 startGL();
 addEventListener('ppt-low-power-change', e=>{e.detail.on ? stopGL() : startGL();});
 
-// =============== 导航 ===============
+// =============== 导航（翻页 / 圆点 / 键盘 / 滚轮 / 触屏） ===============
 const deck=document.getElementById('deck');
 const slides=deck.querySelectorAll('.slide');
 const nav=document.getElementById('nav');
 let idx=0,total=slides.length,lock=false;
 
+const SOURCE_ANCHORS=["chapter","section-1","section-1","section-2","section-2","section-2","section-3","section-3","section-3","section-4","section-4","section-4","section-5","section-5","section-6","section-6","section-6","section-6"];
+const sourcePanel=document.getElementById('source-panel');
+const sourceFrame=document.getElementById('source-frame');
+let sourceOn=false;
+function setSource(on){
+  sourceOn=!!on;
+  sourcePanel.classList.toggle('on',sourceOn);
+  sourcePanel.setAttribute('aria-hidden',sourceOn?'false':'true');
+  if(sourceOn) sourceFrame.src='original.html#'+(SOURCE_ANCHORS[idx]||'chapter');
+}
+function toggleSource(){setSource(!sourceOn)}
+document.getElementById('ppt-source-btn').addEventListener('click',toggleSource);
+document.getElementById('source-close').addEventListener('click',()=>setSource(false));
+addEventListener('message',e=>{if(e.data?.type==='esc-close-source')setSource(false)});
+
+
+// 关键：矫正 deck 宽度为 total * 100vw，否则翻页会错位
 deck.style.width=(total*100)+'vw';
 
 slides.forEach((s,i)=>{
@@ -1358,24 +1001,20 @@ slides.forEach((s,i)=>{
   nav.appendChild(b);
 });
 
-function go(n){
-  if(lock)return;
+function go(n,opts={}){
+  if(lock&&!opts.force)return;
   idx=Math.max(0,Math.min(total-1,n));
+  if(sourceOn)setSource(false);
   window.__currentSlideIndex = idx;
   deck.style.transform=`translateX(${-idx*100}vw)`;
   nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  /* 主题切换：优先读 data-theme，其次从 class（light/dark）推断 */
   const el=slides[idx];
   const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
   document.body.classList.toggle('light-bg',th==='light');
-  slides.forEach(s=>{const p=s.querySelector('.src-panel');if(p)p.classList.remove('on')});
+  /* 动效：翻页过渡中段触发当前页的入场动画（由 motion-boot 注册） */
   if(window.__playSlide) setTimeout(()=>window.__playSlide(idx), 450);
-  lock=true;setTimeout(()=>lock=false,700);
-}
-
-/* =============== 原文层切换 =============== */
-function toggleSrc(){
-  const p=slides[idx].querySelector('.src-panel');
-  if(p)p.classList.toggle('on');
+  if(!opts.force){lock=true;setTimeout(()=>lock=false,700);}
 }
 
 /* =============== ESC 索引视图 =============== */
@@ -1416,16 +1055,14 @@ function toggleOverview(){
   else{ov.style.display='none';}
 }
 
+
 addEventListener('keydown',e=>{
+  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){e.preventDefault();toggleSource();return;}
+  if(sourceOn)return;
   if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
   if(e.key && e.key.toLowerCase()==='b' && !e.metaKey && !e.ctrlKey && !e.altKey){
     e.preventDefault();
     window.__setLowPowerMode(!window.__lowPowerMode);
-    return;
-  }
-  if(e.key && e.key.toLowerCase()==='e' && !e.metaKey && !e.ctrlKey && !e.altKey){
-    e.preventDefault();
-    if(!overviewOn)toggleSrc();
     return;
   }
   if(overviewOn)return;
@@ -1441,7 +1078,6 @@ addEventListener('keydown',e=>{
 
 let wheelTO=null,wheelAcc=0;
 addEventListener('wheel',e=>{
-  if(e.target.closest && e.target.closest('.src-panel'))return;
   wheelAcc+=e.deltaY+e.deltaX;
   if(Math.abs(wheelAcc)>50){
     if(wheelAcc>0 && window.__pipeAdvance && window.__pipeAdvance()){
@@ -1456,7 +1092,6 @@ addEventListener('wheel',e=>{
 let tx=0,ty=0;
 addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
 addEventListener('touchend',e=>{
-  if(e.target.closest && e.target.closest('.src-panel'))return;
   const dx=(e.changedTouches[0].clientX-tx);
   const dy=(e.changedTouches[0].clientY-ty);
   if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
@@ -1465,24 +1100,41 @@ addEventListener('touchend',e=>{
   }
 },{passive:true});
 
-const chapterPrev = '../deck-codex-04/index.html', chapterNext = '../deck-codex-07/index.html';
-addEventListener('click',e=>{if(overviewOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel'))return;const left=e.clientX<innerWidth*.18;if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}go(idx+(left?-1:1))});
-go(0);
+
+const chapterPrev='../deck-codex-04/index.html',chapterNext='../deck-codex-07/index.html';
+addEventListener('click',e=>{
+  if(overviewOn||sourceOn||e.target.closest('#nav,#hint,a,button,input,textarea,.src-panel,.esc-dock,.esc-round'))return;
+  const left=e.clientX<innerWidth*.18;
+  if(left&&idx===0&&chapterPrev){location.href=chapterPrev;return}
+  if(!left&&idx===total-1&&chapterNext){location.href=chapterNext;return}
+  go(idx+(left?-1:1));
+});
+
+/* ?slide=N 直达（1-based），与 Swiss 模板行为一致 */
+const initialSlideParam = new URLSearchParams(location.search).get('slide');
+const initialSlide = initialSlideParam ? Number(initialSlideParam) - 1 : 0;
+go(Number.isFinite(initialSlide) ? initialSlide : 0);
 </script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>lucide.createIcons();</script>
 
-<!-- ============ Motion One 动效引擎（共享 deck-codex 本地库，CDN 兜底） ============ -->
+<!-- ============ Motion One 动效引擎（本地优先,CDN 兜底） ============
+     加载策略:先 ./assets/motion.min.js(本地,离线可用),失败 fallback 到 jsDelivr CDN
+     加载完成后挂 window.__playSlide / window.__pipeAdvance,
+     导航脚本会在翻页中段调用 __playSlide(idx),键盘/滚轮/触屏会在翻页前调用 __pipeAdvance()
+     双双失败时会兜底把所有 [data-anim] 设为可见,不让动效破坏阅读
+-->
 <script type="module">
 let motion;
 try {
-  motion = await import('../deck-codex/assets/motion.min.js');
+  motion = await import('./assets/motion.min.js');
 } catch(e1) {
   try {
     motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
   } catch(e2) {
     console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
     document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+    document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
   }
 }
 
@@ -1491,6 +1143,7 @@ if(motion){
   document.body.classList.add('motion-ready');
   const EASE = [.22, 1, .36, 1];
   const slides = [...document.querySelectorAll('.slide')];
+  let pipeStep = -1;
   let lastIdx = -1;
 
   function resetAnims(slide){
@@ -1520,9 +1173,30 @@ if(motion){
       return;
     }
 
+    if(recipe === 'pipeline'){
+      pipeStep = -1;
+      slide.querySelectorAll('[data-anim]').forEach(el=>{
+        el.style.opacity='0.15';
+        el.style.transform='none';
+      });
+      return;
+    }
+
     resetAnims(slide);
     const all = [...slide.querySelectorAll('[data-anim]')];
     if(!all.length) return;
+
+    if(recipe === 'directional'){
+      const lefts  = all.filter(el=>el.dataset.anim==='left');
+      const divs   = all.filter(el=>el.dataset.anim==='divider');
+      const rights = all.filter(el=>el.dataset.anim==='right');
+      const others = all.filter(el=>!['left','right','divider'].includes(el.dataset.anim));
+      if(others.length) animate(others, {opacity:[0,1], y:[12,0]}, {duration:.6, delay:stagger(.1, {start:.15}), easing:EASE});
+      if(lefts.length)  animate(lefts,  {opacity:[0,1], x:[-24,0]}, {duration:.8, delay:.35, easing:EASE});
+      if(divs.length)   animate(divs,   {opacity:[0,.25]},          {duration:.5, delay:.9});
+      if(rights.length) animate(rights, {opacity:[0,1], x:[24,0]},  {duration:.8, delay:1.0, easing:EASE});
+      return;
+    }
 
     if(recipe === 'quote'){
       const lines = all.filter(el=>el.dataset.anim==='line');
@@ -1537,17 +1211,32 @@ if(motion){
       return;
     }
 
+    // default: cascade
     animate(all, {opacity:[0,1], y:[16,0]}, {duration:.75, delay:stagger(.1, {start:.15}), easing:EASE});
   }
 
-  window.__playSlide = playSlide;
-  window.__pipeAdvance = () => false;
+  function pipeAdvance(){
+    if(window.__lowPowerMode) return false;
+    const slide = slides[lastIdx];
+    if(!slide || slide.dataset.animate !== 'pipeline') return false;
+    const steps  = [...slide.querySelectorAll('[data-anim="step"]')];
+    const arrows = [...slide.querySelectorAll('[data-anim="arrow"]')];
+    if(pipeStep >= steps.length - 1) return false;
+    pipeStep++;
+    animate(steps[pipeStep], {opacity:[0.15,1], y:[8,0]}, {duration:.5, easing:EASE});
+    if(pipeStep > 0 && arrows[pipeStep-1]){
+      animate(arrows[pipeStep-1], {opacity:[0.15,.7]}, {duration:.3, delay:.15});
+    }
+    return true;
+  }
 
-  playSlide(0);
+  window.__playSlide = playSlide;
+  window.__pipeAdvance = pipeAdvance;
+
+  // 首屏:go() 已跑过(同步),没来得及触发动效 → 这里补一下(尊重 ?slide=N)
+  playSlide(window.__currentSlideIndex || 0);
 }
 </script>
-
-
 <script>window.ESC_AUDIO={kind:'deck',chapter:'第 3 章',tracks:[{ch:'第 3 章',title:'认知不是复制而是构造',file:'../audio/第3章 认知不是复制而是构造.m4a'}]}</script>
 <script src="../esc-audio.js"></script>
 </body>
