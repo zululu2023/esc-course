@@ -523,12 +523,11 @@
   }
 
   /* ============ 原文对照层 ============ */
-  .src-panel{position:fixed;inset:0;z-index:120;display:grid;grid-template-rows:auto 1fr;background:rgba(20,22,20,.92);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .src-panel{position:fixed;inset:0;z-index:120;display:block;background:var(--paper);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease}
   .src-panel.on{opacity:1;visibility:visible;pointer-events:auto}
-  .src-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px clamp(18px,3vw,42px);color:#f4f0e6;border-bottom:1px solid rgba(255,255,255,.16);background:rgba(20,22,20,.82);font-family:var(--sans-zh,"Noto Sans SC"),sans-serif}
-  .src-head div{display:flex;align-items:baseline;gap:14px}.src-head span{font:10px var(--mono);letter-spacing:.18em;opacity:.58}.src-head strong{font-size:16px;letter-spacing:.04em}
-  .src-head button{border:1px solid rgba(255,255,255,.35);border-radius:999px;background:transparent;color:inherit;padding:7px 13px;cursor:pointer;font:11px var(--mono);letter-spacing:.08em}.src-head button:hover{background:#f4f0e6;color:#1d211d}
-  .src-panel iframe{width:100%;height:100%;border:0;background:#f4f0e6}
+  .src-panel>.src-head{display:none}
+  .src-panel iframe{display:block;width:100%;height:100%;border:0;background:var(--paper)}
+  @media(prefers-reduced-motion:reduce){.src-panel{transition:none}}
 </style>
 </head>
 <body>
@@ -983,7 +982,11 @@ function setSource(on){
   sourceOn=!!on;
   sourcePanel.classList.toggle('on',sourceOn);
   sourcePanel.setAttribute('aria-hidden',sourceOn?'false':'true');
-  if(sourceOn) sourceFrame.src='original.html#'+(SOURCE_ANCHORS[idx]||'chapter');
+  if(sourceOn){
+    const theme=slides[idx].classList.contains('light')?'light':'dark';
+    sourceFrame.src='original.html?section='+(SOURCE_ANCHORS[idx]||'chapter')+'&theme='+theme;
+    sourceFrame.focus();
+  }
 }
 function toggleSource(){setSource(!sourceOn)}
 document.getElementById('ppt-source-btn').addEventListener('click',toggleSource);
